@@ -18,6 +18,23 @@
 
     </div>
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Week insert pattern [triggered on "w" in task title input]'), 'week_pattern') ?>
+            <?= $this->form->text('week_pattern', ['week_pattern' => $week_pattern], [], [
+                '',
+                'tabindex="2"',
+                'placeholder="' . t('e.g. \'Y{YEAR_SHORT}-W{WEEK}\'') . '"'
+            ]) ?>
+            <?= $this->form->label(t('Options are:') . '{YEAR_SHORT}=two digit year, {YEAR}=four digit year, {WEEK}=week number', '', ['class="weekhelper-small-config-text"']) ?>
+        </div>
+
+    </div>
+
 
 
     <div class="task-form-bottom">

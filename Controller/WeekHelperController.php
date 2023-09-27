@@ -30,6 +30,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
 
         $values = [
             'weekhelper_headerdate_enabled' => isset($form['headerdate_enabled']) ? 1 : 0,
+            'weekhelper_week_pattern' => $form['week_pattern'],
         ];
 
         $this->languageModel->loadCurrentLanguage();
@@ -41,5 +42,16 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         }
 
         return $this->response->redirect($this->helper->url->to('WeekHelperController', 'show', ['plugin' => 'WeekHelper']), true);
+    }
+
+    /**
+     * Get the config for the week pattern as JSON for the javascript.
+     *
+     * @return Response
+     */
+    public function getWeekPattern()
+    {
+        $weekPattern = $this->configModel->get('weekhelper_week_pattern', 'Y{YEAR_SHORT}-W{WEEK}');
+        return $this->response->text($weekPattern);
     }
 }
