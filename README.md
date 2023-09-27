@@ -4,6 +4,12 @@
 
 With this plugin you get some little helper for quickly name a task with e.g. the week number. Also it shows the actual date in the header.
 
+In a task title you can enter "w" and trigger the week replacement feature, which will give you this week, the next week and the overnext week and replace the choice with the pattern set up in the config. By default it is "Y{YEAR_SHORT}-W{WEEK}". In the year 2023 and the week 39 of the year it would be translated to "Y23-W39", for example. These are the possible replacement values:
+
+- YEAR: the four digit actual year
+- YEAR_SHORT: the two digit actual year
+- WEEK: the actual week number
+
 
 Screenshots
 -------------
