@@ -10,6 +10,10 @@ In a task title you can enter "w" and trigger the week replacement feature, whic
 - YEAR_SHORT: the two digit actual year
 - WEEK: the actual week number
 
+## Additional
+
+Also there now is a new automatic action, which will use the pattern you can set up in the settings, convert it to a regex internally and use it to generate a new such string but for the next week. Then you can set up the automatic action to be executed if e.g. you move a task into the backlog or so. Workflow-wise this could mean: put this task onto next week. And this automatic action helps you quickly automatically rename the tasks title to "update" the week number.
+
 
 Screenshots
 -------------
