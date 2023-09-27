@@ -30,7 +30,7 @@
                 'tabindex="2"',
                 'placeholder="' . t('e.g. \'Y{YEAR_SHORT}-W{WEEK}\'') . '"'
             ]) ?>
-            <?= $this->form->label(t('Options are:') . '{YEAR_SHORT}=two digit year, {YEAR}=four digit year, {WEEK}=week number', '', ['class="weekhelper-small-config-text"']) ?>
+            <?= $this->form->label(t('Options are: {YEAR_SHORT}=two digit year, {YEAR}=four digit year, {WEEK}=week number'), '', ['class="weekhelper-small-config-text"']) ?>
         </div>
 
     </div>
