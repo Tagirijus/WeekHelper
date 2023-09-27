@@ -89,13 +89,11 @@ class TaskAutoAddWeek extends Base
 
         // not the actual action, but I want it for my workflow:
         // the "[DUPICATE]" shall be removed as well
-        $this->logger->info(json_encode($newTitle));
         $newTitle = str_replace(
             ['[DUPLICATE]', '[DUPLIKAT]'],
             ['', ''],
             $newTitle
         );
-        $this->logger->info(json_encode($newTitle));
 
         // replace the title finally
         return $this->taskModificationModel->update(
