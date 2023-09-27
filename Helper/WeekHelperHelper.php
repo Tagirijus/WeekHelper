@@ -21,4 +21,31 @@ class WeekHelperHelper extends Base
             'week_pattern' => $this->configModel->get('weekhelper_week_pattern', 'Y{YEAR_SHORT}-W{WEEK}'),
         ];
     }
+
+    /**
+     * Use the now date to create the week pattern string.
+     * Maybe with additional days (for e.g. next or overnext
+     * week).
+     *
+     * @param integer $daysAdd
+     * @return [type] [description]
+     */
+    public function createActualStringWithWeekPattern($daysAdd = 0)
+    {
+        // get times
+        $adder = strtotime('+' . $daysAdd . ' days');
+        $year = date('Y', $adder);
+        $year_short = substr(date('Y', $adder), -2);
+        $week = date('W', $adder);
+
+        // get other base strings
+        $weekpattern = $this->configModel->get('weekhelper_week_pattern', 'Y{YEAR_SHORT}-W{WEEK}');
+
+        // get the final output string
+        return str_replace(
+            ['{YEAR}', '{YEAR_SHORT}', '{WEEK}'],
+            [$year, $year_short, $week],
+            $weekpattern
+        );
+    }
 }

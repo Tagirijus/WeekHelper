@@ -4,12 +4,15 @@ namespace Kanboard\Plugin\WeekHelper;
 
 use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Translator;
+use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
 
 
 class Plugin extends Base
 {
     public function initialize()
     {
+        // Automatic Action
+        $this->actionManager->register(new TaskAutoAddWeek($this->container));
 
         // Helper
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
