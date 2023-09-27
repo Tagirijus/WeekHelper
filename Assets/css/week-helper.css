@@ -9,3 +9,10 @@
 	font-size: 0.75em;
 	font-style: italic;
 }
+
+.weekhelper-weekpattern-dim  {
+	margin-left: .1em;
+	font-size: 0.8em;
+	font-style: italic;
+	opacity: .5;
+}

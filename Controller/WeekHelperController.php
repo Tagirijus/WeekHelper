@@ -51,7 +51,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
      */
     public function getWeekPattern()
     {
-        $weekPattern = $this->configModel->get('weekhelper_week_pattern', 'Y{YEAR_SHORT}-W{WEEK}');
+        $weekPattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
         return $this->response->text($weekPattern);
     }
 }

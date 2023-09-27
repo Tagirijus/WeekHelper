@@ -75,13 +75,8 @@ class TaskAutoAddWeek extends Base
     {
         // get / create base strings
         $title = $data['task']['title'];
-        $weekpattern = $this->configModel->get('weekhelper_week_pattern', 'Y{YEAR_SHORT}-W{WEEK}');
-        $regex = str_replace(
-            ['{YEAR}', '{YEAR_SHORT}', '{WEEK}'],
-            ['\d{4}', '\d{2}', '\d{1,2}'],
-            $weekpattern
-        );
-        $regex = '/' . $regex . '/';
+        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
+        $regex = $this->helper->weekHelperHelper->createRegexFromWeekpattern($weekpattern);
         $nextWeek = $this->helper->weekHelperHelper->createActualStringWithWeekPattern(7);
 
         // replace the previous week with the next week

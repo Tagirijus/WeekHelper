@@ -32,6 +32,11 @@ class Plugin extends Base
         $this->template->hook->attach(
             'template:config:sidebar', 'WeekHelper:config/weekhelper_config_sidebar');
 
+        // Template Overrides
+        $this->template->setTemplateOverride('board/task_public', 'WeekHelper:board/task_public');
+        $this->template->setTemplateOverride('board/task_private', 'WeekHelper:board/task_private');
+        $this->template->setTemplateOverride('task_list/task_title', 'WeekHelper:task_list/task_title');
+
         // Extra Page - Routes
         $this->route->addRoute('/weekhelper/config', 'WeekHelperController', 'show', 'WeekHelper');
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
