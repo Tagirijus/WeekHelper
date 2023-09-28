@@ -27,6 +27,7 @@ class Plugin extends Base
         if ($this->configModel->get('weekhelper_headerdate_enabled', 1) == 1) {
             $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/add-date-to-header.min.js'));
         }
+        $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/checkbox-inserter.min.js'));
 
         // Views - Template Hook
         $this->template->hook->attach(

@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	KB.on('modal.afterRender', function () {
 		$('#form-title').textcomplete([{
-			match: /w(.*)$/,
+			match: /\bw(.*)$/,
 			search: function (term, callback) {
 				getWeekPattern().then(weekpattern => {
 					var results = [];
