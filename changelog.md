@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v1.3
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Start of the day is now monady
+
+
 ## v1.2
 
 ### What's Changed
