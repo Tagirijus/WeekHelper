@@ -25,13 +25,17 @@ class Plugin extends Base
         $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/weekhelper-functions.min.js'));
         $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/week-replacer.min.js'));
         if ($this->configModel->get('weekhelper_headerdate_enabled', 1) == 1) {
-            $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/add-date-to-header.min.js'));
+            $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/add-date-to-layout.min.js'));
         }
         $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/checkbox-inserter.min.js'));
 
         // Views - Template Hook
         $this->template->hook->attach(
             'template:config:sidebar', 'WeekHelper:config/weekhelper_config_sidebar');
+        if ($this->configModel->get('weekhelper_time_box_enabled', 1) == 1) {
+            $this->template->hook->attach(
+                'template:layout:bottom', 'WeekHelper:time_box');
+        }
 
         // Template Overrides
         $this->template->setTemplateOverride('board/task_public', 'WeekHelper:board/task_public');
@@ -65,7 +69,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '1.2.0';
+        return '1.3.0';
     }
 
     public function getCompatibleVersion()

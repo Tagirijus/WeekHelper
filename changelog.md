@@ -7,6 +7,7 @@
 
 _(most recent changes are listed on top):_
 - Start of the day is now monady
+- Added option for a sticky time box on the bottom right
 
 
 ## v1.2

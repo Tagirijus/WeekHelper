@@ -31,6 +31,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $values = [
             'weekhelper_headerdate_enabled' => isset($form['headerdate_enabled']) ? 1 : 0,
             'weekhelper_week_pattern' => $form['week_pattern'],
+            'weekhelper_time_box_enabled' => isset($form['time_box_enabled']) ? 1 : 0,
         ];
 
         $this->languageModel->loadCurrentLanguage();

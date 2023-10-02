@@ -23,8 +23,8 @@ function insertAfter(referenceNode, newNode) {
 	referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
 
-function updateCurrentDate() {
-	var currentDate = document.getElementById('currentDate');
+function updateCurrentDate(elemId) {
+	var currentDate = document.getElementById(elemId);
 	if (currentDate != null) {
 		currentDate.innerHTML = getCurrentDateContent();
 	}

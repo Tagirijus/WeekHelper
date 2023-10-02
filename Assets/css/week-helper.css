@@ -1,4 +1,4 @@
-#currentDate {
+#currentDateHeader {
 	margin-left: .5em;
 	font-size: 0.45em;
 	font-style: italic;
@@ -15,4 +15,19 @@
 	font-size: 0.8em;
 	font-style: italic;
 	opacity: .5;
+}
+
+.weekhelper-time-box-container {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+
+	padding: .5em .75em;
+	border-radius: 7px;
+	background: rgba(30, 40, 70, 0.75);
+	backdrop-filter: blur(2px);
+	font-size: .75em;
+}
+
+#updateCurrentTimeBox {
 }

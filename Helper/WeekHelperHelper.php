@@ -19,6 +19,7 @@ class WeekHelperHelper extends Base
             'title' => t('WeekHelper') . ' &gt; ' . t('Settings'),
             'headerdate_enabled' => $this->configModel->get('weekhelper_headerdate_enabled', 1),
             'week_pattern' => $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}'),
+            'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
         ];
     }
 
