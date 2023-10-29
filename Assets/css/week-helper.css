@@ -56,11 +56,13 @@ span.wh-task-icon-remaining-weeks {
 }
 
 .wh-task-icon-soon {
+	border-left: 1px solid black !important;
 	color: black;
 	background: orange;
 }
 
 .wh-task-icon-very-soon {
+	border-left: 1px solid black !important;
 	color: black;
 	background: red;
 }

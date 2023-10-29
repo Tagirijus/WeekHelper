@@ -127,6 +127,7 @@
                         <li>
                             <strong><?= t('Due date:') ?></strong>
                             <span><?= $this->dt->datetime($task['date_due']) ?></span>
+                            <?= $this->render('WeekHelper:board/task_footer_remaining_box', ['task' => $task]) ?>
                         </li>
                     <?php endif ?>
                     <li>
