@@ -2,7 +2,7 @@
 
 #### _Plugin for [Kanboard](https://github.com/fguillot/kanboard "Kanboard - Kanban Project Management Software")_
 
-With this plugin you get some little helper for quickly name a task with e.g. the week number. Also it shows the actual date in the header.
+With this plugin you get some helpers for planning the week. E.g. quickly name a task with e.g. the week number. Also it shows the actual date in the header. And you get the hours calculated and shown in a more convenient style on various places of th app.
 
 In a task title you can enter "w" and trigger the week replacement feature, which will give you this week, the next week and the overnext week and replace the choice with the pattern set up in the config. By default it is "Y{YEAR_SHORT}-W{WEEK}". In the year 2023 and the week 39 of the year it would be translated to "Y23-W39", for example. These are the possible replacement values:
 
@@ -18,7 +18,13 @@ Also there now is a new automatic action, which will use the pattern you can set
 Screenshots
 -------------
 
-_todo_
+**Board view**
+
+![HoursView board view](../master/Screenshots/HoursView_board.png)
+
+**Dashboard view**
+
+![HoursView dashboard view](../master/Screenshots/HoursView_dashboard.png)
 
 
 Compatibility

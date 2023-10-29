@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.0
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- I merged my [HoursView](https://github.com/Tagirijus/HoursView) plugin with this _WeekHelper_ plugin.
+
+
 ## v1.3
 
 ### What's Changed
