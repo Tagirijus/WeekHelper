@@ -46,7 +46,7 @@ class WeekHelperHelper extends Base
      * week).
      *
      * @param integer $daysAdd
-     * @return [type] [description]
+     * @return string
      */
     public function createActualStringWithWeekPattern($daysAdd = 0)
     {

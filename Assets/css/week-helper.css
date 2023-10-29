@@ -34,6 +34,37 @@
 #updateCurrentTimeBox {
 }
 
+span.wh-task-icon-remaining-days {
+    border: 1px solid black;
+    padding: 1px 3px 1px 3px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px
+}
+
+span.wh-task-icon-remaining-weeks {
+    border: 1px solid black;
+    border-left: none;
+    margin-left: -2px;
+    padding: 1px 3px 1px 5px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px
+}
+
+.wh-task-icon-normal {
+	color: black;
+	background: rgba(0,0,0,0);
+}
+
+.wh-task-icon-soon {
+	color: black;
+	background: orange;
+}
+
+.wh-task-icon-very-soon {
+	color: black;
+	background: red;
+}
+
 
 
 /* HORUS VIEW */
