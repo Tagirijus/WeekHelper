@@ -99,4 +99,42 @@ class WeekHelperHelper extends Base
             $title
         );
     }
+
+    /**
+     * Return the remaining days as an integer from
+     * now to the given unix timestamp.
+     *
+     * @param  integer $unix
+     * @return integer
+     */
+    public function getRemainingDaysFromTimestamp($unix = 0)
+    {
+        $datetime1 = new \DateTime(); // start time
+        $datetime2 = new \DateTime(); // end time
+        $datetime2->setTimestamp($unix);
+        $interval = $datetime1->diff($datetime2);
+        if ($interval->invert) {
+            return '-' . $interval->days;
+        } else {
+            return $interval->days;
+        }
+    }
+
+    /**
+     * Return the remaining weeks as an integer from
+     * now to the given unix timestamp.
+     *
+     * @param  integer $unix
+     * @param  boolean $ceil
+     * @return integer
+     */
+    public function getRemainingWeeksFromTimestamp($unix = 0, $ceil = true)
+    {
+        $days = $this->getRemainingDaysFromTimestamp($unix);
+        $weeks = $days / 7;
+        if ($ceil) {
+            $weeks = ceil($weeks);
+        }
+        return $weeks;
+    }
 }
