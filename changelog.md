@@ -1,7 +1,7 @@
 # Changelog
 
 
-## v2.0
+## v2.1
 
 ### What's Changed
 
