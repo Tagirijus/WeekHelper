@@ -34,15 +34,21 @@
 #updateCurrentTimeBox {
 }
 
+.wh-task-icon-border-black {
+	border: 1px solid black;
+}
+
+.wh-task-icon-border-white {
+	border: 1px solid white;
+}
+
 span.wh-task-icon-remaining-days {
-    border: 1px solid black;
     padding: 1px 3px 1px 3px;
     border-top-left-radius: 3px;
     border-bottom-left-radius: 3px
 }
 
 span.wh-task-icon-remaining-weeks {
-    border: 1px solid black;
     border-left: none;
     margin-left: -2px;
     padding: 1px 3px 1px 5px;
@@ -58,7 +64,7 @@ span.wh-task-icon-remaining-weeks {
 .wh-task-icon-soon {
 	border-left: 1px solid black !important;
 	color: black;
-	background: orange;
+	background: rgba(100, 100, 255, 1);
 }
 
 .wh-task-icon-very-soon {
