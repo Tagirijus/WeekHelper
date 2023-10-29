@@ -6,6 +6,14 @@
 ### What's Changed
 
 _(most recent changes are listed on top):_
+- Added start date to card (on the bottom) and also moved due date to the bottom.
+
+
+## v2.0
+
+### What's Changed
+
+_(most recent changes are listed on top):_
 - I merged my [HoursView](https://github.com/Tagirijus/HoursView) plugin with this _WeekHelper_ plugin.
 
 

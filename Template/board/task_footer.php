@@ -67,22 +67,6 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
             </span>
         <?php endif ?>
 
-        <?php if (! empty($task['date_due'])): ?>
-            <span class="task-date
-                <?php if (time() > $task['date_due']): ?>
-                     task-date-overdue
-                <?php elseif (date('Y-m-d') == date('Y-m-d', $task['date_due'])): ?>
-                     task-date-today
-                <?php endif ?>
-                ">
-                <i class="fa fa-calendar"></i>
-                <?php if (date('Hi', $task['date_due']) === '0000' ): ?>
-                    <?= $this->dt->date($task['date_due']) ?>
-                <?php else: ?>
-                    <?= $this->dt->datetime($task['date_due']) ?>
-                <?php endif ?>
-            </span>
-        <?php endif ?>
     </div>
     <div class="task-board-icons-row">
 
@@ -169,5 +153,46 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
 
     </div>
 </div>
+
+
+<!-- DATES -->
+
+<?php if ($task['date_started'] != 0 || $task['date_due'] != 0): ?>
+
+    <div class="task-board-icons">
+        <div class="task-board-icons-row" style="margin-top: -.5em; margin-bottom: -.5em;">
+
+            <!-- Started Date -->
+            <?php if ($task['date_started'] != 0): ?>
+                <span title="<?= t('Start Date') ?>">
+                    <i class="fa fa-play" role="img" aria-label="<?= t('Start Date') ?>"></i>
+                    <?= $this->dt->date($task['date_started']) ?>
+                </span>
+            <?php endif ?>
+
+            <!-- Due Date -->
+            <?php if ($task['date_due'] != 0): ?>
+                <span class="task-date
+                    <?php if (time() > $task['date_due']): ?>
+                         task-date-overdue
+                    <?php elseif (date('Y-m-d') == date('Y-m-d', $task['date_due'])): ?>
+                         task-date-today
+                    <?php endif ?>
+                    ">
+                    <i class="fa fa-calendar"></i>
+                    <?php if (date('Hi', $task['date_due']) === '0000' ): ?>
+                        <?= $this->dt->date($task['date_due']) ?>
+                    <?php else: ?>
+                        <?= $this->dt->datetime($task['date_due']) ?>
+                    <?php endif ?>
+                </span>
+            <?php endif ?>
+
+        </div>
+    </div>
+
+<?php endif ?>
+
+
 
 <?= $this->hook->render('template:board:task:footer', array('task' => $task)) ?>
