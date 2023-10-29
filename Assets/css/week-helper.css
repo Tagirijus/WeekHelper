@@ -1,3 +1,5 @@
+/* WEEK HELPER */
+
 #currentDateHeader {
 	margin-left: .5em;
 	font-size: 0.45em;
@@ -30,4 +32,142 @@
 }
 
 #updateCurrentTimeBox {
+}
+
+
+
+/* HORUS VIEW */
+
+/* COLORS */
+
+.thv-weak-color {
+	color: rgb(100, 100, 120);
+}
+
+.thv-title-color {
+	color: rgb(100, 100, 150);
+}
+
+.thv-estimated-color {
+	color: rgb(190, 90, 90);
+}
+
+.thv-spent-color {
+	color: rgb(60, 180, 100);
+}
+
+.thv-remaining-color {
+	color: rgb(40, 120, 170);
+}
+
+
+/* BOARD and TIMEBOX */
+
+.thv-board-column {
+	display: inline-block;
+	opacity: .7;
+	font-size: .9em;
+}
+.thv-board-column > span {
+	margin-left:  .5em;
+}
+
+.thv-column-wrapper {
+	margin-left: 0.5em;
+	text-align: right;
+}
+
+.thv-box-wrapper {
+	display: flex;
+	width: 100%;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.thv-box-wrapper-board {
+	display: flex;
+	width: 85%;
+	margin: auto;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+.thv-box-item {
+	display: flex;
+	width: 47%;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	background-color: rgba(100, 100, 125, 0.08);
+	padding: .5em .75em;
+	margin: .25em;
+}
+.thv-box-item:hover {
+	filter: brightness(1.2);
+}
+@media only screen and (max-width: 1000px) {
+	/* For mobile phones: */
+	.thv-box-wrapper-board, .thv-box-item {
+	width: 100%;
+  }
+}
+.thv-box-item .tvh-box-single-item-20 {
+	width: 20%;
+}
+.thv-box-item .tvh-box-single-item-40 {
+	width: 40%;
+}
+.thv-box-item:last-child {
+	margin-bottom: 1em;
+}
+.thv-box-item-full {
+	width: 100% !important;
+	margin: 0 .75em 1em;
+}
+.thv-box-all {
+	opacity: .75;
+	filter: saturate(.8);
+}
+.thv-font-small {
+	font-size: .75em;
+}
+.thv-font-smallB {
+	font-size: .85em;
+}
+.thv-font-big {
+	font-size: 1.3em;
+}
+.thv-font-weak {
+	opacity: .3;
+}
+
+/* Task Progress Bar - based on TaskProgressBar plugin by Valentino Pesce */
+.container-task-progress-bar
+{
+	background-color: rgba(130, 130, 130, 0.5);
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border-radius: 5px;
+}
+
+.task-progress-bar
+{
+	height: 20px;
+	padding-right: 3px;
+	background-color: rgba(130, 130, 200, 0.75);
+	border-radius: 5px;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+.task-summary-progress-bar
+{
+	margin: 1em 0em;
+	text-align: right;
+}
+.task-summary-progress-bar div
+{
+	padding-top: .3em;
+}
+
+/* DASHBOARD */
+.thv-100-percent {
+	opacity: 0.3;
 }

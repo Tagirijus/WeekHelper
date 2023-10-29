@@ -29,7 +29,7 @@ Compatibility
 #### Other Plugins & Action Plugins
 - _No known issues_
 #### Core Files & Templates
-- `02` Template Overrides
+- `09` Template Overrides
 - _No database changes_
 
 

@@ -32,6 +32,19 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_headerdate_enabled' => isset($form['headerdate_enabled']) ? 1 : 0,
             'weekhelper_week_pattern' => $form['week_pattern'],
             'weekhelper_time_box_enabled' => isset($form['time_box_enabled']) ? 1 : 0,
+            'hoursview_level_1_columns' => $form['level_1_columns'],
+            'hoursview_level_2_columns' => $form['level_2_columns'],
+            'hoursview_level_3_columns' => $form['level_3_columns'],
+            'hoursview_level_4_columns' => $form['level_4_columns'],
+            'hoursview_level_1_caption' => $form['level_1_caption'],
+            'hoursview_level_2_caption' => $form['level_2_caption'],
+            'hoursview_level_3_caption' => $form['level_3_caption'],
+            'hoursview_level_4_caption' => $form['level_4_caption'],
+            'hoursview_all_caption' => $form['all_caption'],
+            'hoursview_progressbar_enabled' => isset($form['progressbar_enabled']) ? 1 : 0,
+            'hoursview_progressbar_opacity' => $form['progressbar_opacity'],
+            'hoursview_progressbar_0_opacity' => $form['progressbar_0_opacity'],
+            'hoursview_progress_home_project_level' => $form['progress_home_project_level'],
         ];
 
         $this->languageModel->loadCurrentLanguage();
