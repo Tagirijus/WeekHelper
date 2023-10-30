@@ -43,4 +43,5 @@ return array(
     'Remaining levels for days' => 'Restzeit-Level für Tage',
     'Remaining levels for weeks' => 'Restzeit-Level für Wochen',
     'Week of due date on card' => 'Woche des Fälligkeitsdatums auf Karte',
+    'Show full started date on card' => 'Zeige volles Startdatum auf Karte',
 );

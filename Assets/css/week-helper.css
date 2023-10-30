@@ -48,11 +48,12 @@
 /* Remaining Box */
 
 .wh-remaining-box {
-	display: inline;
+	display: inline-block;
+	line-height: 1.25em;
 }
 
 .wh-remaining-days {
-	display: inline;
+	display: inline-block;
 	border-width: 1px;
 	border-style: solid;
 	border-radius: 3px;
@@ -60,12 +61,11 @@
 }
 
 .wh-remaining-weeks {
-	display: inline;
+	display: inline-block;
 	border-width: 1px;
 	border-style: solid;
     border-radius: 3px;
     padding: 1px 3px 1px 4px;
-	margin-left: .25em;
 }
 
 

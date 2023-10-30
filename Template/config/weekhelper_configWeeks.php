@@ -65,6 +65,21 @@
 
     </div>
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Show full started date on card'), 'full_start_date_enabled') ?>
+            <?= $this->form->checkbox('full_start_date_enabled', t('enabled'), 1, $full_start_date_enabled, '', [
+                'autofocus',
+                'tabindex="5"'
+            ]) ?>
+        </div>
+
+    </div>
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>

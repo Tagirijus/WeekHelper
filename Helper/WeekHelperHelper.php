@@ -43,6 +43,7 @@ class WeekHelperHelper extends Base
             'week_pattern' => $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}'),
             'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
             'due_date_week_card_enabled' => $this->configModel->get('weekhelper_due_date_week_card_enabled', 1),
+            'full_start_date_enabled' => $this->configModel->get('weekhelper_full_start_date_enabled', 1),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -332,5 +333,16 @@ class WeekHelperHelper extends Base
             $out = '<i>(W' . $week . ')</i>';
         }
         return $out;
+    }
+
+    /**
+     * Get the config in the template, if the full started
+     * date should be shown on the card.
+     *
+     * @return boolean
+     */
+    public function showFullStartedDateOnCard()
+    {
+        return $this->configModel->get('weekhelper_full_start_date_enabled', 1) == 1;
     }
 }

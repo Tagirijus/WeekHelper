@@ -166,7 +166,9 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
             <?php if ($task['date_started'] != 0): ?>
                 <span title="<?= t('Start Date') ?>">
                     <i class="fa fa-play" role="img" aria-label="<?= t('Start Date') ?>"></i>
-                    <?= $this->dt->date($task['date_started']) ?>
+                    <?php if ($this->weekHelperHelper->showFullStartedDateOnCard()): ?>
+                        <?= $this->dt->date($task['date_started']) ?>
+                    <?php endif ?>
                 </span>
             <?php endif ?>
 
@@ -189,8 +191,6 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
                     <?= $this->weekHelperHelper->showWeekOfDueDate($task['date_due']) ?>
 
                 </span>
-
-                <br>
 
                 <!-- Remaining box -->
                 <?= $this->render('WeekHelper:remaining_box', ['task' => $task]) ?>
