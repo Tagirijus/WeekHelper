@@ -8,23 +8,37 @@ namespace Kanboard\Plugin\WeekHelper\Controller;
 class WeekHelperController extends \Kanboard\Controller\PluginController
 {
     /**
-     * Settins page for the WeekHelper plugin.
+     * Show one of the settings pages of the WeekHelper plugin.
      *
      * @return HTML response
      */
-    public function show()
+    public function showConfigWeeks()
     {
         // !!!!!
         // When I want to add new config options, I also have to add them
         // in the WeekHelperHelper.php in the getConfig() Method !
         // !!!!!
-        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_config', $this->helper->weekHelperHelper->getConfig()));
+        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_configWeeks', $this->helper->weekHelperHelper->getConfig()));
     }
 
     /**
-     * Save the setting for WeekHelper.
+     * Show one of the settings pages of the WeekHelper plugin.
+     *
+     * @return HTML response
      */
-    public function saveConfig()
+    public function showConfigHoursView()
+    {
+        // !!!!!
+        // When I want to add new config options, I also have to add them
+        // in the WeekHelperHelper.php in the getConfig() Method !
+        // !!!!!
+        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_configHoursView', $this->helper->weekHelperHelper->getConfig()));
+    }
+
+    /**
+     * Save the setting for WeekHelper Weeks.
+     */
+    public function saveConfigWeeks()
     {
         $form = $this->request->getValues();
 
@@ -32,6 +46,27 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_headerdate_enabled' => isset($form['headerdate_enabled']) ? 1 : 0,
             'weekhelper_week_pattern' => $form['week_pattern'],
             'weekhelper_time_box_enabled' => isset($form['time_box_enabled']) ? 1 : 0,
+        ];
+
+        $this->languageModel->loadCurrentLanguage();
+
+        if ($this->configModel->save($values)) {
+            $this->flash->success(t('Settings saved successfully.'));
+        } else {
+            $this->flash->failure(t('Unable to save your settings.'));
+        }
+
+        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigWeeks', ['plugin' => 'WeekHelper']), true);
+    }
+
+    /**
+     * Save the setting for WeekHelper HoursView.
+     */
+    public function saveConfigHoursView()
+    {
+        $form = $this->request->getValues();
+
+        $values = [
             'hoursview_level_1_columns' => $form['level_1_columns'],
             'hoursview_level_2_columns' => $form['level_2_columns'],
             'hoursview_level_3_columns' => $form['level_3_columns'],
@@ -55,7 +90,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             $this->flash->failure(t('Unable to save your settings.'));
         }
 
-        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'show', ['plugin' => 'WeekHelper']), true);
+        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigHoursView', ['plugin' => 'WeekHelper']), true);
     }
 
     /**
