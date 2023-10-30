@@ -42,7 +42,10 @@
             <i class="fa fa-calendar" role="img" aria-label="<?= t('Due date') ?>"></i>
             <?= $this->dt->date($task['date_due']) ?>
         </span>
-        <?= $this->render('WeekHelper:board/task_footer_remaining_box', ['task' => $task, 'white_border' => true]) ?>
+        <?= $this->render('WeekHelper:board/task_footer_remaining_box', [
+            'task' => $task,
+            'alt_colors' => 1
+        ]) ?>
     <?php endif ?>
 
     <?php if ($task['recurrence_status'] == \Kanboard\Model\TaskModel::RECURRING_STATUS_PENDING): ?>

@@ -34,30 +34,44 @@
 #updateCurrentTimeBox {
 }
 
-.wh-task-icon-border-black {
-	border: 1px solid black;
+
+/* Remaining Box */
+
+.wh-remaining-box {
+	display: inline;
 }
 
-.wh-task-icon-border-white {
-	border: 1px solid white;
+.wh-remaining-days {
+	display: inline;
+	border-width: 1px;
+	border-style: solid;
+	border-radius: 3px;
+    padding: 1px 3px 1px 4px;
 }
 
-span.wh-task-icon-remaining-days {
-    padding: 1px 3px 1px 3px;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px
+.wh-remaining-weeks {
+	display: inline;
+	border-width: 1px;
+	border-style: solid;
+    border-radius: 3px;
+    padding: 1px 3px 1px 4px;
+	margin-left: .25em;
 }
 
-span.wh-task-icon-remaining-weeks {
-    border-left: none;
-    margin-left: -2px;
-    padding: 1px 3px 1px 5px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px
+.wh-remaining-border-black {
+	border-color: black;
+}
+
+.wh-remaining-border-white {
+	border-color: white;
 }
 
 .wh-task-icon-normal {
 	color: black;
+	background: rgba(0,0,0,0);
+}
+.wh-task-icon-normal-white {
+	color: white;
 	background: rgba(0,0,0,0);
 }
 
@@ -72,6 +86,7 @@ span.wh-task-icon-remaining-weeks {
 	color: black;
 	background: red;
 }
+
 
 
 
