@@ -62,6 +62,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_time_box_enabled' => isset($form['time_box_enabled']) ? 1 : 0,
             'weekhelper_due_date_week_card_enabled' => isset($form['due_date_week_card_enabled']) ? 1 : 0,
             'weekhelper_full_start_date_enabled' => isset($form['full_start_date_enabled']) ? 1 : 0,
+            'weekhelper_due_date_week_list_enabled' => isset($form['due_date_week_list_enabled']) ? 1 : 0,
         ];
 
         $this->languageModel->loadCurrentLanguage();

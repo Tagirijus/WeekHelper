@@ -44,6 +44,7 @@ class WeekHelperHelper extends Base
             'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
             'due_date_week_card_enabled' => $this->configModel->get('weekhelper_due_date_week_card_enabled', 1),
             'full_start_date_enabled' => $this->configModel->get('weekhelper_full_start_date_enabled', 1),
+            'due_date_week_list_enabled' => $this->configModel->get('weekhelper_due_date_week_list_enabled', 1),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -167,7 +168,7 @@ class WeekHelperHelper extends Base
         $days = $this->getRemainingDaysFromTimestamp($unix);
         $weeks = $days / 7;
         if ($ceil) {
-            $weeks = ceil($weeks);
+            $weeks = round($weeks);
         }
         return $weeks;
     }
@@ -326,12 +327,12 @@ class WeekHelperHelper extends Base
     }
 
     /**
-     * Show Week of due date, if enabled in the config.
+     * Show Week of due date on card, if enabled in the config.
      *
      * @param  integer $dueDate
      * @return string
      */
-    public function showWeekOfDueDate($dueDate = 0)
+    public function showWeekOfDueDateOnCard($dueDate = 0)
     {
         $out = '';
         if ($this->configModel->get('weekhelper_due_date_week_card_enabled', 1)) {
@@ -339,6 +340,24 @@ class WeekHelperHelper extends Base
             $date->setTimestamp($dueDate);
             $week = $date->format("W");
             $out = '<i>(W' . $week . ')</i>';
+        }
+        return $out;
+    }
+
+    /**
+     * Show Week of due date in list, if enabled in the config.
+     *
+     * @param  integer $dueDate
+     * @return string
+     */
+    public function showWeekOfDueDateInList($dueDate = 0)
+    {
+        $out = '';
+        if ($this->configModel->get('weekhelper_due_date_week_list_enabled', 1)) {
+            $date = new \DateTime();
+            $date->setTimestamp($dueDate);
+            $week = $date->format("W");
+            $out = '<i>(W' . $week . ')</i>&nbsp;';
         }
         return $out;
     }

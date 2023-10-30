@@ -192,7 +192,7 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
                         <?= $this->dt->datetime($task['date_due']) ?>
                     <?php endif ?>
 
-                    <?= $this->weekHelperHelper->showWeekOfDueDate($task['date_due']) ?>
+                    <?= $this->weekHelperHelper->showWeekOfDueDateOnCard($task['date_due']) ?>
 
                 </span>
 

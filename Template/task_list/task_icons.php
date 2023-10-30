@@ -41,6 +41,8 @@
             ">
             <i class="fa fa-calendar" role="img" aria-label="<?= t('Due date') ?>"></i>
             <?= $this->dt->date($task['date_due']) ?>
+
+            <?= $this->weekHelperHelper->showWeekOfDueDateInList($task['date_due']) ?>
         </span>
         <?= $this->render('WeekHelper:remaining_box', [
             'task' => $task,

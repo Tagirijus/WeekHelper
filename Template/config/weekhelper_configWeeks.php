@@ -80,6 +80,21 @@
 
     </div>
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Week of due date in list'), 'due_date_week_list_enabled') ?>
+            <?= $this->form->checkbox('due_date_week_list_enabled', t('enabled'), 1, $due_date_week_list_enabled, '', [
+                'autofocus',
+                'tabindex="6"'
+            ]) ?>
+        </div>
+
+    </div>
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
