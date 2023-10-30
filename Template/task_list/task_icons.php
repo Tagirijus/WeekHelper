@@ -43,7 +43,8 @@
             <?= $this->dt->date($task['date_due']) ?>
         </span>
         <?= $this->render('WeekHelper:remaining_box', [
-            'task' => $task
+            'task' => $task,
+            'style' => 'border-color:white;'
         ]) ?>
     <?php endif ?>
 

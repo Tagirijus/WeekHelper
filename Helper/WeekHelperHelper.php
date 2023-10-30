@@ -315,9 +315,11 @@ class WeekHelperHelper extends Base
     protected function getCSSFromDifference($difference = 0, $levels = [])
     {
         $out = '';
+        $lowest = 99999;
         foreach ($levels as $level) {
-            if ($difference <= $level['difference']) {
+            if ($difference <= $level['difference'] && $level['difference'] <= $lowest) {
                 $out = $level['css'];
+                $lowest = $level['difference'];
             }
         }
         return $out;
