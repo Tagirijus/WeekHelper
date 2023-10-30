@@ -37,4 +37,9 @@ return array(
     'Level or All to use for the project times on home. You can use comma seperated values to included more than one level; e.g.: "level_1,level_3"' => 'Level oder All was für die Projektzeiten auf Home genutzt werden soll. Sie können Komma getrennt mehrere Werte angeben, um mehr als nur ein Level zu nutzen; z.B. "level_1,level_3"',
     'Remaining days' => 'Restliche Tage',
     'Remaining weeks' => 'Restliche Wochen',
+    'Every line has to be in the format "difference:CSS", e.g.: "3:rgba(100,0,255,.5)"' => 'Jede Zeile muss in diesem Format sein: "Unterschied:CSS", z.B.: "3:rgba(100,0,255,.5)"',
+    'Show remaining box for days' => 'Zeige Restzeit-Box für Tage',
+    'Show remaining box for weeks' => 'Zeige Restzeit-Box für Wochen',
+    'Remaining levels for days' => 'Restzeit-Level für Tage',
+    'Remaining levels for weeks' => 'Restzeit-Level für Wochen',
 );

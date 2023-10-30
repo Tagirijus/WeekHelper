@@ -1,5 +1,15 @@
 /* WEEK HELPER */
 
+.weekhelper-textarea-config {
+	width: 100%;
+}
+
+.weekhelper-config-weak-text {
+	font-style: italic;
+	opacity: .75;
+	font-size: .75em;
+}
+
 #currentDateHeader {
 	margin-left: .5em;
 	font-size: 0.45em;

@@ -36,6 +36,8 @@ class Plugin extends Base
             'template:config:sidebar', 'WeekHelper:config/weekhelper_configWeeks_sidebar');
         $this->template->hook->attach(
             'template:config:sidebar', 'WeekHelper:config/weekhelper_configHoursView_sidebar');
+        $this->template->hook->attach(
+            'template:config:sidebar', 'WeekHelper:config/weekhelper_configRemainingBox_sidebar');
         if ($this->configModel->get('weekhelper_time_box_enabled', 1) == 1) {
             $this->template->hook->attach(
                 'template:layout:bottom', 'WeekHelper:time_box');
@@ -83,6 +85,7 @@ class Plugin extends Base
         // Extra Page - Routes
         $this->route->addRoute('/weekhelper/configWeeks', 'WeekHelperController', 'showConfigWeeks', 'WeekHelper');
         $this->route->addRoute('/weekhelper/configHoursView', 'WeekHelperController', 'showConfigHoursView', 'WeekHelper');
+        $this->route->addRoute('/weekhelper/configRemainingBox', 'WeekHelperController', 'showConfigRemainingBox', 'WeekHelper');
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
     }
 

@@ -16,14 +16,14 @@ class WeekHelperHelper extends Base
     public function getConfig()
     {
         return [
-            // WeekHelper
             'title' => t('WeekHelper') . ' &gt; ' . t('Settings'),
+
+            // Weeks
             'headerdate_enabled' => $this->configModel->get('weekhelper_headerdate_enabled', 1),
             'week_pattern' => $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}'),
             'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
 
             // HoursView
-            'title' => t('HoursView') . ' &gt; ' . t('Settings'),
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
             'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
             'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),
@@ -37,6 +37,12 @@ class WeekHelperHelper extends Base
             'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
             'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
+
+            // Remaining Box
+            'remaining_days_enabled' => $this->configModel->get('weekhelper_remaining_days_enabled', 1),
+            'remaining_lvl_days' =>  $this->configModel->get('weekhelper_remaining_lvl_days', ''),
+            'remaining_weeks_enabled' => $this->configModel->get('weekhelper_remaining_weeks_enabled', 1),
+            'remaining_lvl_weeks' =>  $this->configModel->get('weekhelper_remaining_lvl_weeks', ''),
         ];
     }
 

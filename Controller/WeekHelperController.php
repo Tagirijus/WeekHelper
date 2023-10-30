@@ -36,6 +36,20 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
+     * Show one of the settings pages of the WeekHelper plugin.
+     *
+     * @return HTML response
+     */
+    public function showConfigRemainingBox()
+    {
+        // !!!!!
+        // When I want to add new config options, I also have to add them
+        // in the WeekHelperHelper.php in the getConfig() Method !
+        // !!!!!
+        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_configRemainingBox', $this->helper->weekHelperHelper->getConfig()));
+    }
+
+    /**
      * Save the setting for WeekHelper Weeks.
      */
     public function saveConfigWeeks()
@@ -91,6 +105,31 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         }
 
         return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigHoursView', ['plugin' => 'WeekHelper']), true);
+    }
+
+    /**
+     * Save the setting for WeekHelper Weeks.
+     */
+    public function saveConfigRemainingBox()
+    {
+        $form = $this->request->getValues();
+
+        $values = [
+            'weekhelper_remaining_days_enabled' => isset($form['remaining_days_enabled']) ? 1 : 0,
+            'weekhelper_remaining_lvl_days' => $form['remaining_lvl_days'],
+            'weekhelper_remaining_weeks_enabled' => isset($form['remaining_weeks_enabled']) ? 1 : 0,
+            'weekhelper_remaining_lvl_weeks' => $form['remaining_lvl_weeks'],
+        ];
+
+        $this->languageModel->loadCurrentLanguage();
+
+        if ($this->configModel->save($values)) {
+            $this->flash->success(t('Settings saved successfully.'));
+        } else {
+            $this->flash->failure(t('Unable to save your settings.'));
+        }
+
+        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigRemainingBox', ['plugin' => 'WeekHelper']), true);
     }
 
     /**
