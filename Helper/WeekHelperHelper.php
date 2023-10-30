@@ -42,6 +42,7 @@ class WeekHelperHelper extends Base
             'headerdate_enabled' => $this->configModel->get('weekhelper_headerdate_enabled', 1),
             'week_pattern' => $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}'),
             'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
+            'due_date_week_card_enabled' => $this->configModel->get('weekhelper_due_date_week_card_enabled', 1),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -311,6 +312,24 @@ class WeekHelperHelper extends Base
             if ($difference <= $level['difference']) {
                 $out = $level['css'];
             }
+        }
+        return $out;
+    }
+
+    /**
+     * Show Week of due date, if enabled in the config.
+     *
+     * @param  integer $dueDate
+     * @return string
+     */
+    public function showWeekOfDueDate($dueDate = 0)
+    {
+        $out = '';
+        if ($this->configModel->get('weekhelper_due_date_week_card_enabled', 1)) {
+            $date = new \DateTime();
+            $date->setTimestamp($dueDate);
+            $week = $date->format("W");
+            $out = '<i>(W' . $week . ')</i>';
         }
         return $out;
     }

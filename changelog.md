@@ -7,6 +7,8 @@
 
 _(most recent changes are listed on top):_
 - Added start date to card (on the bottom) and also moved due date to the bottom.
+- Added config and feature to change style of remaining boxes according to the difference to today.
+- Added option to show the week of the due date on the card.
 
 
 ## v2.0

@@ -42,4 +42,5 @@ return array(
     'Show remaining box for weeks' => 'Zeige Restzeit-Box für Wochen',
     'Remaining levels for days' => 'Restzeit-Level für Tage',
     'Remaining levels for weeks' => 'Restzeit-Level für Wochen',
+    'Week of due date on card' => 'Woche des Fälligkeitsdatums auf Karte',
 );

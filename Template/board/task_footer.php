@@ -186,8 +186,11 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
                         <?= $this->dt->datetime($task['date_due']) ?>
                     <?php endif ?>
 
-                    <br>
+                    <?= $this->weekHelperHelper->showWeekOfDueDate($task['date_due']) ?>
+
                 </span>
+
+                <br>
 
                 <!-- Remaining box -->
                 <?= $this->render('WeekHelper:remaining_box', ['task' => $task]) ?>
