@@ -187,11 +187,11 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
                     <?php endif ?>
 
                     <br>
-
-                    <!-- Remaining box -->
-                    <?= $this->render('WeekHelper:board/task_footer_remaining_box', ['task' => $task]) ?>
-
                 </span>
+
+                <!-- Remaining box -->
+                <?= $this->render('WeekHelper:remaining_box', ['task' => $task]) ?>
+
             <?php endif ?>
 
         </div>

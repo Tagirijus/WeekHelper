@@ -25,7 +25,7 @@
 
     </div>
     <p class="weekhelper-config-weak-text">
-        <?= t('Every line has to be in the format "difference:CSS", e.g.: "3:rgba(100,0,255,.5)"') ?>
+        <?= t('Every line has to be in the format "difference:CSS", e.g.: "3=background-color:rgba(100,0,255,.5)"') ?>
     </p>
 
     <br>
@@ -51,7 +51,7 @@
 
     </div>
     <p class="weekhelper-config-weak-text">
-        <?= t('Every line has to be in the format "difference:CSS", e.g.: "3:rgba(100,0,255,.5)"') ?>
+        <?= t('Every line has to be in the format "difference:CSS", e.g.: "3=background-color:rgba(100,0,255,.5)"') ?>
     </p>
 
 

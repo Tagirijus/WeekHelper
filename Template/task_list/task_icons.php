@@ -42,9 +42,8 @@
             <i class="fa fa-calendar" role="img" aria-label="<?= t('Due date') ?>"></i>
             <?= $this->dt->date($task['date_due']) ?>
         </span>
-        <?= $this->render('WeekHelper:board/task_footer_remaining_box', [
-            'task' => $task,
-            'alt_colors' => 1
+        <?= $this->render('WeekHelper:remaining_box', [
+            'task' => $task
         ]) ?>
     <?php endif ?>
 

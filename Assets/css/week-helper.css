@@ -68,35 +68,6 @@
 	margin-left: .25em;
 }
 
-.wh-remaining-border-black {
-	border-color: black;
-}
-
-.wh-remaining-border-white {
-	border-color: white;
-}
-
-.wh-task-icon-normal {
-	color: black;
-	background: rgba(0,0,0,0);
-}
-.wh-task-icon-normal-white {
-	color: white;
-	background: rgba(0,0,0,0);
-}
-
-.wh-task-icon-soon {
-	border-left: 1px solid black !important;
-	color: black;
-	background: rgba(100, 100, 255, 1);
-}
-
-.wh-task-icon-very-soon {
-	border-left: 1px solid black !important;
-	color: black;
-	background: red;
-}
-
 
 
 

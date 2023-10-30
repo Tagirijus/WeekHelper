@@ -9,6 +9,26 @@ class WeekHelperHelper extends Base
 {
 
     /**
+     * @var boolean
+     **/
+    public $remainingDaysEnabled = null;
+
+    /**
+     * @var boolean
+     **/
+    public $remainingWeeksEnabled = null;
+
+    /**
+     * @var boolean
+     **/
+    public $remainingDaysLvl = null;
+
+    /**
+     * @var boolean
+     **/
+    public $remainingWeeksLvl = null;
+
+    /**
      * Get configuration for plugin as array.
      *
      * @return array
@@ -142,5 +162,156 @@ class WeekHelperHelper extends Base
             $weeks = ceil($weeks);
         }
         return $weeks;
+    }
+
+    /**
+     * Get config for remaining box feature
+     * and cache it in this classes variables.
+     */
+    public function initRemainingBoxConfig(): void
+    {
+        $this->remainingDaysEnabled = $this->configModel->get('weekhelper_remaining_days_enabled', 1);
+        $this->remainingDaysLvl = $this->configModel->get('weekhelper_remaining_lvl_days', '');
+        $this->remainingDaysLvl = $this->parseRemainingLevels($this->remainingDaysLvl);
+        $this->remainingWeeksEnabled = $this->configModel->get('weekhelper_remaining_weeks_enabled', 1);
+        $this->remainingWeeksLvl = $this->configModel->get('weekhelper_remaining_lvl_weeks', '');
+        $this->remainingWeeksLvl = $this->parseRemainingLevels($this->remainingWeeksLvl);
+    }
+
+    /**
+     * Parse the given remaining box feature config
+     * string and generate an array from it.
+     *
+     * @param  string $configStr
+     * @return array
+     */
+    public function parseRemainingLevels($configStr)
+    {
+        $out = [];
+        $config_per_line = preg_split("/\r\n|\n|\r/", $configStr);
+        foreach ($config_per_line as $config_line) {
+            $config_tmp = explode('=', $config_line);
+            if (count($config_tmp) > 1) {
+                $out[] = [
+                    'difference' => $config_tmp[0],
+                    'css' => $config_tmp[1]
+                ];
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Show remaining days? Get it from config
+     * and return the bool directly.
+     *
+     * @return boolean
+     */
+    public function showRemainingDays()
+    {
+        if (is_null($this->remainingDaysEnabled)) {
+            $this->initRemainingBoxConfig();
+        }
+        return $this->remainingDaysEnabled;
+    }
+
+    /**
+     * Show remaining weeks? Get it from config
+     * and return the bool directly.
+     *
+     * @return boolean
+     */
+    public function showRemainingWeeks()
+    {
+        if (is_null($this->remainingWeeksEnabled)) {
+            $this->initRemainingBoxConfig();
+        }
+        return $this->remainingWeeksEnabled;
+    }
+
+    /**
+     * This method will get a timestamp and check against
+     * todays date and calculate the difference and then
+     * output th according CSS set in the config for this
+     * difference.
+     *
+     * IN DAYS for this method.
+     *
+     * @param  integer $unix
+     * @return string
+     */
+    public function getCSSForRemainingDaysTimestamp($unix = 0)
+    {
+        return $this->getCSSForRemainingTimestamp($unix, 'days');
+    }
+
+    /**
+     * This method will get a timestamp and check against
+     * todays date and calculate the difference and then
+     * output th according CSS set in the config for this
+     * difference.
+     *
+     * IN WEEKS for this method.
+     *
+     * @param  integer $unix
+     * @return string
+     */
+    public function getCSSForRemainingWeeksTimestamp($unix = 0)
+    {
+        return $this->getCSSForRemainingTimestamp($unix, 'weeks');
+    }
+
+    /**
+     * Wrapper method for the respective methods:
+     *
+     * This method will get a timestamp and check against
+     * todays date and calculate the difference and then
+     * output th according CSS set in the config for this
+     * difference.
+     *
+     * @param  integer $unix
+     * @param  string  $what
+     * @return string
+     */
+    protected function getCSSForRemainingTimestamp($unix = 0, $what = 'days')
+    {
+        if (is_null($this->remainingDaysLvl) || is_null($this->remainingWeeksLvl)) {
+            $this->initRemainingBoxConfig();
+        }
+
+        // first get the difference and the config array to use
+        if ($what == 'days') {
+            $difference = $this->getRemainingDaysFromTimestamp($unix);
+            $levels = $this->remainingDaysLvl;
+        } elseif ($what == 'weeks') {
+            $difference = $this->getRemainingWeeksFromTimestamp($unix);
+            $levels = $this->remainingWeeksLvl;
+        } else {
+            $difference = 0;
+            $levels = [];
+        }
+
+        // now check and choose CSS string to output
+        return $this->getCSSFromDifference($difference, $levels);
+    }
+
+    /**
+     * Get the CSS string with the given difference.
+     * This basically is the logic on how to choose
+     * the CS string from the (parsed) config array.
+     *
+     * @param  integer $difference
+     * @param  array $levels
+     * @return string
+     */
+    protected function getCSSFromDifference($difference = 0, $levels = [])
+    {
+        $out = '';
+        foreach ($levels as $level) {
+            if ($difference <= $level['difference']) {
+                $out = $level['css'];
+            }
+        }
+        return $out;
     }
 }
