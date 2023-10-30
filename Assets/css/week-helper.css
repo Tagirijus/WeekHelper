@@ -1,3 +1,31 @@
+/* CARD STUFF with OVERRIDE */
+
+.wh-category-tag-wrapper {
+	text-align: right;
+}
+
+.task-board-category-container {
+	display: inline;
+}
+
+.task-tags {
+    display: inline;
+    font-size: .75em;
+    margin-left: .25em;
+}
+.task-tags ul {
+    display: inline;
+}
+.task-tags li {
+    color: var(--color-primary);
+    padding: 1px 2px;
+    margin-top: -2px;
+    border: 1px dotted #333;
+    border-radius: 4px
+}
+
+
+
 /* WEEK HELPER */
 
 .weekhelper-textarea-config {
