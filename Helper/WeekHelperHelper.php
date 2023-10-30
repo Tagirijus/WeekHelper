@@ -132,13 +132,19 @@ class WeekHelperHelper extends Base
      * Return the remaining days as an integer from
      * now to the given unix timestamp.
      *
+     * Info: this method will ignore the day times and
+     *       just use the plain dates to calculate the
+     *       days!
+     *
      * @param  integer $unix
      * @return integer
      */
     public function getRemainingDaysFromTimestamp($unix = 0)
     {
         $datetime1 = new \DateTime(); // start time
+        $datetime1->setTime(0, 0, 0, 0);
         $datetime2 = new \DateTime(); // end time
+        $datetime2->setTime(0, 0, 0, 0);
         $datetime2->setTimestamp($unix);
         $interval = $datetime1->diff($datetime2);
         if ($interval->invert) {
