@@ -19,12 +19,12 @@ class WeekHelperHelper extends Base
     public $remainingWeeksEnabled = null;
 
     /**
-     * @var boolean
+     * @var array
      **/
     public $remainingDaysLvl = null;
 
     /**
-     * @var boolean
+     * @var array
      **/
     public $remainingWeeksLvl = null;
 
