@@ -45,6 +45,7 @@ class WeekHelperHelper extends Base
             'due_date_week_card_enabled' => $this->configModel->get('weekhelper_due_date_week_card_enabled', 1),
             'full_start_date_enabled' => $this->configModel->get('weekhelper_full_start_date_enabled', 1),
             'due_date_week_list_enabled' => $this->configModel->get('weekhelper_due_date_week_list_enabled', 1),
+            'calendarweeks_for_week_difference_enabled' => $this->configModel->get('weekhelper_calendarweeks_for_week_difference_enabled', 0),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -140,7 +141,7 @@ class WeekHelperHelper extends Base
      * @param  integer $unix
      * @return integer
      */
-    public function getRemainingDaysFromTimestamp($unix = 0)
+    public function getRemainingDaysFromNowTillTimestamp($unix = 0)
     {
         $datetime1 = new \DateTime(); // start time
         $datetime1->setTime(0, 0, 0, 0);
@@ -160,17 +161,66 @@ class WeekHelperHelper extends Base
      * now to the given unix timestamp.
      *
      * @param  integer $unix
-     * @param  boolean $ceil
      * @return integer
      */
-    public function getRemainingWeeksFromTimestamp($unix = 0, $ceil = true)
+    public function getRemainingWeeksFromNowTillTimestamp($unix = 0)
     {
-        $days = $this->getRemainingDaysFromTimestamp($unix);
-        $weeks = $days / 7;
-        if ($ceil) {
-            $weeks = round($weeks);
+        // new optional calculation method
+        if ($this->configModel->get('weekhelper_calendarweeks_for_week_difference_enabled', 0) == 1) {
+            return $this->getRemainingWeeksFromNowTillTimestampWithCalendarWeeks($unix);
+
+        // old default calculation method
+        } else {
+            return $this->getRemainingWeeksFromNowTillTimestampWithPlainDays($unix);
         }
+    }
+
+    /**
+     * This method calculates the week difference from
+     * now to the given unix timestamp. It simply uses
+     * the logic that one week is equal to seven days.
+     *
+     * It is the default and was the only method
+     * till v2.2.
+     *
+     * @param  integer $unix
+     * @return integer
+     */
+    protected function getRemainingWeeksFromNowTillTimestampWithPlainDays($unix = 0)
+    {
+        $days = $this->getRemainingDaysFromNowTillTimestamp($unix);
+        $weeks = $days / 7;
+        $weeks = round($weeks);
         return $weeks;
+    }
+
+    /**
+     * This method calculates the week difference from
+     * now to the given unix timestamp. This method uses
+     * the 52 calendar weeks of the year for the calculation.
+     *
+     * @param  integer $unix
+     * @return integer
+     */
+    protected function getRemainingWeeksFromNowTillTimestampWithCalendarWeeks($unix = 0)
+    {
+        // now
+        $datetime1 = new \DateTime();
+        $datetime1->setTime(0, 0, 0, 0);
+
+        // target date
+        $datetime2 = new \DateTime();
+        $datetime2->setTime(0, 0, 0, 0);
+        $datetime2->setTimestamp($unix);
+
+        // year difference of both
+        $year_diff = abs($datetime2->format('Y') - $datetime1->format('Y'));
+
+        // get calendar weeks
+        $week1 = $datetime1->format('W');
+        $week2 = $datetime2->format('W') + $year_diff * 52;
+
+        return $week2 - $week1;
     }
 
     /**
@@ -290,10 +340,10 @@ class WeekHelperHelper extends Base
 
         // first get the difference and the config array to use
         if ($what == 'days') {
-            $difference = $this->getRemainingDaysFromTimestamp($unix);
+            $difference = $this->getRemainingDaysFromNowTillTimestamp($unix);
             $levels = $this->remainingDaysLvl;
         } elseif ($what == 'weeks') {
-            $difference = $this->getRemainingWeeksFromTimestamp($unix);
+            $difference = $this->getRemainingWeeksFromNowTillTimestamp($unix);
             $levels = $this->remainingWeeksLvl;
         } else {
             $difference = 0;

@@ -45,4 +45,5 @@ return array(
     'Week of due date on card' => 'Woche des Fälligkeitsdatums auf Karte',
     'Show full started date on card' => 'Zeige volles Startdatum auf Karte',
     'Week of due date in list' => 'Woche des Fälligkeitsdatums in Liste',
+    'Use calendar weeks for week-difference calculation' => 'Nutze Kalender-Wochen für die Wochen-Differenz-Berechnung',
 );

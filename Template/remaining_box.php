@@ -17,7 +17,7 @@
                 style="<?= $style ?><?= $this->weekHelperHelper->getCSSForRemainingDaysTimestamp($task['date_due']) ?>"
             >
                 <span class="ui-helper-hidden-accessible"><?= t('Remaining days') ?> </span>
-                <?= $this->weekHelperHelper->getRemainingDaysFromTimestamp($task['date_due']) ?>D
+                <?= $this->weekHelperHelper->getRemainingDaysFromNowTillTimestamp($task['date_due']) ?>D
             </div>
         <?php endif ?>
 
@@ -28,7 +28,7 @@
                 style="<?= $style ?><?= $this->weekHelperHelper->getCSSForRemainingWeeksTimestamp($task['date_due']) ?>"
             >
                 <span class="ui-helper-hidden-accessible"><?= t('Remaining weeks') ?> </span>
-                <?= $this->weekHelperHelper->getRemainingWeeksFromTimestamp($task['date_due']) ?>W
+                <?= $this->weekHelperHelper->getRemainingWeeksFromNowTillTimestamp($task['date_due']) ?>W
             </div>
         <?php endif ?>
 

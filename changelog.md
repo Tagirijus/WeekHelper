@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.2
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Added an alternative week-difference calculation, which will use the calendar weeks for the difference, instead of plain "7 days is a week" calculation. This better reflects the typical work week from monday to friday (or saturdax or even sunday), for example.
+
+
 ## v2.1
 
 ### What's Changed

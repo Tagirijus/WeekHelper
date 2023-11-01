@@ -96,6 +96,22 @@
     </div>
 
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Use calendar weeks for week-difference calculation'), 'calendarweeks_for_week_difference_enabled') ?>
+            <?= $this->form->checkbox('calendarweeks_for_week_difference_enabled', t('enabled'), 1, $calendarweeks_for_week_difference_enabled, '', [
+                'autofocus',
+                'tabindex="7"'
+            ]) ?>
+        </div>
+
+    </div>
+
+
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
     </div>
