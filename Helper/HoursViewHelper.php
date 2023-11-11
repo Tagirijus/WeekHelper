@@ -539,12 +539,7 @@ class HoursViewHelper extends Base
                 $tmp = $task['time_spent'] - $task['time_estimated'];
             }
 
-            // here e.g. for overtime there can only be positive
-            // values; otherwise there probably is no overtime
-            // at all
-            if ($tmp > 0) {
-                $over_time = $tmp;
-            }
+            $over_time = $tmp;
         }
         $task['time_overtime'] = round($over_time, 2);
         return $task;
@@ -563,13 +558,7 @@ class HoursViewHelper extends Base
         foreach ($subtasks as $subtask) {
             $tmp = $subtask['time_spent'] - $subtask['time_estimated'];
 
-            // only add time as spending, as long as the spent time of the subtask
-            // does not exceed the estimated time, so that in total
-            // the remaining time will always represent the actual estimated
-            // time throughout all subtasks
-            if ($tmp > 0) {
-                $out += $tmp;
-            }
+            $out += $tmp;
         }
         return $out;
     }
