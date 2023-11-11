@@ -584,20 +584,21 @@ class HoursViewHelper extends Base
 
     /**
      * Wrapper for the getSlowerOrFasterThanEstimatedForTask()
-     * method to render the ouput with correct sign.
+     * method to render the ouput sign.
      *
      * @param  array &$task
      * @return string
      */
-    public function getSlowerOrFasterThanEstimatedForTaskAsString(&$task)
+    public function getSlowerOrFasterSign(&$task)
     {
         $slowerOrFaster = $this->getSlowerOrFasterThanEstimatedForTask($task);
         if ($slowerOrFaster > 0) {
-            $out = '>> ';
+            $out = '>>';
         } else {
-            $out = '<< ';
+            $out = '<<';
         }
-        $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
+        // how it was before:
+        // $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
         return $out;
     }
 
