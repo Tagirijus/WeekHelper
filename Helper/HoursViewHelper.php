@@ -462,6 +462,11 @@ class HoursViewHelper extends Base
             } else {
                 $tmp = $task['time_estimated'] - $task['time_spent'];
             }
+
+            // remaining time should be positive
+            if ($tmp > 0) {
+                $remaining_time = $tmp;
+            }
         }
         $task['time_remaining'] = round($remaining_time, 2);
         return $task;
