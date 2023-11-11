@@ -25,7 +25,9 @@
                 </span>
                 <span class="thv-spent-color">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['spent']); ?>h
-                    <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['spent'] - $times['level_1']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['overtime']); ?>h)</i>
+                    <?php if ($times['level_1']['_total']['overtime'] != 0.0): ?>
+                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['spent'] - $times['level_1']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['overtime']); ?>h)</i>
+                    <?php endif ?>
                 </span>
             </div>
 
@@ -67,7 +69,9 @@
                 </span>
                 <span class="thv-spent-color">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['spent']); ?>h
-                    <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['spent'] - $times['level_2']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['overtime']); ?>h)</i>
+                    <?php if ($times['level_2']['_total']['overtime'] != 0.0): ?>
+                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['spent'] - $times['level_2']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['overtime']); ?>h)</i>
+                    <?php endif ?>
                 </span>
             </div>
 
@@ -109,7 +113,9 @@
                 </span>
                 <span class="thv-spent-color">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['spent']); ?>h
-                    <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['spent'] - $times['level_3']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['overtime']); ?>h)</i>
+                    <?php if ($times['level_3']['_total']['overtime'] != 0.0): ?>
+                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['spent'] - $times['level_3']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['overtime']); ?>h)</i>
+                    <?php endif ?>
                 </span>
             </div>
 
@@ -151,7 +157,9 @@
                 </span>
                 <span class="thv-spent-color">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['spent']); ?>h
-                    <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['spent'] - $times['level_4']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['overtime']); ?>h)</i>
+                    <?php if ($times['level_4']['_total']['overtime'] != 0.0): ?>
+                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['spent'] - $times['level_4']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['overtime']); ?>h)</i>
+                    <?php endif ?>
                 </span>
             </div>
 
@@ -193,7 +201,9 @@
                 </span>
                 <span class="thv-spent-color">
                     <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent']); ?>h
-                    <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent'] - $times['all']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['overtime']); ?>h)</i>
+                    <?php if ($times['all']['_total']['overtime'] != 0.0): ?>
+                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent'] - $times['all']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['overtime']); ?>h)</i>
+                    <?php endif ?>
                 </span>
             </div>
 
