@@ -519,6 +519,28 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get the overtime with the correct sign to
+     * show in the header.
+     *
+     * E.g. either there was overtime; then it will
+     * be shown as "time_estimated" + "overtime".
+     *
+     * If you worked faster it's "time_estimated" - "overtime".
+     *
+     * @param  float $overtime
+     * @return string
+     */
+    public function getOvertimeForTaskAsString($overtime)
+    {
+        if ($overtime > 0) {
+            $prefix = '+ ';
+        } else {
+            $prefix = '- ';
+        }
+        return $prefix . $this->floatToHHMM(abs($overtime)) . 'h';
+    }
+
+    /**
      * Initialize the overtime for the given task.
      *
      * @param  array  &$task

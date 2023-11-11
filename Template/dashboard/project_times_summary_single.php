@@ -13,7 +13,9 @@
 
     <span class="thv-spent-color">
         <?= $this->hoursViewHelper->floatToHHMM($times['spent']); ?>h
-        <i class="thv-font-small">(<?= $this->hoursViewHelper->floatToHHMM($times['spent'] - $times['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['overtime']); ?>h)</i>
+        <?php if ($times['overtime'] != 0): ?>
+            <i class="thv-font-small">(<?= $this->hoursViewHelper->floatToHHMM($times['spent'] - $times['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['overtime']); ?>)</i>
+        <?php endif ?>
     </span>
     <span></span>
 
