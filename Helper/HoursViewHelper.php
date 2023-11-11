@@ -562,6 +562,10 @@ class HoursViewHelper extends Base
             }
 
             $over_time = $tmp;
+
+            // also add the remaining time, which otherwise
+            // would generate an overtime, which is not wanted
+            $over_time += $this->getRemainingTimeForTask($task);
         }
         $task['time_overtime'] = round($over_time, 2);
         return $task;
