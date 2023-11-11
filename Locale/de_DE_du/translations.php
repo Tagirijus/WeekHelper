@@ -46,4 +46,5 @@ return array(
     'Show full started date on card' => 'Zeige volles Startdatum auf Karte',
     'Week of due date in list' => 'Woche des Fälligkeitsdatums in Liste',
     'Use calendar weeks for week-difference calculation' => 'Nutze Kalender-Wochen für die Wochen-Differenz-Berechnung',
+    '+ means you worked faster, - means you worked slower' => '+ heißt du warst schneller, - heißt du warst langsamer',
 );

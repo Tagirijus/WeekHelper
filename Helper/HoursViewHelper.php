@@ -575,7 +575,7 @@ class HoursViewHelper extends Base
      * an available overhead-time. Or even vice versa and there
      * is less time left, since I mis-estimated the times.
      *
-     * In either way this method os for calculation the difference.
+     * In either way this method is for calculating the difference.
      *
      * @param  array &$task
      * @return float
@@ -599,11 +599,11 @@ class HoursViewHelper extends Base
     {
         $slowerOrFaster = $this->getSlowerOrFasterThanEstimatedForTask($task);
         if ($slowerOrFaster > 0) {
-            $out = '+';
+            $out = '+ ';
         } else {
-            $out = '';
+            $out = '- ';
         }
-        $out .= $this->floatToHHMM($slowerOrFaster) . ' h';
+        $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
         return $out;
     }
 
