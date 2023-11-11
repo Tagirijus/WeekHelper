@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.3
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Changed how _overtime_ is being displayed.
+
+
 ## v2.2
 
 ### What's Changed
