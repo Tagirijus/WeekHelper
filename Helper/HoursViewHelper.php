@@ -604,9 +604,9 @@ class HoursViewHelper extends Base
     {
         $slowerOrFaster = $this->getSlowerOrFasterThanEstimatedForTask($task);
         if ($slowerOrFaster > 0) {
-            $out = '+ ';
+            $out = '>> ';
         } else {
-            $out = '- ';
+            $out = '<< ';
         }
         $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
         return $out;

@@ -110,7 +110,7 @@
                     <?php if ($task['time_estimated'] && $task['time_spent']): ?>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('+ means you worked faster, - means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterThanEstimatedForTaskAsString($task) ?>)</i></span>
+                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterThanEstimatedForTaskAsString($task) ?>)</i></span>
                     </li>
                     <li>
                         <strong><?= t('Time remaining:') ?></strong>
