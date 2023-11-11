@@ -428,66 +428,64 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Calculates the remaining or overtime for the given task,
-     * depending on the subtasks, if they exist.
-     * If not, simply use the task times.
+     * Init maybe and then return the remaining time
+     * for the given task.
      *
-     * @param  array $task
-     * @param  bool $overtime
+     * @param  array  &$task
      * @return float
      */
-    public function getRemainingOrOvertimeForTask($task, $overtime = false)
+    public function getRemainingTimeForTask(&$task)
     {
-        $out = 0.0;
+        if (!array_key_exists('time_remaining', $task)) {
+            $this->initRemainingTimeForTask($task);
+        }
+        return $task['time_remaining'];
+    }
+
+    /**
+     * Initialize the remaining time for the given task.
+     *
+     * @param  array  &$task
+     * @return array
+     */
+    protected function initRemainingTimeForTask(&$task = [])
+    {
+        $remaining_time = 0.0;
         if (isset($task['id'])) {
             $subtasks = $this->getSubtasksByTaskId($task['id']);
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getRemainingOrOvertimeFromSubtasks($subtasks, $overtime);
+                $tmp = $this->getRemainingFromSubtasks($subtasks);
 
             // calculate remaining or overtime based only on task itself
             } else {
-                if ($overtime) {
-                    $tmp = $task['time_spent'] - $task['time_estimated'];
-                } else {
-                    $tmp = $task['time_estimated'] - $task['time_spent'];
-                }
-            }
-
-            // here e.g. for overtime there can only be positive
-            // values; otherwise there probably is no overtime
-            // at all
-            if ($tmp > 0) {
-                $out = $tmp;
+                $tmp = $task['time_estimated'] - $task['time_spent'];
             }
         }
-        return round($out, 2);
+        $task['time_remaining'] = round($remaining_time, 2);
+        return $task;
     }
 
     /**
-     * Calculate the remaining time from subtasks.
+     * Get the remaining times from the given
+     * subtasks in the array.
      *
-     * @param  array $subtasks
-     * @param  bool $overtime
+     * @param  array  $subtasks
      * @return float
      */
-    protected function getRemainingOrOvertimeFromSubtasks($subtasks, $overtime = false)
+    protected function getRemainingFromSubtasks($subtasks = [])
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
-            if ($overtime) {
-                $tmp = $subtask['time_spent'] - $subtask['time_estimated'];
+            // if the subtask is done, yet the spent time is below the estimated time,
+            // only use the lower spent time as the estimated time then
+            if ($subtask['status'] == 2 && $subtask['time_spent'] < $subtask['time_estimated']) {
+                $sub_estimated = $subtask['time_spent'];
             } else {
-                // if the subtask is done yet the spent time is below the estimated time,
-                // only use the lower spent time as the estimated time then
-                if ($subtask['status'] == 2 && $subtask['time_spent'] < $subtask['time_estimated']) {
-                    $sub_estimated = $subtask['time_spent'];
-                } else {
-                    $sub_estimated = $subtask['time_estimated'];
-                }
-                $tmp = $sub_estimated - $subtask['time_spent'];
+                $sub_estimated = $subtask['time_estimated'];
             }
+            $tmp = $sub_estimated - $subtask['time_spent'];
 
             // only add time as spending, as long as the spent time of the subtask
             // does not exceed the estimated time, so that in total
@@ -501,23 +499,8 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Wrapper for "remaining time", which will use the
-     * getRemainingOrOvertimeForTask method.
-     *
-     * @param  array  &$task
-     * @return float
-     */
-    public function getRemainingTimeForTask(&$task)
-    {
-        if (!array_key_exists('time_remaining', $task)) {
-            $task['time_remaining'] = $this->getRemainingOrOvertimeForTask($task, false);
-        }
-        return $task['time_remaining'];
-    }
-
-    /**
-     * Wrapper for "overtime", which will use the
-     * getRemainingOrOvertimeForTask method.
+     * Init maybe and then return the overtime time
+     * for the given task.
      *
      * @param  array  &$task
      * @return float
@@ -525,9 +508,65 @@ class HoursViewHelper extends Base
     public function getOvertimeForTask(&$task)
     {
         if (!array_key_exists('time_overtime', $task)) {
-            $task['time_overtime'] = $this->getRemainingOrOvertimeForTask($task, true);
+            $this->initOvertimeTimeForTask($task);
         }
         return $task['time_overtime'];
+    }
+
+    /**
+     * Initialize the overtime for the given task.
+     *
+     * @param  array  &$task
+     * @return array
+     */
+    protected function initOvertimeTimeForTask(&$task = [])
+    {
+        $over_time = 0.0;
+        if (isset($task['id'])) {
+            $subtasks = $this->getSubtasksByTaskId($task['id']);
+
+            // calculate remaining or overtime based on subtasks
+            if (!empty($subtasks)) {
+                $tmp = $this->getOvertimeFromSubtasks($subtasks);
+
+            // calculate remaining or overtime based only on task itself
+            } else {
+                $tmp = $task['time_spent'] - $task['time_estimated'];
+            }
+
+            // here e.g. for overtime there can only be positive
+            // values; otherwise there probably is no overtime
+            // at all
+            if ($tmp > 0) {
+                $over_time = $tmp;
+            }
+        }
+        $task['time_overtime'] = round($over_time, 2);
+        return $task;
+    }
+
+    /**
+     * Get the overtime times from the given
+     * subtasks in the array.
+     *
+     * @param  array  $subtasks
+     * @return float
+     */
+    protected function getOvertimeFromSubtasks($subtasks = [])
+    {
+        $out = 0.0;
+        foreach ($subtasks as $subtask) {
+            $tmp = $subtask['time_spent'] - $subtask['time_estimated'];
+
+            // only add time as spending, as long as the spent time of the subtask
+            // does not exceed the estimated time, so that in total
+            // the remaining time will always represent the actual estimated
+            // time throughout all subtasks
+            if ($tmp > 0) {
+                $out += $tmp;
+            }
+        }
+        return $out;
     }
 
     /**
