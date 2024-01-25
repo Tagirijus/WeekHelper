@@ -129,9 +129,16 @@ class WeekHelperHelper extends Base
         // check if task is blocked
         $block_str = '';
         if ($this->configModel->get('weekhelper_block_icon_before_task_title', 1) == 1) {
-            $links = array_keys($this->taskLinkModel->getAllGroupedByLabel($task['id']));
-            if (in_array('is blocked by', $links)) {
-                $block_str = '<i class="fa fa-ban" title="' . t('Is blocked by other task') . '"></i> ';
+            $all_links = $this->taskLinkModel->getAllGroupedByLabel($task['id']);
+            foreach ($all_links as $label => $link) {
+                if ($label == 'is blocked by') {
+                    foreach ($link as $task) {
+                        if ($task['is_active'] == 1) {
+                            $block_str = '<i class="fa fa-ban" title="' . t('Is blocked by other task') . '"></i> ';
+                            break;
+                        }
+                    }
+                }
             }
         }
 
