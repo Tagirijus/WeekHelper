@@ -7,6 +7,7 @@
 
 _(most recent changes are listed on top):_
 - Fixes that the automatic action would only replace "[DUPLICATE]" in the title with blank, thus the title got white space added.
+- Automatic action gets new weeknumber without a leading zero now.
 
 
 ## v2.3

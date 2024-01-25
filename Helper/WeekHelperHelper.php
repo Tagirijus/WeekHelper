@@ -84,7 +84,7 @@ class WeekHelperHelper extends Base
         $adder = strtotime('+' . $daysAdd . ' days');
         $year = date('Y', $adder);
         $year_short = substr(date('Y', $adder), -2);
-        $week = date('W', $adder);
+        $week = intval(date('W', $adder));
 
         // get other base strings
         $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
