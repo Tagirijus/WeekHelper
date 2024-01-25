@@ -9,6 +9,7 @@ _(most recent changes are listed on top):_
 - Fixes that the automatic action would only replace "[DUPLICATE]" in the title with blank, thus the title got white space added.
 - Automatic action gets new weeknumber without a leading zero now.
 - More future weeks are not available in the "w"-replacer dropdown (which can be triggered in the title of a task).
+- Added feature to show "blocked icon" in front of task title for tasks, which are blocked by other tasks.
 
 
 ## v2.3
