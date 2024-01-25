@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.4
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Fixes that the automatic action would only replace "[DUPLICATE]" in the title with blank, thus the title got white space added.
+
+
 ## v2.3
 
 ### What's Changed

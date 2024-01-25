@@ -90,6 +90,13 @@ class TaskAutoAddWeek extends Base
             $newTitle
         );
 
+        // trim whitespace around title;
+        // otherwise I could also replace "[DUPICATE] "
+        // (including the whitespace) by ""; but I want it
+        // this way; in case the ending has whitespace as well
+        // by accident
+        $newTitle = trim($newTitle);
+
         // replace the title finally
         return $this->taskModificationModel->update(
             [
