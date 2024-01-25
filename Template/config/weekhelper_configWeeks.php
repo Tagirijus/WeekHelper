@@ -112,6 +112,22 @@
     </div>
 
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Show blocked icon before task title for tasks, which are blocked by other tasks'), 'block_icon_before_task_title') ?>
+            <?= $this->form->checkbox('block_icon_before_task_title', t('enabled'), 1, $block_icon_before_task_title, '', [
+                'autofocus',
+                'tabindex="8"'
+            ]) ?>
+        </div>
+
+    </div>
+
+
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
     </div>

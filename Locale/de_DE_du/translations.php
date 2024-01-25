@@ -47,4 +47,6 @@ return array(
     'Week of due date in list' => 'Woche des Fälligkeitsdatums in Liste',
     'Use calendar weeks for week-difference calculation' => 'Nutze Kalender-Wochen für die Wochen-Differenz-Berechnung',
     '>> means you worked faster, << means you worked slower' => '>> heißt du warst schneller, << heißt du warst langsamer',
+    'Show blocked icon before task title for tasks, which are blocked by other tasks' => 'Zeige Blocked-Icon vor Task-Titel für Tasks, die von anderen Tasks geblockt sind',
+    'Is blocked by other task' => 'Ist blockiert durch einen anderen Task',
 );

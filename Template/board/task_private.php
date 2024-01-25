@@ -58,7 +58,7 @@
             <?= $this->hook->render('template:board:private:task:before-title', array('task' => $task)) ?>
             <div class="task-board-title">
                 <?php
-                    $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']));
+                    $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
                 ?>
                 <?= $this->url->link($title_prepared, 'TaskViewController', 'show', array('task_id' => $task['id'])) ?>
             </div>

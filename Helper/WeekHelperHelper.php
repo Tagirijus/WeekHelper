@@ -46,6 +46,7 @@ class WeekHelperHelper extends Base
             'full_start_date_enabled' => $this->configModel->get('weekhelper_full_start_date_enabled', 1),
             'due_date_week_list_enabled' => $this->configModel->get('weekhelper_due_date_week_list_enabled', 1),
             'calendarweeks_for_week_difference_enabled' => $this->configModel->get('weekhelper_calendarweeks_for_week_difference_enabled', 0),
+            'block_icon_before_task_title' => $this->configModel->get('weekhelper_block_icon_before_task_title', 1),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -118,12 +119,23 @@ class WeekHelperHelper extends Base
      * a span element around the found string.
      *
      * @param  string $title
+     * @param  array $task
      * @return string
      */
-    public function prepareWeekpatternInTitle($title)
+    public function prepareWeekpatternInTitle($title, $task = [])
     {
         $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
-        return preg_replace(
+
+        // check if task is blocked
+        $block_str = '';
+        if ($this->configModel->get('weekhelper_block_icon_before_task_title', 1) == 1) {
+            $links = array_keys($this->taskLinkModel->getAllGroupedByLabel($task['id']));
+            if (in_array('is blocked by', $links)) {
+                $block_str = '<i class="fa fa-ban" title="' . t('Is blocked by other task') . '"></i> ';
+            }
+        }
+
+        return $block_str . preg_replace(
             $this->createRegexFromWeekpattern($weekpattern),
             '<span class="weekhelper-weekpattern-dim">$1</span>',
             $title
