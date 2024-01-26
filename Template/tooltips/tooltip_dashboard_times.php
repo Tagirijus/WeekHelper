@@ -36,6 +36,8 @@
         </tr>
         <?php foreach ($times as $projectId => $project): ?>
             <?php $time = $project['times']; ?>
+            <?php if (!$time[$level]['_has_times']): continue ?>
+            <?php endif ?>
             <tr>
                 <td>
                     <a href="/board/<?= $projectId ?>"><?= $project['name'] ?></a>
