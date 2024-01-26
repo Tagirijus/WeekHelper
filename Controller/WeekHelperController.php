@@ -147,4 +147,31 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $weekPattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
         return $this->response->text($weekPattern);
     }
+
+    /**
+     * Get the tooltip for the dashboard times.
+     *
+     * @return HTML
+     */
+    public function getTooltipDashboardTimes()
+    {
+        $level = $this->request->getStringParam('level', 'all');
+        if ($level == 'level_1') {
+            $label = $this->configModel->get('hoursview_level_1_caption', 'level_1');
+        } elseif ($level == 'level_2') {
+            $label = $this->configModel->get('hoursview_level_2_caption', 'level_2');
+        } elseif ($level == 'level_3') {
+            $label = $this->configModel->get('hoursview_level_3_caption', 'level_3');
+        } elseif ($level == 'level_4') {
+            $label = $this->configModel->get('hoursview_level_4_caption', 'level_4');
+        } else {
+            $label = $this->configModel->get('hoursview_all_caption', 'all');
+        }
+        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+        $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_dashboard_times', [
+            'label' => $label,
+            'level' => $level,
+            'times' => $times
+        ]));
+    }
 }

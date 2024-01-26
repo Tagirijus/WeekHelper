@@ -116,6 +116,10 @@ class HoursViewHelper extends Base
         $col_name = 'null';
 
         foreach ($tasks as $task) {
+            // WETER HIER:
+            // Gucken, ob im $task das Projekt enthalten ist.
+            // Falls ja, könnte ich hier bereits einen weiteren Array-Key
+            // pro Projekt haben und somit einzeln die Projektzeiten bekommen.
 
             // get column name and swimlane
             $col_name = $task['column_name'];
@@ -805,5 +809,25 @@ class HoursViewHelper extends Base
             $out = $paginator->getCollection();
         }
         return $out;
+    }
+
+    /**
+     * Get an array with array of the getTimesByProjectId() method
+     * for each project, which is active.
+     *
+     * @param integer $user
+     * @return array
+     */
+    public function getTimesForAllActiveProjects()
+    {
+        $times = [];
+        $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
+        foreach ($projects as $projectId => $projectName) {
+            $times[$projectId] = [
+                'name' => $projectName,
+                'times' => $this->getTimesByProjectId($projectId)
+            ];
+        }
+        return $times;
     }
 }

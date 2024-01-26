@@ -7,6 +7,9 @@
         <div class="thv-box-item">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (!$projectSite): ?>
+                    <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=level_1"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?= $captions['level_1'] ?>:
             </div>
 
@@ -51,6 +54,9 @@
         <div class="thv-box-item">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (!$projectSite): ?>
+                    <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=level_2"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?= $captions['level_2'] ?>:
             </div>
 
@@ -95,6 +101,9 @@
         <div class="thv-box-item">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (!$projectSite): ?>
+                    <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=level_3"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?= $captions['level_3'] ?>:
             </div>
 
@@ -139,6 +148,9 @@
         <div class="thv-box-item">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (!$projectSite): ?>
+                    <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=level_4"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?= $captions['level_4'] ?>:
             </div>
 
@@ -183,6 +195,9 @@
         <div class="thv-box-item thv-box-all">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (!$projectSite): ?>
+                    <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=all"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?= $captions['all'] ?>:
             </div>
 
