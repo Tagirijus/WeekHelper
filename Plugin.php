@@ -5,12 +5,18 @@ namespace Kanboard\Plugin\WeekHelper;
 use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Translator;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
+use Kanboard\Plugin\WeekHelper\Model;
 
 
 class Plugin extends Base
 {
     public function initialize()
     {
+        // Controller override
+        $this->container['subtaskTimeTrackingModel'] = $this->container->factory(function ($container) {
+            return new Model\SubtaskTimeTrackingModelMod($container);
+        });
+
         // Automatic Action
         $this->actionManager->register(new TaskAutoAddWeek($this->container));
 

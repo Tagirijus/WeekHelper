@@ -30,6 +30,28 @@ class HoursViewHelper extends Base
     var $task_got_subtasks = [];
 
     /**
+     * Array describing, which subtask titles
+     * should be ignoed during calculation.
+     * It's a cache variable
+     *
+     * @var array
+     **/
+    var $ignore_subtask_titles = null;
+
+    /**
+     * Init and/or ge the ignored subtask titles.
+     *
+     * @return array
+     */
+    public function getIgnoredSubtaskTitles()
+    {
+        if (is_null($this->ignore_subtask_titles)) {
+            $this->ignore_subtask_titles = explode(',', $this->configModel->get('hoursview_ignore_subtask_titles', ''));
+        }
+        return $this->ignore_subtask_titles;
+    }
+
+    /**
      * Check if subtasks for task exist and return
      * the array, or otherwise fetch it from
      * the DB.
@@ -424,6 +446,7 @@ class HoursViewHelper extends Base
             'level_3_caption' => $this->configModel->get('hoursview_level_3_caption', ''),
             'level_4_caption' => $this->configModel->get('hoursview_level_4_caption', ''),
             'all_caption' => $this->configModel->get('hoursview_all_caption', ''),
+            'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'progressbar_enabled' => $this->configModel->get('hoursview_progressbar_enabled', 1),
             'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
@@ -487,6 +510,10 @@ class HoursViewHelper extends Base
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
+            // skip, if its title should be ignored
+            if (in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+                continue;
+            }
             // if the subtask is done, yet the spent time is below the estimated time,
             // only use the lower spent time as the estimated time then
             if ($subtask['status'] == 2 && $subtask['time_spent'] < $subtask['time_estimated']) {
@@ -586,6 +613,11 @@ class HoursViewHelper extends Base
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
+            // skip, if its title should be ignored
+            if (in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+                continue;
+            }
+
             $tmp = $subtask['time_spent'] - $subtask['time_estimated'];
 
             $out += $tmp;

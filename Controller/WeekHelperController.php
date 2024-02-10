@@ -95,6 +95,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_level_3_caption' => $form['level_3_caption'],
             'hoursview_level_4_caption' => $form['level_4_caption'],
             'hoursview_all_caption' => $form['all_caption'],
+            'hoursview_ignore_subtask_titles' => $form['ignore_subtask_titles'],
             'hoursview_progressbar_enabled' => isset($form['progressbar_enabled']) ? 1 : 0,
             'hoursview_progressbar_opacity' => $form['progressbar_opacity'],
             'hoursview_progressbar_0_opacity' => $form['progressbar_0_opacity'],

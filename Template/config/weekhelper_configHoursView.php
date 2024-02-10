@@ -122,6 +122,30 @@
     <br>
 
 
+    <!-- IGNORE -->
+
+    <p>
+        <h3><?= t('Ignoring subtasks') ?></h3>
+    </p>
+
+    <p>
+        <?= t('In this section conditions can be defined to make certain subtasks be ignored in the calculations.') ?>
+    </p>
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Subtask has string in its title (multiple with comma seperated)'), 'ignore_subtask_titles') ?>
+            <?= $this->form->text('ignore_subtask_titles', ['ignore_subtask_titles' => $ignore_subtask_titles], [], [
+                'autofocus',
+                'tabindex="1"'
+            ]) ?>
+        </div>
+    </div>
+
+    <br>
+    <br>
+
+
     <!-- PROGRESS -->
 
     <p>

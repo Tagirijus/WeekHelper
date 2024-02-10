@@ -58,6 +58,7 @@ class WeekHelperHelper extends Base
             'level_3_caption' => $this->configModel->get('hoursview_level_3_caption', ''),
             'level_4_caption' => $this->configModel->get('hoursview_level_4_caption', ''),
             'all_caption' => $this->configModel->get('hoursview_all_caption', ''),
+            'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'progressbar_enabled' => $this->configModel->get('hoursview_progressbar_enabled', 1),
             'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
