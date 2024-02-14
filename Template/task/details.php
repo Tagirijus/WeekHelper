@@ -97,6 +97,7 @@
                 <ul class="no-bullet">
                     <?php if ($task['time_estimated']): ?>
                     <li>
+                        <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipTaskTimes&amp;task_id=<?= $task['id'] ?>"><i class="fa fa-bars"></i></span>
                         <strong><?= t('Time estimated:') ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($task['time_estimated'])) ?></span>
                     </li>

@@ -52,4 +52,5 @@ return array(
     'Ignoring subtasks' => 'Subtasks ignorieren',
     'In this section conditions can be defined to make certain subtasks be ignored in the calculations.' => 'In dieser Sektion können Konditionen definiert werden, mit denen Subtasks beim Berechnen ignoriert werden.',
     'Subtask has string in its title (multiple with comma seperated)' => 'Subtask hat Zeichenfolge im Namen (mehrere mit Komma trennen)',
+    'Time details' => 'Zeit Details',
 );

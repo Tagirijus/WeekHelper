@@ -138,11 +138,6 @@ class HoursViewHelper extends Base
         $col_name = 'null';
 
         foreach ($tasks as $task) {
-            // WETER HIER:
-            // Gucken, ob im $task das Projekt enthalten ist.
-            // Falls ja, könnte ich hier bereits einen weiteren Array-Key
-            // pro Projekt haben und somit einzeln die Projektzeiten bekommen.
-
             // get column name and swimlane
             $col_name = $task['column_name'];
             $swim_name = $task['swimlane_name'];
@@ -459,12 +454,13 @@ class HoursViewHelper extends Base
      * for the given task.
      *
      * @param  array  &$task
+     * @param  bool   $use_ignore
      * @return float
      */
-    public function getRemainingTimeForTask(&$task)
+    public function getRemainingTimeForTask(&$task, $use_ignore = true)
     {
         if (!array_key_exists('time_remaining', $task)) {
-            $this->initRemainingTimeForTask($task);
+            $this->initRemainingTimeForTask($task, $use_ignore);
         }
         return $task['time_remaining'];
     }
@@ -473,9 +469,10 @@ class HoursViewHelper extends Base
      * Initialize the remaining time for the given task.
      *
      * @param  array  &$task
-     * @return array
+     * @param  bool  $use_ignore
+     * @return float
      */
-    protected function initRemainingTimeForTask(&$task = [])
+    protected function initRemainingTimeForTask(&$task = [], $use_ignore = true)
     {
         $remaining_time = 0.0;
         if (isset($task['id'])) {
@@ -483,7 +480,7 @@ class HoursViewHelper extends Base
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getRemainingFromSubtasks($subtasks);
+                $tmp = $this->getRemainingFromSubtasks($subtasks, $use_ignore);
 
             // calculate remaining or overtime based only on task itself
             } else {
@@ -496,7 +493,7 @@ class HoursViewHelper extends Base
             }
         }
         $task['time_remaining'] = round($remaining_time, 2);
-        return $task;
+        return $task['time_remaining'];
     }
 
     /**
@@ -504,14 +501,15 @@ class HoursViewHelper extends Base
      * subtasks in the array.
      *
      * @param  array  $subtasks
+     * @param  bool   $use_ignore
      * @return float
      */
-    protected function getRemainingFromSubtasks($subtasks = [])
+    protected function getRemainingFromSubtasks($subtasks = [], $use_ignore = true)
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
             // skip, if its title should be ignored
-            if (in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+            if ($use_ignore && in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
                 continue;
             }
             // if the subtask is done, yet the spent time is below the estimated time,
@@ -539,12 +537,13 @@ class HoursViewHelper extends Base
      * for the given task.
      *
      * @param  array  &$task
+     * @param  bool   $use_ignore
      * @return float
      */
-    public function getOvertimeForTask(&$task)
+    public function getOvertimeForTask(&$task, $use_ignore = true)
     {
         if (!array_key_exists('time_overtime', $task)) {
-            $this->initOvertimeTimeForTask($task);
+            $this->initOvertimeTimeForTask($task, $use_ignore);
         }
         return $task['time_overtime'];
     }
@@ -575,9 +574,10 @@ class HoursViewHelper extends Base
      * Initialize the overtime for the given task.
      *
      * @param  array  &$task
-     * @return array
+     * @param  array  $use_ignore
+     * @return float
      */
-    protected function initOvertimeTimeForTask(&$task = [])
+    protected function initOvertimeTimeForTask(&$task = [], $use_ignore = true)
     {
         $over_time = 0.0;
         if (isset($task['id'])) {
@@ -585,7 +585,7 @@ class HoursViewHelper extends Base
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getOvertimeFromSubtasks($subtasks);
+                $tmp = $this->getOvertimeFromSubtasks($subtasks, $use_ignore);
 
             // calculate remaining or overtime based only on task itself
             } else {
@@ -599,7 +599,7 @@ class HoursViewHelper extends Base
             $over_time += $this->getRemainingTimeForTask($task);
         }
         $task['time_overtime'] = round($over_time, 2);
-        return $task;
+        return $task['time_overtime'];
     }
 
     /**
@@ -607,14 +607,15 @@ class HoursViewHelper extends Base
      * subtasks in the array.
      *
      * @param  array  $subtasks
+     * @param  bool   $use_ignore
      * @return float
      */
-    protected function getOvertimeFromSubtasks($subtasks = [])
+    protected function getOvertimeFromSubtasks($subtasks = [], $use_ignore = true)
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
             // skip, if its title should be ignored
-            if (in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+            if ($use_ignore && in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
                 continue;
             }
 
@@ -861,5 +862,42 @@ class HoursViewHelper extends Base
             ];
         }
         return $times;
+    }
+
+    /**
+     * Get a times array for the tooltip on the tasks
+     * detail page.
+     *
+     * @param  integer $task_id
+     * @return array
+     */
+    public function getTimesForTooltipTaskTimes($task_id)
+    {
+        $subtasks = $this->getSubtasksByTaskId($task_id);
+        $times_all = ['id' => $task_id, 'time_estimated' => 0.0, 'time_spent' => 0.0];
+        $times_without_ignored = ['id' => $task_id, 'time_estimated' => 0.0, 'time_spent' => 0.0];
+
+        // estimated and spent times
+        foreach ($subtasks as $subtask) {
+            // first get all times in general
+            $times_all['time_estimated'] += $subtask['time_estimated'];
+            $times_all['time_spent'] += $subtask['time_spent'];
+            // get this time as well, but not the ignored ones
+            if (!in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+                $times_without_ignored['time_estimated'] += $subtask['time_estimated'];
+                $times_without_ignored['time_spent'] += $subtask['time_spent'];
+            }
+        }
+
+        // overtime and remaining times
+        $this->getOvertimeForTask($times_all, false);
+        $this->getOvertimeForTask($times_without_ignored, true);
+        $this->getRemainingTimeForTask($times_all, false);
+        $this->getRemainingTimeForTask($times_without_ignored, true);
+
+        return [
+            'All' => $times_all,
+            'Without ignored' => $times_without_ignored
+        ];
     }
 }

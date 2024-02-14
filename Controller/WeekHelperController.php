@@ -175,4 +175,19 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'times' => $times
         ]));
     }
+
+    /**
+     * Get the tooltip for the task times.
+     *
+     * @return HTML
+     */
+    public function getTooltipTaskTimes()
+    {
+        $task_id = $this->request->getStringParam('task_id', -1);
+        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+        $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_task_times', [
+            'task_id' => $task_id,
+            'times' => $times
+        ]));
+    }
 }

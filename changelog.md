@@ -7,6 +7,7 @@
 
 _(most recent changes are listed on top):_
 - Improved ignore subtask feature.
+- Added tooltip for task detail times.
 
 
 ## v2.6
