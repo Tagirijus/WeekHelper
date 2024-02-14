@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.7
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Improved ignore subtask feature.
+
+
 ## v2.6
 
 ### What's Changed

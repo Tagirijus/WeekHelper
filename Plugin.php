@@ -16,6 +16,9 @@ class Plugin extends Base
         $this->container['subtaskTimeTrackingModel'] = $this->container->factory(function ($container) {
             return new Model\SubtaskTimeTrackingModelMod($container);
         });
+        $this->container['taskStatusModel'] = $this->container->factory(function ($container) {
+            return new Model\TaskStatusModelMod($container);
+        });
 
         // Automatic Action
         $this->actionManager->register(new TaskAutoAddWeek($this->container));
