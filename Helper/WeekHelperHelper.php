@@ -29,6 +29,11 @@ class WeekHelperHelper extends Base
     public $remainingWeeksLvl = null;
 
     /**
+     * @var string
+     **/
+    public $weekpattern = null;
+
+    /**
      * Get configuration for plugin as array.
      *
      * @return array
@@ -40,7 +45,7 @@ class WeekHelperHelper extends Base
 
             // Weeks
             'headerdate_enabled' => $this->configModel->get('weekhelper_headerdate_enabled', 1),
-            'week_pattern' => $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}'),
+            'week_pattern' => $this->getWeekpattern(),
             'time_box_enabled' => $this->configModel->get('weekhelper_time_box_enabled', 1),
             'due_date_week_card_enabled' => $this->configModel->get('weekhelper_due_date_week_card_enabled', 1),
             'full_start_date_enabled' => $this->configModel->get('weekhelper_full_start_date_enabled', 1),
@@ -73,44 +78,122 @@ class WeekHelperHelper extends Base
     }
 
     /**
+     * Init the cached weekpattern and return it.
+     *
+     * @return string
+     */
+    public function getWeekpattern()
+    {
+        if (is_null($this->weekpattern)) {
+            $this->weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
+        }
+        return $this->weekpattern;
+    }
+
+    /**
      * Use the now date to create the week pattern string.
      * Maybe with additional days (for e.g. next or overnext
      * week).
      *
+     * Or use the given date via the weekpattern given in
+     * the title, if $fromNow is true and a weekpattern will
+     * be found in the given title.
+     *
      * @param integer $daysAdd
+     * @param bool $fromNow
+     * @param string $title
      * @return string
      */
-    public function createActualStringWithWeekPattern($daysAdd = 0)
+    public function createActualStringWithWeekPattern($daysAdd = 0, $fromNow = false, $title = '')
     {
-        // get times
-        $adder = strtotime('+' . $daysAdd . ' days');
-        $year = date('Y', $adder);
-        $year_short = substr(date('Y', $adder), -2);
-        $week = intval(date('W', $adder));
+        // fallback: use the actual week (now) to add the days from
+        $baseDate = strtotime('+' . $daysAdd . ' days');
 
-        // get other base strings
-        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
+        // try to use the week from the given title, if wanted
+        if (!$fromNow) {
+            $dateFromWeekpatternInTitle = $this->getDateFromWeekPatternString(
+                $this->getWeekPatterStringFromTitle($title)
+            );
+            if ($dateFromWeekpatternInTitle) {
+                $baseDate = $dateFromWeekpatternInTitle;
+                $baseDate->modify('+' . $daysAdd . ' days');
+                $baseDate = $baseDate->getTimestamp();
+            }
+        }
+
+        $year = date('Y', $baseDate);
+        $year_short = substr(date('Y', $baseDate), -2);
+        $week = intval(date('W', $baseDate));
 
         // get the final output string
         return str_replace(
             ['{YEAR}', '{YEAR_SHORT}', '{WEEK}'],
             [$year, $year_short, $week],
-            $weekpattern
+            $this->getWeekpattern()
         );
+    }
+
+    /**
+     * Get the weekpattern from a given task title or similar.
+     *
+     * @param  string $title
+     * @return string
+     */
+    public function getWeekPatterStringFromTitle($title)
+    {
+        if (preg_match($this->createRegexFromWeekpattern(), $title, $matches)) {
+            return $matches[0];
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * Get the start of the week by the given week pattern
+     * string. If it fails, just get "now".
+     *
+     * @param  string $string
+     * @return DateTime
+     */
+    public function getDateFromWeekPatternString($string)
+    {
+        $out = false;
+        preg_match($this->createRegexFromWeekpattern(), $string, $matches);
+        if ($matches) {
+            $out = new \DateTime();
+
+            // year
+            if (isset($matches['YEAR'])) {
+                $year = (int) $matches['YEAR'];
+            } elseif (isset($matches['YEAR_SHORT'])) {
+                $year = (int) $matches['YEAR_SHORT'];
+            } else {
+                return new \DateTime();
+            }
+
+            // week
+            if (isset($matches['WEEK'])) {
+                $week = (int) $matches['WEEK'];
+            } else {
+                return new \DateTime();
+            }
+
+            $out->setISODate($year, $week);
+        }
+        return $out;
     }
 
     /**
      * Convert the given weekpattern to a regex.
      *
-     * @param  string $weekpattern
      * @return string
      */
-    public function createRegexFromWeekpattern($weekpattern)
+    public function createRegexFromWeekpattern()
     {
         $regex = str_replace(
             ['{YEAR}', '{YEAR_SHORT}', '{WEEK}'],
-            ['\d{4}', '\d{2}', '\d{1,2}'],
-            $weekpattern
+            ['(?P<YEAR>\d{4})', '(?P<YEAR_SHORT>\d{2})', '(?P<WEEK>\d{1,2})'],
+            $this->getWeekpattern()
         );
         return '/(' . $regex . ')/';
     }
@@ -125,8 +208,6 @@ class WeekHelperHelper extends Base
      */
     public function prepareWeekpatternInTitle($title, $task = [])
     {
-        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
-
         // check if task is blocked
         $block_str = '';
         if ($this->configModel->get('weekhelper_block_icon_before_task_title', 1) == 1) {
@@ -144,7 +225,7 @@ class WeekHelperHelper extends Base
         }
 
         return $block_str . preg_replace(
-            $this->createRegexFromWeekpattern($weekpattern),
+            $this->createRegexFromWeekpattern(),
             '<span class="weekhelper-weekpattern-dim">$1</span>',
             $title
         );
@@ -377,7 +458,7 @@ class WeekHelperHelper extends Base
     /**
      * Get the CSS string with the given difference.
      * This basically is the logic on how to choose
-     * the CS string from the (parsed) config array.
+     * the CSS string from the (parsed) config array.
      *
      * @param  integer $difference
      * @param  array $levels
@@ -447,14 +528,18 @@ class WeekHelperHelper extends Base
      * Add one week to the given title according to the
      * week pattern of the plugin.
      *
+     * The $fromNow parameter is for either using the actual
+     * week automatically or use the week, given in the title
+     * with the weekpattern format, set up in the config.
+     *
      * @param string $title
+     * @param bool $fromNow
      * @return string
      */
-    public function addOneWeekToGivenTitle($title)
+    public function addOneWeekToGivenTitle($title, $fromNow = false)
     {
-        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
-        $regex = $this->createRegexFromWeekpattern($weekpattern);
-        $nextWeek = $this->createActualStringWithWeekPattern(7);
+        $regex = $this->createRegexFromWeekpattern();
+        $nextWeek = $this->createActualStringWithWeekPattern(7, $fromNow, $title);
 
         // replace the previous week with the next week
         return preg_replace($regex, $nextWeek, $title);

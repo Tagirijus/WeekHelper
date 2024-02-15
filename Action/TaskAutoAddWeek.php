@@ -75,7 +75,7 @@ class TaskAutoAddWeek extends Base
     {
         // get / create base strings
         $title = $data['task']['title'];
-        $newTitle = $this->helper->weekHelperHelper->addOneWeekToGivenTitle($title);
+        $newTitle = $this->helper->weekHelperHelper->addOneWeekToGivenTitle($title, true);
 
         // not the actual action, but I want it for my workflow:
         // the "[DUPICATE]" shall be removed as well
