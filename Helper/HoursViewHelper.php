@@ -484,7 +484,7 @@ class HoursViewHelper extends Base
 
             // calculate remaining or overtime based only on task itself
             } else {
-                $tmp = $task['time_estimated'] - $task['time_spent'];
+                $tmp = $this->remainingCalculation($task);
             }
 
             // remaining time should be positive
@@ -513,14 +513,7 @@ class HoursViewHelper extends Base
                 continue;
             }
 
-            // if the subtask is done, yet the spent time is below the estimated time,
-            // only use the lower spent time as the estimated time then
-            if ($subtask['status'] == 2 && $subtask['time_spent'] < $subtask['time_estimated']) {
-                $sub_estimated = $subtask['time_spent'];
-            } else {
-                $sub_estimated = $subtask['time_estimated'];
-            }
-            $tmp = $sub_estimated - $subtask['time_spent'];
+            $tmp = $this->remainingCalculation($subtask);
 
             // only add time as spending, as long as the spent time of the subtask
             // does not exceed the estimated time, so that in total
@@ -531,6 +524,34 @@ class HoursViewHelper extends Base
             }
         }
         return $out;
+    }
+
+    /**
+     * The calculation logic for a task or subtask.
+     * It varies on the state of the task / subtask.
+     *
+     * @param  array $task_or_subtask
+     * @return float
+     */
+    public function remainingCalculation($task_or_subtask)
+    {
+        $done = (
+            // it's a task
+            isset($task_or_subtask['is_active']) && $task_or_subtask['is_active'] == 0
+        ) || (
+            // it's a subtask
+            isset($task_or_subtask['status']) && $task_or_subtask['status'] == 2
+        );
+
+        // if the subtask is done or the tasks is closed,
+        // yet the spent time is below the estimated time,
+        // only use the lower spent time as the estimated time then
+        if ($done && $task_or_subtask['time_spent'] < $task_or_subtask['time_estimated']) {
+            $tmp_estimated = $task_or_subtask['time_spent'];
+        } else {
+            $tmp_estimated = $task_or_subtask['time_estimated'];
+        }
+        return $tmp_estimated - $task_or_subtask['time_spent'];
     }
 
     /**
