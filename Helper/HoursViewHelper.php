@@ -512,6 +512,7 @@ class HoursViewHelper extends Base
             if ($use_ignore && in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
                 continue;
             }
+
             // if the subtask is done, yet the spent time is below the estimated time,
             // only use the lower spent time as the estimated time then
             if ($subtask['status'] == 2 && $subtask['time_spent'] < $subtask['time_estimated']) {
@@ -596,7 +597,7 @@ class HoursViewHelper extends Base
 
             // also add the remaining time, which otherwise
             // would generate an overtime, which is not wanted
-            $over_time += $this->getRemainingTimeForTask($task);
+            $over_time += $this->getRemainingTimeForTask($task, $use_ignore);
         }
         $task['time_overtime'] = round($over_time, 2);
         return $task['time_overtime'];
@@ -874,29 +875,73 @@ class HoursViewHelper extends Base
     public function getTimesForTooltipTaskTimes($task_id)
     {
         $subtasks = $this->getSubtasksByTaskId($task_id);
-        $times_all = ['id' => $task_id, 'time_estimated' => 0.0, 'time_spent' => 0.0];
-        $times_without_ignored = ['id' => $task_id, 'time_estimated' => 0.0, 'time_spent' => 0.0];
+
+        // maybe the task only has own times, which means that there
+        // cannot be ignord ones etc. so only output All
+        if (empty($subtasks)) {
+            return $this->getTimesForTooltipTaskTimesFromItsTimes($task_id);
+
+        // task has subtasks; use them then!
+        } else {
+            return $this->getTimesForTooltipTaskTimesFromItsSubtasks($subtasks);
+        }
+    }
+
+    /**
+     * Get a times array for the tooltip on the tasks
+     * detail page based on the times of the task.
+     *
+     * @param  integer $task_id
+     * @return array
+     */
+    public function getTimesForTooltipTaskTimesFromItsTimes($task_id)
+    {
+        $task = $this->taskFinderModel->getById($task_id);
+
+        $this->getOvertimeForTask($task, false);
+
+        return [
+            'All' => $task,
+        ];
+    }
+
+    /**
+     * Get a times array for the tooltip on the tasks
+     * detail page based on the subtasks of the task.
+     *
+     * @param  array $subtasks
+     * @return array
+     */
+    public function getTimesForTooltipTaskTimesFromItsSubtasks($subtasks)
+    {
+        $times_all = ['id' => -1, 'time_estimated' => 0.0, 'time_spent' => 0.0];
+        $times_ignored = ['id' => -1, 'time_estimated' => 0.0, 'time_spent' => 0.0];
+        $times_without_ignored = ['id' => -1, 'time_estimated' => 0.0, 'time_spent' => 0.0];
 
         // estimated and spent times
         foreach ($subtasks as $subtask) {
             // first get all times in general
             $times_all['time_estimated'] += $subtask['time_estimated'];
             $times_all['time_spent'] += $subtask['time_spent'];
-            // get this time as well, but not the ignored ones
+            // get times, but only the ignored ones
+            if (in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
+                $times_ignored['time_estimated'] += $subtask['time_estimated'];
+                $times_ignored['time_spent'] += $subtask['time_spent'];
+            }
+            // get times, but not the ignored ones
             if (!in_array($subtask['title'], $this->getIgnoredSubtaskTitles())) {
                 $times_without_ignored['time_estimated'] += $subtask['time_estimated'];
                 $times_without_ignored['time_spent'] += $subtask['time_spent'];
             }
         }
 
-        // overtime and remaining times
         $this->getOvertimeForTask($times_all, false);
+        $this->getOvertimeForTask($times_ignored, false);
         $this->getOvertimeForTask($times_without_ignored, true);
-        $this->getRemainingTimeForTask($times_all, false);
-        $this->getRemainingTimeForTask($times_without_ignored, true);
 
         return [
             'All' => $times_all,
+            'Ignored' => $times_ignored,
             'Without ignored' => $times_without_ignored
         ];
     }
