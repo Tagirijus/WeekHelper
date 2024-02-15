@@ -110,13 +110,17 @@ class TaskStatusModelMod extends Base
             return false;
         }
 
-        // use ignore subtask feature of HoursView on opening
-        if ($status == \Kanboard\Model\TaskModel::STATUS_OPEN) {
-            $this->subtaskTimeTrackingModel->updateTaskTimeTracking($task_id, true);
+        // check if the task has subtasks
+        $subtasks = $this->helper->hoursViewHelper->getSubtasksByTaskId($task_id);
+        if (!empty($subtasks)) {
+            // use ignore subtask feature of HoursView on opening
+            if ($status == \Kanboard\Model\TaskModel::STATUS_OPEN) {
+                $this->subtaskTimeTrackingModel->updateTaskTimeTracking($task_id, true);
 
-        // otherwise "undo" the ignoring
-        } elseif ($status == \Kanboard\Model\TaskModel::STATUS_CLOSED) {
-            $this->subtaskTimeTrackingModel->updateTaskTimeTracking($task_id, false);
+            // otherwise "undo" the ignoring
+            } elseif ($status == \Kanboard\Model\TaskModel::STATUS_CLOSED) {
+                $this->subtaskTimeTrackingModel->updateTaskTimeTracking($task_id, false);
+            }
         }
 
         $result = $this->db
