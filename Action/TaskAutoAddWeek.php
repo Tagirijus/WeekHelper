@@ -78,10 +78,14 @@ class TaskAutoAddWeek extends Base
         $newTitle = $this->helper->weekHelperHelper->addOneWeekToGivenTitle($title, true);
 
         // not the actual action, but I want it for my workflow:
-        // the "[DUPICATE]" shall be removed as well
+        // the "[DUPICATE]" shall be removed as well ...
+        // ... maybe I should make this optional via config in
+        // the future!? ... lazy me not doing so now!
+        // since v2.7.0 also the DuplicateMod pattern, which the user
+        // can set in the config, will be replaced.
         $newTitle = str_replace(
-            ['[DUPLICATE]', '[DUPLIKAT]'],
-            ['', ''],
+            ['[DUPLICATE]', '[DUPLIKAT]', $this->configModel->get('duplicatemod_prefix', '')],
+            ['', '', ''],
             $newTitle
         );
 

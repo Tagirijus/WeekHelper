@@ -8,6 +8,7 @@
 _(most recent changes are listed on top):_
 - Improved ignore subtask feature.
 - Added tooltip for task detail times.
+- Automatic action task title replacement for "[DUPICATE]" to "" got extended by the pattern, the user can set up in the config for the plugin [DuplicateMod](https://github.com/Tagirijus/DuplicateMod).
 
 
 ## v2.6
