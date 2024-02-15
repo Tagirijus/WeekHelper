@@ -442,4 +442,21 @@ class WeekHelperHelper extends Base
     {
         return $this->configModel->get('weekhelper_full_start_date_enabled', 1) == 1;
     }
+
+    /**
+     * Add one week to the given title according to the
+     * week pattern of the plugin.
+     *
+     * @param string $title
+     * @return string
+     */
+    public function addOneWeekToGivenTitle($title)
+    {
+        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
+        $regex = $this->createRegexFromWeekpattern($weekpattern);
+        $nextWeek = $this->createActualStringWithWeekPattern(7);
+
+        // replace the previous week with the next week
+        return preg_replace($regex, $nextWeek, $title);
+    }
 }

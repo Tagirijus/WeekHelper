@@ -75,12 +75,7 @@ class TaskAutoAddWeek extends Base
     {
         // get / create base strings
         $title = $data['task']['title'];
-        $weekpattern = $this->configModel->get('weekhelper_week_pattern', '{YEAR_SHORT}W{WEEK}');
-        $regex = $this->helper->weekHelperHelper->createRegexFromWeekpattern($weekpattern);
-        $nextWeek = $this->helper->weekHelperHelper->createActualStringWithWeekPattern(7);
-
-        // replace the previous week with the next week
-        $newTitle = preg_replace($regex, $nextWeek, $title);
+        $newTitle = $this->helper->weekHelperHelper->addOneWeekToGivenTitle($title);
 
         // not the actual action, but I want it for my workflow:
         // the "[DUPICATE]" shall be removed as well
