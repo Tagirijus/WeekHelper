@@ -195,6 +195,9 @@
         <div class="thv-box-item thv-box-all">
 
             <div class="thv-weak-color tvh-box-single-item-20">
+                <?php if (isset($project['id'])): ?>
+                        <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipWorkedTimes&amp;project_id=<?= $project['id'] ?>"><i class="fa fa-bars"></i></span>
+                <?php endif ?>
                 <?php if (!$projectSite): ?>
                     <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipDashboardTimes&amp;level=all"><i class="fa fa-bars"></i></span>
                 <?php endif ?>

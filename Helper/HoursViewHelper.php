@@ -415,7 +415,7 @@ class HoursViewHelper extends Base
             $negative = false;
         }
         $hours = (int) $time;
-        $minutes = fmod($time, 1) * 60;
+        $minutes = fmod((float) $time, 1) * 60;
         if ($negative) {
             return sprintf('-%01d:%02d', $hours, $minutes);
         } else {
@@ -512,6 +512,10 @@ class HoursViewHelper extends Base
      * use_ignore == 2
      *     This means that subtasktitles should be skipped,
      *     if they do not exist in the config
+     * use_ignore == 3 (or anything not 1|2)
+     *     Means that the method returns false,
+     *     thus nothing will be ignored. Will probably
+     *     be used for "get all subtasks".
      *
      * @param  array $subtask
      * @param  integer $use_ignore
@@ -1027,34 +1031,202 @@ class HoursViewHelper extends Base
      * detail page based on the subtasks of the task.
      * Prepare three kinds of subtasks to be able to
      * correctly split the subtasks into:
-     * 1. All times (ignored + not-ignored)
-     * 2. Only ignored times
-     * 3. Only not-ignored time
+     * 1. All times (ignored + not-ignored): key 'All'
+     * 2. Only ignored times: key 'Ignored'
+     * 3. Only not-ignored time: key 'Without ignored'
      *
      * @param  integer $task_id
      * @return array
      */
     public function getTimesForTooltipTaskTimesFromItsSubtasks($task_id)
     {
-        $task_all = $this->taskFinderModel->getById($task_id);
-        $this->getEstimatedFromSubtasks($task_all, 3);
-        $this->getSpentFromSubtasks($task_all, 3);
-        $this->getOvertimeForTask($task_all, 3);
+        $task_raw = $this->taskFinderModel->getById($task_id);
 
-        $task_ignored = $this->taskFinderModel->getById($task_id);
-        $this->getEstimatedFromSubtasks($task_ignored, 2);
-        $this->getSpentFromSubtasks($task_ignored, 2);
-        $this->getOvertimeForTask($task_ignored, 2);
-
-        $task_without_ignored = $this->taskFinderModel->getById($task_id);
-        $this->getEstimatedFromSubtasks($task_without_ignored, 1);
-        $this->getSpentFromSubtasks($task_without_ignored, 1);
-        $this->getOvertimeForTask($task_without_ignored, 1);
+        $task_all = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 3);
+        $task_ignored = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 2);
+        $task_without_ignored = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 1);
 
         return [
             'All' => $task_all,
             'Ignored' => $task_ignored,
             'Without ignored' => $task_without_ignored
         ];
+    }
+
+    /**
+     * Calculate estimated, spent and overtime for the given
+     * task array, depending on its subtasks. Also consider
+     * the subtask title ignoring or not.
+     *
+     * Return a new task from the given one and do not modify
+     * the given task in the argument.
+     *
+     * @param  array  $task
+     * @param  integer $use_ignore
+     * @return array
+     */
+    public function calculateEstimatedSpentOvertimeForTask($task, $use_ignore = 1)
+    {
+        $task_tmp = $task;
+        $this->getEstimatedFromSubtasks($task_tmp, $use_ignore);
+        $this->getSpentFromSubtasks($task_tmp, $use_ignore);
+        $this->getOvertimeForTask($task_tmp, $use_ignore);
+        return $task_tmp;
+    }
+
+    /**
+     * Basically some kind of wrapper function for getting
+     * the array with all the tasks for the project in the
+     * given date range.
+     *
+     * @param  integer $projectId
+     * @param  integer $start
+     * @param  integer $end
+     * @return array
+     */
+    protected function getAllTasksByProjectIdInDateRange($projectId, $start, $end)
+    {
+        $project = $this->projectModel->getById($projectId);
+
+        $query = $this->taskFinderModel->getExtendedQuery()
+            ->eq(TaskModel::TABLE.'.project_id', $projectId)
+            ->gte(TaskModel::TABLE.'.date_modification', $start)
+            ->lte(TaskModel::TABLE.'.date_modification', $end);
+
+        $builder = $this->taskLexer;
+        $builder->withQuery($query);
+        return $builder->build('')->toArray();
+    }
+
+    /**
+     * Generate a simple array, which will commonly
+     * be used in my plugin to access times of the
+     * task. E.g. it will generate a blank array
+     * with the common time-keys like:
+     * - time_estimated
+     * - time_spent
+     * - time_remaining
+     * - time_overtime
+     *
+     * @return array
+     */
+    public function generateTaskTimesTemplate()
+    {
+        return [
+            'time_estimated' => 0.0,
+            'time_spent' => 0.0,
+            'time_remaining' => 0.0,
+            'time_overtime' => 0.0
+        ];
+    }
+
+    /**
+     * Add the times on the keys time_estimated,
+     * time_spent, time_remaining and time_overtime
+     * from one given task to the same keys of
+     * the other given task.
+     *
+     * @param array &$modify_task
+     * @param array $add_task
+     * @return array
+     */
+    public function addTimesFromOneTaskToAnother(&$modify_task, $add_task)
+    {
+        $modify_task['time_estimated'] += $add_task['time_estimated'];
+        $modify_task['time_spent'] += $add_task['time_spent'];
+        $modify_task['time_remaining'] += $add_task['time_remaining'];
+        $modify_task['time_overtime'] += $add_task['time_overtime'];
+        return $modify_task;
+    }
+
+    /**
+     * Iter through the given tasks and try to access their
+     * values under the keys time_estimated, time_spent,
+     * time_remaining and time_overtime to calculate
+     * a total out of them and return it as an array.
+     *
+     * Array will contain all tasks, consider ignored
+     * subtasks and also non-ignored subtasks.
+     *
+     * Output will be:
+     * [
+     *     'All' => 0.0,
+     *     'Ignored' => 0.0,
+     *     'Without ignored' => 0.0
+     * ]
+     *
+     * @param  array $tasks
+     * @return array
+     */
+    public function generateTimesArrayFromTasksForWorkedTimesTooltip($tasks)
+    {
+        $tasks_all = $this->generateTaskTimesTemplate();
+        $tasks_ignored = $this->generateTaskTimesTemplate();
+        $tasks_without_ignored = $this->generateTaskTimesTemplate();
+
+        foreach ($tasks as $task) {
+            $task_all_tmp = $task;
+            $task_ignored_tmp = $task;
+            $task_without_ignored_tmp = $task;
+            $this->addTimesFromOneTaskToAnother(
+                $tasks_all, $this->calculateEstimatedSpentOvertimeForTask($task_all_tmp, 3)
+            );
+            $this->addTimesFromOneTaskToAnother(
+                $tasks_ignored, $this->calculateEstimatedSpentOvertimeForTask($task_ignored_tmp, 2)
+            );
+            $this->addTimesFromOneTaskToAnother(
+                $tasks_without_ignored, $this->calculateEstimatedSpentOvertimeForTask($task_without_ignored_tmp, 1)
+            );
+        }
+
+        return [
+            'All' => $tasks_all,
+            'Ignored' => $tasks_ignored,
+            'Without ignored' => $tasks_without_ignored
+        ];
+    }
+
+    /**
+     * Get the start and the end of a month
+     * relative to the actual month and return
+     * it as an array with [0] being the start
+     * and [1] being the end. The format is
+     * a simple unix timestamp then.
+     *
+     * @param  integer $relative
+     * @return array
+     */
+    public function getMonthStartAndEnd($relative = 0)
+    {
+        // start
+        $actualDate = strtotime('now');
+        $firstDayOfMonth = strtotime(date('Y-m-01', $actualDate));
+        $firstDayOfRelativeMonth = strtotime((string) $relative . ' month', $firstDayOfMonth);
+
+        // end
+        $firstDayOfMonthAfter = strtotime('+1 month', $firstDayOfRelativeMonth);
+        $lasDayOfRelativeMonth = strtotime('-1 day', $firstDayOfMonthAfter);
+
+        return [$firstDayOfRelativeMonth, $lasDayOfRelativeMonth];
+    }
+
+    /**
+     * Get times for actual or relative to actual month
+     * for the given project and return it as an array.
+     *
+     * @param  integer $project_id
+     * @param  integer $relative
+     * @return array
+     */
+    public function getMonthTimes($project_id, $relative = 0)
+    {
+        // date boundaries
+        $month = $this->getMonthStartAndEnd($relative);
+        $start = $month[0];
+        $end = $month[1];
+
+        $all_tasks_raw = $this->getAllTasksByProjectIdInDateRange($project_id, $start, $end);
+
+        return $this->generateTimesArrayFromTasksForWorkedTimesTooltip($all_tasks_raw);
     }
 }

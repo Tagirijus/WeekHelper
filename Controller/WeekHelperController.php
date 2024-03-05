@@ -190,4 +190,25 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'times' => $times
         ]));
     }
+
+    /**
+     * Get the tooltip for the hours header, showing
+     * the worked times for done task for: days, weeks
+     * and months.
+     *
+     * @return HTML
+     */
+    public function getTooltipWorkedTimes()
+    {
+        $project_id = $this->request->getStringParam('project_id', -1);
+        $month_times = [
+            -1 => $this->helper->hoursViewHelper->getMonthTimes($project_id, -1),
+            0 => $this->helper->hoursViewHelper->getMonthTimes($project_id, 0)
+        ];
+        // $this->logger->info(json_encode($month_times));
+        $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_worked_times', [
+            'project_id' => $project_id,
+            'month_times' => $month_times
+        ]));
+    }
 }
