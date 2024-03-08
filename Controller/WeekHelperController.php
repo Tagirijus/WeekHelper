@@ -205,7 +205,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             -1 => $this->helper->hoursViewHelper->getMonthTimes($project_id, -1),
             0 => $this->helper->hoursViewHelper->getMonthTimes($project_id, 0)
         ];
-        // $this->logger->info(json_encode($month_times));
+
         $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_worked_times', [
             'project_id' => $project_id,
             'month_times' => $month_times
