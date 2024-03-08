@@ -1168,16 +1168,6 @@ class HoursViewHelper extends Base
             $task_all_tmp = $task;
             $task_ignored_tmp = $task;
             $task_without_ignored_tmp = $task;
-            // WEITER HIER
-            // Irgendwie berechnet er die Zeiten nicht korrekt.
-            // Ich habe im Beispiel für letzten Monat (Projekt 3)
-            // 26:40h erwartet, aber das Tolltip zeigt mir
-            // 49:10h an.
-            // Ich glaube, "der letzte Monat" wird nicht korrekt berechnet; Rest schon
-            // Das Datum stimmt aber. Werden die Tasks korrekt gequeryt?
-            // Ja, Tasks werden korrekt geholt; also muss irgendwas falsch'rechnen ... also in DIESER Methode!?
-            // ggf. ist die Diskrepanz, weil das normale Suchen auch Subtasks ignore berücksichtigt; nur warum
-            // sehe ich dann die 26:40h nicht in der Tabelle?
             $this->addTimesFromOneTaskToAnother(
                 $tasks_all, $this->calculateEstimatedSpentOvertimeForTask($task_all_tmp, 3)
             );
