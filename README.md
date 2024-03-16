@@ -31,6 +31,7 @@ Compatibility
 -------------
 
 - Requires [Kanboard](https://github.com/fguillot/kanboard "Kanboard - Kanban Project Management Software") ≥`1.2.27`
+- Requires [KanboardTabs](https://github.com/Tagirijus/KanboardTabs) to properly work for showing the tooltip times for last months/weeks/etc.
 
 #### Other Plugins & Action Plugins
 - _No known issues_

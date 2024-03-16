@@ -16,7 +16,7 @@ _(most recent changes are listed on top):_
 ### What's Changed
 
 _(most recent changes are listed on top):_
-- Added ignor subtask by title feature.
+- Added ignore subtask by title feature.
 
 
 ## v2.5
