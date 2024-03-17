@@ -1273,4 +1273,49 @@ class HoursViewHelper extends Base
 
         return $this->generateTimesArrayFromTasksForWorkedTimesTooltip($all_tasks_raw);
     }
+
+    /**
+     * Get the start and the end of a day
+     * relative to the actual day and return
+     * it as an array with [0] being the start
+     * and [1] being the end. The format is
+     * a simple unix timestamp then.
+     *
+     * @param  integer $relative
+     * @return array
+     */
+    public function getDayStartAndEnd($relative = 0)
+    {
+        $actualDate = strtotime('now');
+
+        // start
+        $startOfActualDay = strtotime(date('Y-m-d 00:00:00', $actualDate));
+        $startOfActualDayRelative = strtotime((string) $relative . ' day', $startOfActualDay);
+
+        // end
+        $endOfActualDay = strtotime(date('Y-m-d 23:59:59', $actualDate));
+        $endOfActualDayRelative = strtotime((string) $relative . ' day', $endOfActualDay);
+
+        return [$startOfActualDayRelative, $endOfActualDayRelative];
+    }
+
+    /**
+     * Get times for actual or relative to actual day
+     * for the given project and return it as an array.
+     *
+     * @param  integer $project_id
+     * @param  integer $relative
+     * @return array
+     */
+    public function getDayTimes($project_id, $relative = 0)
+    {
+        // date boundaries
+        $day = $this->getDayStartAndEnd($relative);
+        $start = $day[0];
+        $end = $day[1];
+
+        $all_tasks_raw = $this->getAllTasksByProjectIdInDateRange($project_id, $start, $end);
+
+        return $this->generateTimesArrayFromTasksForWorkedTimesTooltip($all_tasks_raw);
+    }
 }

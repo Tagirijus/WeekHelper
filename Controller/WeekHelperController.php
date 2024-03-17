@@ -209,11 +209,17 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             -1 => $this->helper->hoursViewHelper->getWeekTimes($project_id, -1),
             0 => $this->helper->hoursViewHelper->getWeekTimes($project_id, 0)
         ];
+        $day_times = [
+            -2 => $this->helper->hoursViewHelper->getDayTimes($project_id, -2),
+            -1 => $this->helper->hoursViewHelper->getDayTimes($project_id, -1),
+            0 => $this->helper->hoursViewHelper->getDayTimes($project_id, 0)
+        ];
 
         $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_worked_times', [
             'project_id' => $project_id,
             'month_times' => $month_times,
-            'week_times' => $week_times
+            'week_times' => $week_times,
+            'day_times' => $day_times
         ]));
     }
 }
