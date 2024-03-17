@@ -1205,10 +1205,10 @@ class HoursViewHelper extends Base
 
         // end
         $firstDayOfMonthAfter = strtotime('+1 month', $firstDayOfRelativeMonth);
-        $lasDayOfRelativeMonth = strtotime('-1 day', $firstDayOfMonthAfter);
-        $lasDayOfRelativeMonth = strtotime('+23 hours +59 minutes +59 seconds', $lasDayOfRelativeMonth);
+        $lastDayOfRelativeMonth = strtotime('-1 day', $firstDayOfMonthAfter);
+        $lastDayOfRelativeMonth = strtotime('+23 hours +59 minutes +59 seconds', $lastDayOfRelativeMonth);
 
-        return [$firstDayOfRelativeMonth, $lasDayOfRelativeMonth];
+        return [$firstDayOfRelativeMonth, $lastDayOfRelativeMonth];
     }
 
     /**
@@ -1225,6 +1225,49 @@ class HoursViewHelper extends Base
         $month = $this->getMonthStartAndEnd($relative);
         $start = $month[0];
         $end = $month[1];
+
+        $all_tasks_raw = $this->getAllTasksByProjectIdInDateRange($project_id, $start, $end);
+
+        return $this->generateTimesArrayFromTasksForWorkedTimesTooltip($all_tasks_raw);
+    }
+
+    /**
+     * Get the start and the end of a weel
+     * relative to the actual week and return
+     * it as an array with [0] being the start
+     * and [1] being the end. The format is
+     * a simple unix timestamp then.
+     *
+     * @param  integer $relative
+     * @return array
+     */
+    public function getWeekStartAndEnd($relative = 0)
+    {
+        // start
+        $actualDate = strtotime('now');
+        $firstDayOfWeek = strtotime('last monday', $actualDate);
+        $firstDayOfRelativeWeek = strtotime((string) $relative . ' week', $firstDayOfWeek);
+
+        // end
+        $lastDayOfRelativeWeek = strtotime('next sunday', $firstDayOfRelativeWeek) + 86399; // 86399 seconds for 23:59:59
+
+        return [$firstDayOfRelativeWeek, $lastDayOfRelativeWeek];
+    }
+
+    /**
+     * Get times for actual or relative to actual month
+     * for the given project and return it as an array.
+     *
+     * @param  integer $project_id
+     * @param  integer $relative
+     * @return array
+     */
+    public function getWeekTimes($project_id, $relative = 0)
+    {
+        // date boundaries
+        $week = $this->getWeekStartAndEnd($relative);
+        $start = $week[0];
+        $end = $week[1];
 
         $all_tasks_raw = $this->getAllTasksByProjectIdInDateRange($project_id, $start, $end);
 

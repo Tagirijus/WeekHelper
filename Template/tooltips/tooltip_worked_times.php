@@ -19,5 +19,14 @@
 </div>
 
 <div id="Weeks" class="kanboardtabcontent kanboardtabcontenthide">
-    WEEKS HERE
+    <?php
+        $table_name = 'Last week';
+        $taskTimes = $week_times[-1];
+        include(__DIR__ . '/tooltip_worked_times_table.php');
+    ?>
+    <?php
+        $table_name = 'This week';
+        $taskTimes = $week_times[0];
+        include(__DIR__ . '/tooltip_worked_times_table.php');
+    ?>
 </div>
