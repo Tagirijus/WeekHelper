@@ -287,14 +287,18 @@ class SubtaskTimeTrackingModelMod extends Base
         } else {
             $ignore_subtask_titles = [];
         }
-        return $this->db
+        $tmpQuery = $this->db
                     ->table(\Kanboard\Model\SubtaskModel::TABLE)
                     ->eq('task_id', $task_id)
                     ->columns(
                         'SUM(time_spent) AS time_spent',
                         'SUM(time_estimated) AS time_estimated'
-                    )
-                    ->notIn('title', $ignore_subtask_titles)
-                    ->findOne();
+                    );
+        if (!empty($ignore_subtask_titles)) {
+            foreach ($ignore_subtask_titles as $ignore_title_substring) {
+                $tmpQuery->addCondition('`title` NOT LIKE \'%' . $ignore_title_substring . '%\'');
+            }
+        }
+        return $tmpQuery->findOne();
     }
 }

@@ -39,6 +39,24 @@ class HoursViewHelper extends Base
     var $ignore_subtask_titles = null;
 
     /**
+     * Array describing, which subtask IDs
+     * are already found as "ignored".
+     * It's a cache variable
+     *
+     * @var array
+     **/
+    var $subtask_ids_have_ignore_substring_in_title = [];
+
+    /**
+     * Array describing, which subtask IDs
+     * are already found as "not ignored".
+     * It's a cache variable
+     *
+     * @var array
+     **/
+    var $subtask_ids_do_not_have_ignore_substring_in_title = [];
+
+    /**
      * Init and/or ge the ignored subtask titles.
      *
      * @return array
@@ -508,10 +526,12 @@ class HoursViewHelper extends Base
      *
      * use_ignore == 1
      *     This means that subtasktitles should be skipped,
-     *     if they exist in the config
+     *     if they have a subtask title, which should
+     *     be ignored according to the settings
      * use_ignore == 2
      *     This means that subtasktitles should be skipped,
-     *     if they do not exist in the config
+     *     if they do not have a subtask title, which should
+     *     be ignored according to the settings
      * use_ignore == 3 (or anything not 1|2)
      *     Means that the method returns false,
      *     thus nothing will be ignored. Will probably
@@ -524,13 +544,50 @@ class HoursViewHelper extends Base
     public function ignoreLogic($subtask, $use_ignore)
     {
         if (
-            ($use_ignore == 1 && in_array($subtask['title'], $this->getIgnoredSubtaskTitles()))
+            ($use_ignore == 1 && $this->subtaskTitleHasIgnoreTitleSubString($subtask))
             ||
-            ($use_ignore == 2 && !in_array($subtask['title'], $this->getIgnoredSubtaskTitles()))
+            ($use_ignore == 2 && !$this->subtaskTitleHasIgnoreTitleSubString($subtask))
         ) {
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Checks, if the given subtask has a substring in its title,
+     * which exists in the configs "ignore subtasks" setting.
+     *
+     * @param  array $subtask
+     * @return bool
+     */
+    public function subtaskTitleHasIgnoreTitleSubString($subtask)
+    {
+        $subtask_is_ignored = in_array($subtask['id'], $this->subtask_ids_have_ignore_substring_in_title);
+        // return already to save some premature performance, since
+        // it means that the subtask was checked already
+        if ($subtask_is_ignored) {return $subtask_is_ignored;}
+        $subtask_is_not_ignored = in_array($subtask['id'], $this->subtask_ids_do_not_have_ignore_substring_in_title);
+        $subtask_was_checked = $subtask_is_ignored || $subtask_is_not_ignored;
+
+        // first check, if the subtask was checked already
+        if ($subtask_was_checked) {
+            return $subtask_is_ignored;
+
+        // or check it new
+        } else {
+            $found = false;
+            foreach ($this->getIgnoredSubtaskTitles() as $ignore_substring) {
+                if (strpos($subtask['title'], $ignore_substring) !== false) {
+                    $found = true;
+                }
+            }
+            if ($found) {
+                $this->subtask_ids_have_ignore_substring_in_title[] = $subtask['id'];
+            } else {
+                $this->subtask_ids_do_not_have_ignore_substring_in_title[] = $subtask['id'];
+            }
+            return $found;
         }
     }
 
