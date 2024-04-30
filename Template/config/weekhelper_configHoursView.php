@@ -190,6 +190,14 @@
             ]) ?>
         </div>
 
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Hide project times with 0 hours from dashboard'), 'hide_0hours_projects_enabled') ?>
+            <?= $this->form->checkbox('hide_0hours_projects_enabled', t('enabled'), 1, $hide_0hours_projects_enabled, '', [
+                'autofocus',
+                'tabindex="6"'
+            ]) ?>
+        </div>
+
     </div>
 
 

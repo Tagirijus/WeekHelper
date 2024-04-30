@@ -464,6 +464,7 @@ class HoursViewHelper extends Base
             'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
             'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
+            'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
         ];
     }
 
@@ -1374,5 +1375,21 @@ class HoursViewHelper extends Base
         $all_tasks_raw = $this->getAllTasksByProjectIdInDateRange($project_id, $start, $end);
 
         return $this->generateTimesArrayFromTasksForWorkedTimesTooltip($all_tasks_raw);
+    }
+
+    /**
+     * Check the given array, if it contains any times
+     * and returns a boolean accordingly.
+     *
+     * @param  array   $timesArray
+     * @return boolean
+     */
+    public function hasTimes($timesArray = [])
+    {
+        if ($timesArray['estimated'] != 0.0 || $timesArray['spent'] != 0.0 || $timesArray['remaining'] != 0.0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
