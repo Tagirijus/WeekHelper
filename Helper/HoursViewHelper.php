@@ -299,7 +299,7 @@ class HoursViewHelper extends Base
      */
     public function getTimesByProjectId($projectId)
     {
-        $tasks = $this->getTasksByProjectId($projectId);
+        $tasks = $this->getOpenTasksByProjectId($projectId);
 
         return $this->getTimesFromTasks($tasks);
     }
@@ -360,17 +360,20 @@ class HoursViewHelper extends Base
      * @param  integer $projectId
      * @return array
      */
-    protected function getTasksByProjectId($projectId)
+    protected function getOpenTasksByProjectId($projectId)
     {
         $project = $this->projectModel->getById($projectId);
-        $search = $this->helper->projectHeader->getSearchQuery($project);
+
+        // this is not needed anymore, since I just want to get open
+        // tasks anyway, which would get "status:open" here anyway.
+        // $search = $this->helper->projectHeader->getSearchQuery($project);
 
         $query = $this->taskFinderModel->getExtendedQuery()
             ->eq(TaskModel::TABLE.'.project_id', $projectId);
 
         $builder = $this->taskLexer;
         $builder->withQuery($query);
-        return $builder->build($search)->toArray();
+        return $builder->build('status:open')->toArray();
     }
 
     /**
