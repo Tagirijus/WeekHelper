@@ -200,7 +200,7 @@
         ?>
 
         <div class="container-task-progress-bar task-summary-progress-bar" style="opacity: <?= $percent_opacity; ?>;">
-            <div class="task-progress-bar" style="width:<?= $percent . '%'; ?>;">
+            <div class="task-progress-bar <?= $this->hoursViewHelper->getPercentCSSClass($percent, $task); ?>" style="width:<?= $percent . '%'; ?>;">
                 <?= $percent_txt . '%' ?>
             </div>
         </div>

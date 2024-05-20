@@ -214,10 +214,34 @@
 {
 	height: 20px;
 	padding-right: 3px;
-	background-color: rgba(130, 130, 200, 0.75);
 	border-radius: 5px;
 	font-weight: bold;
 	white-space: nowrap;
+}
+
+.progress-color
+{
+	background-color: rgba(130, 130, 200, 0.75);
+}
+
+.progress-color-50
+{
+	background-color: rgba(120, 180, 200, 0.75);
+}
+
+.progress-color-75
+{
+	background-color: rgba(80, 200, 150, 0.75);
+}
+
+.progress-color-100
+{
+	background-color: rgba(50, 220, 50, 0.75);
+}
+
+.progress-color-100-undone
+{
+	background-color: rgba(220, 180, 50, 0.75);
 }
 
 .task-summary-progress-bar

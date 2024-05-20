@@ -505,10 +505,11 @@ class HoursViewHelper extends Base
         $remaining_time = 0.0;
         if (isset($task['id'])) {
             $subtasks = $this->getSubtasksByTaskId($task['id']);
+            $task['open_subtasks'] = 0;
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getRemainingFromSubtasks($subtasks, $use_ignore);
+                $tmp = $this->getRemainingFromSubtasks($subtasks, $use_ignore, $task);
 
             // calculate remaining or overtime based only on task itself
             } else {
@@ -604,14 +605,20 @@ class HoursViewHelper extends Base
      *         1: get only non-ignored subtasks times
      *         2: get only ignored subtask times
      *         3: get all times
+     * @param  array   &$task    For modifying the open_subtasks key
      * @return float
      */
-    protected function getRemainingFromSubtasks($subtasks = [], $use_ignore = 1)
+    protected function getRemainingFromSubtasks($subtasks = [], $use_ignore = 1, &$task = [])
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
             if ($this->ignoreLogic($subtask, $use_ignore)) {
                 continue;
+            }
+
+            // check if this subtask is open or not and add it, if it's open
+            if ($subtask['status'] != 2) {
+                $task['open_subtasks']++;
             }
 
             $tmp = $this->remainingCalculation($subtask);
@@ -896,6 +903,32 @@ class HoursViewHelper extends Base
         }
 
         return $out;
+    }
+
+    /**
+     * Generate additional task progress bar CSS
+     * depending on the given percentage.
+     *
+     * Output will be the class in
+     *     week-helper.css
+     *
+     * @param  integer $percent
+     * @param  array   $task      To check if there are open subtasks or not
+     * @return string
+     */
+    public function getPercentCSSClass($percent = 0, $task = [])
+    {
+        if ($percent >= 50 && $percent < 75) {
+            return 'progress-color-50';
+        } elseif ($percent >= 75 && $percent < 100) {
+            return 'progress-color-75';
+        } elseif ($percent >= 100 && $task['open_subtasks'] == 0) {
+            return 'progress-color-100';
+        } elseif ($percent >= 100 && $task['open_subtasks'] != 0) {
+            return 'progress-color-100-undone';
+        } else {
+            return 'progress-color';
+        }
     }
 
     /**
