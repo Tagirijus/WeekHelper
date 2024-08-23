@@ -34,6 +34,7 @@ class TaskAutoAddWeek extends Base
     {
         return array(
             TaskModel::EVENT_MOVE_COLUMN,
+            TaskModel::EVENT_CREATE,
         );
     }
 
