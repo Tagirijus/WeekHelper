@@ -5,6 +5,7 @@ namespace Kanboard\Plugin\WeekHelper;
 use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Translator;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
+use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeekOnCreate;
 use Kanboard\Plugin\WeekHelper\Model;
 
 
@@ -22,6 +23,7 @@ class Plugin extends Base
 
         // Automatic Action
         $this->actionManager->register(new TaskAutoAddWeek($this->container));
+        $this->actionManager->register(new TaskAutoAddWeekOnCreate($this->container));
 
         // Helper
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
@@ -123,7 +125,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '2.6.0';
+        return '2.7.0';
     }
 
     public function getCompatibleVersion()

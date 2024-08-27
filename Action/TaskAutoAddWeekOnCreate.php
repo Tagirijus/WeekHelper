@@ -11,7 +11,7 @@ use Kanboard\Action\Base;
  * @package action
  * @author  Frederic Guillot
  */
-class TaskAutoAddWeek extends Base
+class TaskAutoAddWeekOnCreate extends Base
 {
     /**
      * Get automatic action description
@@ -21,7 +21,7 @@ class TaskAutoAddWeek extends Base
      */
     public function getDescription()
     {
-        return t('Change a tasks title on move where the week-pattern, if it exists, will be added one week');
+        return t('Change a tasks title on create where the week-pattern, if it exists, will be added one week');
     }
 
     /**
@@ -33,7 +33,7 @@ class TaskAutoAddWeek extends Base
     public function getCompatibleEvents()
     {
         return array(
-            TaskModel::EVENT_MOVE_COLUMN,
+            TaskModel::EVENT_CREATE,
         );
     }
 
@@ -58,10 +58,7 @@ class TaskAutoAddWeek extends Base
      */
     public function getEventRequiredParameters()
     {
-        return array(
-            'task_id',
-            'src_column_id',
-        );
+        return array();
     }
 
     /**
@@ -114,6 +111,8 @@ class TaskAutoAddWeek extends Base
      */
     public function hasRequiredCondition(array $data)
     {
+        // return true;
+        $this->logger->info(json_encode($data));
         return $data['task']['column_id'] == $this->getParam('column_id');
     }
 }
