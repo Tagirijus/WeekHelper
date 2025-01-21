@@ -101,6 +101,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_progressbar_0_opacity' => $form['progressbar_0_opacity'],
             'hoursview_progress_home_project_level' => $form['progress_home_project_level'],
             'hoursview_hide_0hours_projects_enabled' => isset($form['hide_0hours_projects_enabled']) ? 1 : 0,
+            'hoursview_block_hours' => $form['block_hours'],
         ];
 
         $this->languageModel->loadCurrentLanguage();

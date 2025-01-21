@@ -55,4 +55,8 @@ return array(
     'Subtask has string in its title (multiple with comma seperated)' => 'Subtask hat Zeichenfolge im Namen (mehrere mit Komma trennen)',
     'Time details' => 'Zeit Details',
     'Hide project times with 0 hours from dashboard' => 'Verstecke Projekte-Zeiten mit 0 Stunden auf dem Dashboard',
+    'Block hours' => 'Block Stunden',
+    'Configure the block calculations.' => 'Konfiguriere die Block Kalkulationen.',
+    'Configure the block calculations.' => 'Konfiguriere die Block Kalkulationen.',
+    'How many hours is one block? (0 disables the block feature)' => 'Wie viele Stunden sind ein Block? (0 deaktiviert das Block Feature)',
 );

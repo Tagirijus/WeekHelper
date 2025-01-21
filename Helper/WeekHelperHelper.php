@@ -69,6 +69,7 @@ class WeekHelperHelper extends Base
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
             'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
             'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
+            'block_hours' => $this->configModel->get('hoursview_block_hours', 0),
 
             // Remaining Box
             'remaining_days_enabled' => $this->configModel->get('weekhelper_remaining_days_enabled', 1),
