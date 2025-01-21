@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.8
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Added block hours calculation on dashboard project tooltip. You can set up a _block\_hours_ in the config now. If it is >0, on the tooltip there will be shown a blocks calculation, how many blocks would be needed for the remaining time of the project.
+
+
 ## v2.7
 
 ### What's Changed
