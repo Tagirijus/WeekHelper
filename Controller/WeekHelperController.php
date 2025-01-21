@@ -174,7 +174,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_dashboard_times', [
             'label' => $label,
             'level' => $level,
-            'times' => $times
+            'times' => $times,
+            'block_hours' => $this->configModel->get('hoursview_block_hours', 0)
         ]));
     }
 

@@ -1,6 +1,7 @@
 <?php
 
     $timesTotal = $this->helper->hoursViewHelper->getTimesByUserId($this->user->getId());
+    $blocks = 0;
 
     function percentFromTotal($this_times, $total_times)
     {
@@ -71,6 +72,16 @@
                     <span class="thv-font-small">
                         <?= percentFromTotal($time[$level]['_total']['remaining'], $timesTotal[$level]['_total']['remaining']) ?>
                     </span>
+                    <?php if ($block_hours != 0): ?>
+                        <?php
+                            $blocks_this_project = $this->hoursViewHelper->calcBlocksFromTime($time[$level]['_total']['remaining']);
+                            $blocks += $blocks_this_project;
+                        ?>
+                        <br>
+                        <span class="thv-font-small">
+                            <?= $blocks_this_project ?> Blocks
+                        </span>
+                    <?php endif ?>
                 </td>
             </tr>
         <?php endforeach ?>
@@ -95,6 +106,12 @@
                 <span class="thv-remaining-color">
                     <?= $this->hoursViewHelper->floatToHHMM($timesTotal[$level]['_total']['remaining']) ?>h
                 </span>
+                <?php if ($block_hours != 0): ?>
+                    <br>
+                    <span class="thv-font-small">
+                        <?= $blocks ?> Blocks
+                    </span>
+                <?php endif ?>
             </td>
         </tr>
     </table>

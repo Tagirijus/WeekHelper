@@ -1429,4 +1429,20 @@ class HoursViewHelper extends Base
             return false;
         }
     }
+
+    /**
+     * Calculate the amount of blocks for the given time and respecting the
+     * set config for "hoursview_block_hours".
+     *
+     * @param  float  $time The time to be used for the simple calculation.
+     * @return integer
+     */
+    public function calcBlocksFromTime($time = 0.0)
+    {
+        $block_hours = (int) $this->configModel->get('hoursview_block_hours', 0);
+        if ($block_hours == 0) {
+            return 0;
+        }
+        return (int) ceil($time / $block_hours);
+    }
 }
