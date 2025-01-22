@@ -1026,6 +1026,7 @@ class HoursViewHelper extends Base
                 'times' => $this->getTimesByProjectId($projectId)
             ];
         }
+
         return $times;
     }
 
@@ -1444,5 +1445,51 @@ class HoursViewHelper extends Base
             return 0;
         }
         return (int) ceil($time / $block_hours);
+    }
+
+    /**
+     * A helper function to help sort the times array, when accessing the
+     * times array in tooltip_dashboard_times.
+     *
+     * The function sorts the given level by the given key, which lays
+     * deep nested in the array, actually, and returns a new sorted array.
+     *
+     * The method automatically uses the config to know how to sort.
+     *
+     * @param  array  $times
+     * @param  string  $level
+     * @return array
+     */
+    public function sortTimesArray($times, $level = 'level_1')
+    {
+        $tooltip_sorting = $this->configModel->get('hoursview_tooltip_sorting', 'id');
+        if ($tooltip_sorting == 'id') {
+            // by default the returned $times array should already
+            // be in the sorting of 'id', which is the key of the
+            // array.
+            return $times;
+        }
+
+        // otherwise do the sorting thing now
+
+        // this part interpretes the tooltip_sorting config
+        if ($tooltip_sorting == 'remaining_hours_asc') {
+            $key = 'remaining';
+            $asc = True;
+        } elseif ($tooltip_sorting == 'remaining_hours_desc') {
+            $key = 'remaining';
+            $asc = False;
+        }
+
+        // this one sorts with a custom function
+        usort($times, function ($a, $b) use ($level, $key, $asc) {
+            if ($asc == true) {
+                return $a['times'][$level]['_total'][$key] <=> $b['times'][$level]['_total'][$key];
+            } else {
+                return $b['times'][$level]['_total'][$key] <=> $a['times'][$level]['_total'][$key];
+            }
+        });
+
+        return $times;
     }
 }

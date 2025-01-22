@@ -35,7 +35,7 @@
                 <?= t('Remaining') ?>
             </th>
         </tr>
-        <?php foreach ($times as $projectId => $project): ?>
+        <?php foreach ($this->hoursViewHelper->sortTimesArray($times, $level) as $projectId => $project): ?>
             <?php $time = $project['times']; ?>
             <?php if (!$time[$level]['_has_times']): continue ?>
             <?php endif ?>
