@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.9
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Added feature with config to be able to sort the projects on the dashboard tooltip by remaining time.
+
+
 ## v2.8
 
 ### What's Changed
