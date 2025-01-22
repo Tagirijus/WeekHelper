@@ -225,6 +225,41 @@
 
     </div>
 
+    <br>
+    <br>
+
+
+
+    <!-- TOOLTIP -->
+
+    <p>
+        <h3><?= t('Tooltip') ?></h3>
+    </p>
+
+    <p>
+        <?= t('Configure the tooltip on the dashboard.') ?>
+    </p>
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Sort by'), 'tooltip_sorting') ?>
+            <?= $this->form->select(
+                'tooltip_sorting',
+                [
+                    'id' => 'ID',
+                    'remaining_hours_asc' => t('Remaining hours ascending'),
+                    'remaining_hours_desc' => t('Remaining hours descending'),
+                ],
+                ['tooltip_sorting' => $tooltip_sorting],
+                [],
+                [
+                    'autofocus'
+                ]
+            ) ?>
+        </div>
+
+    </div>
+
 
 
     <div class="task-form-bottom">

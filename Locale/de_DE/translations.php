@@ -59,4 +59,8 @@ return array(
     'Configure the block calculations.' => 'Konfiguriere die Block Kalkulationen.',
     'Configure the block calculations.' => 'Konfiguriere die Block Kalkulationen.',
     'How many hours is one block? (0 disables the block feature)' => 'Wie viele Stunden sind ein Block? (0 deaktiviert das Block Feature)',
+    'Configure the tooltip on the dashboard.' => 'Tooltip auf dem Dashboard konfigurieren.',
+    'Sort by' => 'Sortiere nach',
+    'Remaining hours ascending' => 'Übrige Stunden aufsteigend',
+    'Remaining hours descending' => 'Übrige Stunden absteigend',
 );

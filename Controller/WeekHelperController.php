@@ -102,6 +102,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_progress_home_project_level' => $form['progress_home_project_level'],
             'hoursview_hide_0hours_projects_enabled' => isset($form['hide_0hours_projects_enabled']) ? 1 : 0,
             'hoursview_block_hours' => $form['block_hours'],
+            'hoursview_tooltip_sorting' => $form['tooltip_sorting'],
         ];
 
         $this->languageModel->loadCurrentLanguage();
@@ -175,7 +176,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'label' => $label,
             'level' => $level,
             'times' => $times,
-            'block_hours' => $this->configModel->get('hoursview_block_hours', 0)
+            'block_hours' => $this->configModel->get('hoursview_block_hours', 0),
+            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id')
         ]));
     }
 
