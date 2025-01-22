@@ -1485,7 +1485,7 @@ class HoursViewHelper extends Base
         }
 
         // this one sorts with a custom function
-        usort($times, function ($a, $b) use ($level, $key, $asc) {
+        uasort($times, function ($a, $b) use ($level, $key, $asc) {
             if ($asc == true) {
                 return $a['times'][$level]['_total'][$key] <=> $b['times'][$level]['_total'][$key];
             } else {
