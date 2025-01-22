@@ -1475,10 +1475,13 @@ class HoursViewHelper extends Base
         // this part interpretes the tooltip_sorting config
         if ($tooltip_sorting == 'remaining_hours_asc') {
             $key = 'remaining';
-            $asc = True;
+            $asc = true;
         } elseif ($tooltip_sorting == 'remaining_hours_desc') {
             $key = 'remaining';
-            $asc = False;
+            $asc = false;
+        } else {
+            $key = 'all';
+            $asc = true;
         }
 
         // this one sorts with a custom function
