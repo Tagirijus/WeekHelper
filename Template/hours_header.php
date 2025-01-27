@@ -17,7 +17,7 @@
                 <span class="thv-title-color">
                     <?= t('Estimated'); ?>:
                 </span>
-                <span class="thv-estimated-color">
+                <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_1']['_total']['estimated']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['estimated']); ?>h
                 </span>
             </div>
@@ -26,7 +26,7 @@
                 <span class="thv-title-color">
                     <?= t('Spent'); ?>:
                 </span>
-                <span class="thv-spent-color">
+                <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_1']['_total']['spent']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['spent']); ?>h
                     <?php if ($times['level_1']['_total']['overtime'] != 0.0): ?>
                         <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['spent'] - $times['level_1']['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['level_1']['_total']['overtime']); ?>)</i>
@@ -38,7 +38,7 @@
                 <span class="thv-title-color">
                     <?= t('Remaining'); ?>:
                 </span>
-                <span class="thv-remaining-color">
+                <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_1']['_total']['remaining']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_1']['_total']['remaining']); ?>h
                 </span>
             </div>
@@ -64,7 +64,7 @@
                 <span class="thv-title-color">
                     <?= t('Estimated'); ?>:
                 </span>
-                <span class="thv-estimated-color">
+                <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_2']['_total']['estimated']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['estimated']); ?>h
                 </span>
             </div>
@@ -73,7 +73,7 @@
                 <span class="thv-title-color">
                     <?= t('Spent'); ?>:
                 </span>
-                <span class="thv-spent-color">
+                <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_2']['_total']['spent']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['spent']); ?>h
                     <?php if ($times['level_2']['_total']['overtime'] != 0.0): ?>
                         <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['spent'] - $times['level_2']['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['level_2']['_total']['overtime']); ?>)</i>
@@ -85,7 +85,7 @@
                 <span class="thv-title-color">
                     <?= t('Remaining'); ?>:
                 </span>
-                <span class="thv-remaining-color">
+                <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_2']['_total']['remaining']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_2']['_total']['remaining']); ?>h
                 </span>
             </div>
@@ -111,7 +111,7 @@
                 <span class="thv-title-color">
                     <?= t('Estimated'); ?>:
                 </span>
-                <span class="thv-estimated-color">
+                <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_3']['_total']['estimated']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['estimated']); ?>h
                 </span>
             </div>
@@ -120,7 +120,7 @@
                 <span class="thv-title-color">
                     <?= t('Spent'); ?>:
                 </span>
-                <span class="thv-spent-color">
+                <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_3']['_total']['spent']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['spent']); ?>h
                     <?php if ($times['level_3']['_total']['overtime'] != 0.0): ?>
                         <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['spent'] - $times['level_3']['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['level_3']['_total']['overtime']); ?>)</i>
@@ -132,7 +132,7 @@
                 <span class="thv-title-color">
                     <?= t('Remaining'); ?>:
                 </span>
-                <span class="thv-remaining-color">
+                <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_3']['_total']['remaining']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_3']['_total']['remaining']); ?>h
                 </span>
             </div>
@@ -158,7 +158,7 @@
                 <span class="thv-title-color">
                     <?= t('Estimated'); ?>:
                 </span>
-                <span class="thv-estimated-color">
+                <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_4']['_total']['estimated']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['estimated']); ?>h
                 </span>
             </div>
@@ -167,7 +167,7 @@
                 <span class="thv-title-color">
                     <?= t('Spent'); ?>:
                 </span>
-                <span class="thv-spent-color">
+                <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_4']['_total']['spent']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['spent']); ?>h
                     <?php if ($times['level_4']['_total']['overtime'] != 0.0): ?>
                         <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['spent'] - $times['level_4']['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['level_4']['_total']['overtime']); ?>)</i>
@@ -179,7 +179,7 @@
                 <span class="thv-title-color">
                     <?= t('Remaining'); ?>:
                 </span>
-                <span class="thv-remaining-color">
+                <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['level_4']['_total']['remaining']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['level_4']['_total']['remaining']); ?>h
                 </span>
             </div>
@@ -208,7 +208,7 @@
                 <span class="thv-title-color">
                     <?= t('Estimated'); ?>:
                 </span>
-                <span class="thv-estimated-color">
+                <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['all']['_total']['estimated']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['estimated']); ?>h
                 </span>
             </div>
@@ -217,7 +217,7 @@
                 <span class="thv-title-color">
                     <?= t('Spent'); ?>:
                 </span>
-                <span class="thv-spent-color">
+                <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['all']['_total']['spent']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent']); ?>h
                     <?php if ($times['all']['_total']['overtime'] != 0.0): ?>
                         <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent'] - $times['all']['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['all']['_total']['overtime']); ?>)</i>
@@ -229,7 +229,7 @@
                 <span class="thv-title-color">
                     <?= t('Remaining'); ?>:
                 </span>
-                <span class="thv-remaining-color">
+                <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['all']['_total']['remaining']); ?> Blocks">
                     <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['remaining']); ?>h
                 </span>
             </div>
