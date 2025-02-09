@@ -62,4 +62,5 @@ return array(
     'Sort by' => 'Sortiere nach',
     'Remaining hours ascending' => 'Übrige Stunden aufsteigend',
     'Remaining hours descending' => 'Übrige Stunden absteigend',
+    'in dashboard sidebar' => 'in Sidebar auf dem Dashboard',
 );

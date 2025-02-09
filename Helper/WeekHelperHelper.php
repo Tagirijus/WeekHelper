@@ -71,6 +71,10 @@ class WeekHelperHelper extends Base
             'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
             'block_hours' => $this->configModel->get('hoursview_block_hours', 0),
             'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
+            'dashboard_link_level_1' => $this->configModel->get('hoursview_dashboard_link_level_1', 0),
+            'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
+            'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
+            'dashboard_link_level_4' => $this->configModel->get('hoursview_dashboard_link_level_4', 0),
 
             // Remaining Box
             'remaining_days_enabled' => $this->configModel->get('weekhelper_remaining_days_enabled', 1),

@@ -103,6 +103,10 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_hide_0hours_projects_enabled' => isset($form['hide_0hours_projects_enabled']) ? 1 : 0,
             'hoursview_block_hours' => $form['block_hours'],
             'hoursview_tooltip_sorting' => $form['tooltip_sorting'],
+            'hoursview_dashboard_link_level_1' => $form['dashboard_link_level_1'],
+            'hoursview_dashboard_link_level_2' => $form['dashboard_link_level_2'],
+            'hoursview_dashboard_link_level_3' => $form['dashboard_link_level_3'],
+            'hoursview_dashboard_link_level_4' => $form['dashboard_link_level_4'],
         ];
 
         $this->languageModel->loadCurrentLanguage();
