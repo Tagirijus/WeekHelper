@@ -84,6 +84,57 @@ class Plugin extends Base
                 }
             ]
         );
+        // levels on dashboard sidebar
+        if (
+            $this->configModel->get('hoursview_dashboard_link_level_1', 0)
+        ) {
+            $this->template->hook->attach(
+                'template:dashboard:sidebar', 'WeekHelper:dashboard/level_on_dashboard_sidebar', [
+                    'level' => 'level_1',
+                    'caption' => $this->configModel->get('hoursview_level_1_caption', 'level_1')
+                ]
+            );
+        }
+        if (
+            $this->configModel->get('hoursview_dashboard_link_level_2', 0)
+        ) {
+            $this->template->hook->attach(
+                'template:dashboard:sidebar', 'WeekHelper:dashboard/level_on_dashboard_sidebar', [
+                    'level' => 'level_2',
+                    'caption' => $this->configModel->get('hoursview_level_2_caption', 'level_2')
+                ]
+            );
+        }
+        if (
+            $this->configModel->get('hoursview_dashboard_link_level_3', 0)
+        ) {
+            $this->template->hook->attach(
+                'template:dashboard:sidebar', 'WeekHelper:dashboard/level_on_dashboard_sidebar', [
+                    'level' => 'level_3',
+                    'caption' => $this->configModel->get('hoursview_level_3_caption', 'level_3')
+                ]
+            );
+        }
+        if (
+            $this->configModel->get('hoursview_dashboard_link_level_4', 0)
+        ) {
+            $this->template->hook->attach(
+                'template:dashboard:sidebar', 'WeekHelper:dashboard/level_on_dashboard_sidebar', [
+                    'level' => 'level_4',
+                    'caption' => $this->configModel->get('hoursview_level_4_caption', 'level_4')
+                ]
+            );
+        }
+        if (
+            $this->configModel->get('hoursview_dashboard_link_level_all', 0)
+        ) {
+            $this->template->hook->attach(
+                'template:dashboard:sidebar', 'WeekHelper:dashboard/level_on_dashboard_sidebar', [
+                    'level' => 'all',
+                    'caption' => $this->configModel->get('hoursview_all_caption', 'All')
+                ]
+            );
+        }
 
         // Template Overrides
         $this->template->setTemplateOverride('board/task_public', 'WeekHelper:board/task_public');
@@ -101,6 +152,7 @@ class Plugin extends Base
         $this->route->addRoute('/weekhelper/configHoursView', 'WeekHelperController', 'showConfigHoursView', 'WeekHelper');
         $this->route->addRoute('/weekhelper/configRemainingBox', 'WeekHelperController', 'showConfigRemainingBox', 'WeekHelper');
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
+        $this->route->addRoute('/weekhelper/dashboard_level/:level', 'WeekHelperController', 'showLevelHoverAsPage', 'WeekHelper');
     }
 
     public function onStartup()

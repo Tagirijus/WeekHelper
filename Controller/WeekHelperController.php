@@ -50,6 +50,40 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
+     * Show one of the levels as a new page, instead of just a tooltip
+     * like on the dashboard hovers.
+     *
+     * @return HTML response
+     */
+    public function showLevelHoverAsPage()
+    {
+        $user = $this->getUser();
+        $level = $this->request->getStringParam('level', 'all');
+        if ($level == 'level_1') {
+            $label = $this->configModel->get('hoursview_level_1_caption', 'level_1');
+        } elseif ($level == 'level_2') {
+            $label = $this->configModel->get('hoursview_level_2_caption', 'level_2');
+        } elseif ($level == 'level_3') {
+            $label = $this->configModel->get('hoursview_level_3_caption', 'level_3');
+        } elseif ($level == 'level_4') {
+            $label = $this->configModel->get('hoursview_level_4_caption', 'level_4');
+        } else {
+            $label = $this->configModel->get('hoursview_all_caption', 'all');
+        }
+        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+
+        $this->response->html($this->helper->layout->dashboard('WeekHelper:tooltips/tooltip_dashboard_times', [
+            'title' => 'Level: ' . $label,
+            'user' => $user,
+            'label' => $label,
+            'level' => $level,
+            'times' => $times,
+            'block_hours' => $this->configModel->get('hoursview_block_hours', 0),
+            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id')
+        ]));
+    }
+
+    /**
      * Save the setting for WeekHelper Weeks.
      */
     public function saveConfigWeeks()
@@ -107,6 +141,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_dashboard_link_level_2' => $form['dashboard_link_level_2'],
             'hoursview_dashboard_link_level_3' => $form['dashboard_link_level_3'],
             'hoursview_dashboard_link_level_4' => $form['dashboard_link_level_4'],
+            'hoursview_dashboard_link_level_all' => $form['dashboard_link_level_all'],
         ];
 
         $this->languageModel->loadCurrentLanguage();
@@ -164,6 +199,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     public function getTooltipDashboardTimes()
     {
         $level = $this->request->getStringParam('level', 'all');
+        $this->logger->info(json_encode($level));
         if ($level == 'level_1') {
             $label = $this->configModel->get('hoursview_level_1_caption', 'level_1');
         } elseif ($level == 'level_2') {

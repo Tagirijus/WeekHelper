@@ -116,6 +116,7 @@
             ]) ?>
         </div>
 
+        <!-- Levels Links on Dashboard -->
         <div class="task-form-main-column">
             <?= $this->form->label('Level 1 ' . t('in dashboard sidebar'), 'dashboard_link_level_1') ?>
             <?= $this->form->checkbox('dashboard_link_level_1', t('enabled'), 1, $dashboard_link_level_1, '', []) ?>
@@ -134,6 +135,11 @@
         <div class="task-form-main-column">
             <?= $this->form->label('Level 4 ' . t('in dashboard sidebar'), 'dashboard_link_level_1') ?>
             <?= $this->form->checkbox('dashboard_link_level_4', t('enabled'), 1, $dashboard_link_level_4, '', []) ?>
+        </div>
+
+        <div class="task-form-main-column">
+            <?= $this->form->label('Level All ' . t('in dashboard sidebar'), 'dashboard_link_level_all') ?>
+            <?= $this->form->checkbox('dashboard_link_level_all', t('enabled'), 1, $dashboard_link_level_all, '', []) ?>
         </div>
 
     </div>

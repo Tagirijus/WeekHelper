@@ -473,6 +473,7 @@ class HoursViewHelper extends Base
             'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
             'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
             'dashboard_link_level_4' => $this->configModel->get('hoursview_dashboard_link_level_4', 0),
+            'dashboard_link_level_all' => $this->configModel->get('hoursview_dashboard_link_level_all', 0),
         ];
     }
 
