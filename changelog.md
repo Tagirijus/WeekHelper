@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.10
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Levels stuff can now not only be shown as a tooltip when hovering on the dashboard level thing, but also optionally as a separate dashboard page, linked through the sidebar.
+
+
 ## v2.9
 
 ### What's Changed
