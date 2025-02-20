@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.11
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Clicking on _"Start timer"_ for a subtask now will set the parent tasks started date, if there was none and change the subtask status as well.
+
+
 ## v2.10
 
 ### What's Changed
