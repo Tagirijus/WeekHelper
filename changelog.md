@@ -1,6 +1,15 @@
 # Changelog
 
 
+## v2.12
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- The blocking card icon is now more obvious.
+- Also the blocking icon on the blocked card can be avoided with a config, if the blocking card is in specific columns.
+
+
 ## v2.11
 
 ### What's Changed
