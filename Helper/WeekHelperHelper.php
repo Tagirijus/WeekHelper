@@ -52,6 +52,7 @@ class WeekHelperHelper extends Base
             'due_date_week_list_enabled' => $this->configModel->get('weekhelper_due_date_week_list_enabled', 1),
             'calendarweeks_for_week_difference_enabled' => $this->configModel->get('weekhelper_calendarweeks_for_week_difference_enabled', 0),
             'block_icon_before_task_title' => $this->configModel->get('weekhelper_block_icon_before_task_title', 1),
+            'block_ignore_columns' => $this->configModel->get('weekhelper_block_ignore_columns', 'done'),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
@@ -223,7 +224,9 @@ class WeekHelperHelper extends Base
             foreach ($all_links as $label => $link) {
                 if ($label == 'is blocked by') {
                     foreach ($link as $task) {
-                        if ($task['is_active'] == 1) {
+                        $columns = $this->configModel->get('weekhelper_block_ignore_columns', 'done');
+                        $columns = explode(',', $columns);
+                        if ($task['is_active'] == 1 && !in_array($task['column_title'], $columns)) {
                             $block_str = '<i class="fa fa-ban" style="color:rgb(200, 0, 0);font-size:1.25em;" title="' . t('Is blocked by other task') . '"></i> ';
                             break;
                         }

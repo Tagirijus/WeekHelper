@@ -64,4 +64,5 @@ return array(
     'Remaining hours ascending' => 'Übrige Stunden aufsteigend',
     'Remaining hours descending' => 'Übrige Stunden absteigend',
     'in dashboard sidebar' => 'in Sidebar auf dem Dashboard',
+    'If a blocking card is in one of these column (comma separated), the icon on the blocked cards won\'t be shown.' => 'Wenn eine blockierende Karte in eine dieser Spalten ist (Komma getrennt), gibt es auf den blockierten Karten kein Icon.',
 );

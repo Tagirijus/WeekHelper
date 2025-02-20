@@ -99,6 +99,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_due_date_week_list_enabled' => isset($form['due_date_week_list_enabled']) ? 1 : 0,
             'weekhelper_calendarweeks_for_week_difference_enabled' => isset($form['calendarweeks_for_week_difference_enabled']) ? 1 : 0,
             'weekhelper_block_icon_before_task_title' => isset($form['block_icon_before_task_title']) ? 1 : 0,
+            'weekhelper_block_ignore_columns' => $form['block_ignore_columns'],
         ];
 
         $this->languageModel->loadCurrentLanguage();

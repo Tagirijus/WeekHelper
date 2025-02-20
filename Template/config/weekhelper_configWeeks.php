@@ -127,6 +127,22 @@
 
     </div>
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('If a blocking card is in one of these column (comma separated), the icon on the blocked cards won\'t be shown.'), 'block_ignore_columns') ?>
+            <?= $this->form->text('block_ignore_columns', ['block_ignore_columns' => $block_ignore_columns], [], [
+                '',
+                'tabindex="9"',
+                'placeholder="' . t('e.g. \'done\'') . '"'
+            ]) ?>
+        </div>
+
+    </div>
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
