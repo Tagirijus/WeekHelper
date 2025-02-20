@@ -1,5 +1,8 @@
 <section id="task-summary">
-    <h2><?= $this->text->e($task['title']) ?></h2>
+    <?php
+        $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
+    ?>
+    <h2><?= $title_prepared ?></h2>
 
     <?= $this->hook->render('template:task:details:top', array('task' => $task)) ?>
 

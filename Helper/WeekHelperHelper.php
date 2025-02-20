@@ -224,7 +224,7 @@ class WeekHelperHelper extends Base
                 if ($label == 'is blocked by') {
                     foreach ($link as $task) {
                         if ($task['is_active'] == 1) {
-                            $block_str = '<i class="fa fa-ban" title="' . t('Is blocked by other task') . '"></i> ';
+                            $block_str = '<i class="fa fa-ban" style="color:rgb(200, 0, 0);font-size:1.25em;" title="' . t('Is blocked by other task') . '"></i> ';
                             break;
                         }
                     }
