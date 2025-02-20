@@ -5,6 +5,7 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 
 use DateTime;
 use Kanboard\Core\Base;
+use Kanboard\Model;
 
 /**
  * Subtask time tracking
@@ -164,6 +165,29 @@ class SubtaskTimeTrackingModelMod extends Base
      */
     public function logStartTime($subtask_id, $user_id)
     {
+        // set the subtask status to "in progress", if it wasn't
+        $this->db
+            ->table(Model\SubtaskModel::TABLE)
+            ->eq('id', $subtask_id)
+            ->update(['status' => 1]);
+
+        // set start date of parent task to now, if it had no start date
+        $subtask = $this->db
+            ->table(Model\SubtaskModel::TABLE)
+            ->eq('id', $subtask_id)
+            ->findOne();
+        $task = $this->db
+            ->table(Model\TaskModel::TABLE)
+            ->eq('id', $subtask['task_id'])
+            ->findOne();
+        if ($task['date_started'] == 0) {
+            $this->db
+                ->table(Model\TaskModel::TABLE)
+                ->eq('id', $subtask['task_id'])
+                ->update(['date_started' => time()]);
+        }
+
+        // and here is the original remaining code of this method
         return
             ! $this->hasTimer($subtask_id, $user_id) &&
             $this->db

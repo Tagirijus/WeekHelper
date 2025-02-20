@@ -7,3 +7,16 @@
 KB.on('subtasks.reloaded', function () {
 	window.location.reload();
 });
+
+
+// also when clikcing on "start timer" for a subtask I want
+// the whole site to refresh as well ... monkey patchissimo!
+$(document).ready(function() {
+    $('.js-subtask-toggle-timer').click(function() {
+        // refresh page after short delay so that the
+        // original action is being processed as well
+        setTimeout(function() {
+            window.location.reload();
+        }, 100);
+    });
+});
