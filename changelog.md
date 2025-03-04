@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.13
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Icon for open tasks prepending in title added.
+
+
 ## v2.12
 
 ### What's Changed
