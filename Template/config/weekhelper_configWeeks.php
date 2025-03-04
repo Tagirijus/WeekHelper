@@ -143,6 +143,21 @@
 
     </div>
 
+    <br>
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Show open-tasks icon before task title for tasks, which have open tasks in the task description or comments. Only do so while the task is not blocked and the blocked icon should be shown.'), 'todo_icon_before_task_title') ?>
+            <?= $this->form->checkbox('todo_icon_before_task_title', t('enabled'), 1, $todo_icon_before_task_title) ?>
+        </div>
+
+    </div>
+
+    <br>
+    <br>
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>

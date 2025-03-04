@@ -65,4 +65,5 @@ return array(
     'Remaining hours descending' => 'Übrige Stunden absteigend',
     'in dashboard sidebar' => 'in Sidebar auf dem Dashboard',
     'If a blocking card is in one of these column (comma separated), the icon on the blocked cards won\'t be shown.' => 'Wenn eine blockierende Karte in eine dieser Spalten ist (Komma getrennt), gibt es auf den blockierten Karten kein Icon.',
+    'Show open-tasks icon before task title for tasks, which have open tasks in the task description or comments. Only do so while the task is not blocked and the blocked icon should be shown.' => 'Zeige ein offene-Tasks Icon vor dem Task-Titel, wenn es offene Tasks in der Task-Beschreibung oder den Kommentaren gibt. Zeige das Icon aber nur, wenn der Task nicht als blockiert zählt und dann das Block-Icon angezeigt werden soll.',
 );

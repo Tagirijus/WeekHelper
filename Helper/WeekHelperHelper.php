@@ -53,6 +53,7 @@ class WeekHelperHelper extends Base
             'calendarweeks_for_week_difference_enabled' => $this->configModel->get('weekhelper_calendarweeks_for_week_difference_enabled', 0),
             'block_icon_before_task_title' => $this->configModel->get('weekhelper_block_icon_before_task_title', 1),
             'block_ignore_columns' => $this->configModel->get('weekhelper_block_ignore_columns', 'done'),
+            'todo_icon_before_task_title' => $this->configModel->get('weekhelper_todo_icon_before_task_title', 1),
 
             // HoursView
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
