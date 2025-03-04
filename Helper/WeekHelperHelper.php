@@ -328,7 +328,7 @@ class WeekHelperHelper extends Base
 
     /**
      * Checks if the given string contains the logic for an open task.
-     * Initially it is the string "[ ]", but maybe I could change it
+     * Initially it is the string "- [ ]", but maybe I could change it
      * over time.
      *
      * @param  string $string
@@ -336,7 +336,7 @@ class WeekHelperHelper extends Base
      */
     public function stringHasOpenTask($string = '')
     {
-        return strpos($string, "[ ]") != false;
+        return strpos($string, "- [ ]") != false;
     }
 
     /**
