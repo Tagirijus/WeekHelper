@@ -218,8 +218,57 @@ class WeekHelperHelper extends Base
      */
     public function prepareWeekpatternInTitle($title, $task = [])
     {
-        // check if task is blocked
-        $block_str = '';
+        return $this->prepareIconInFrontOfTitle($task) . preg_replace(
+            $this->createRegexFromWeekpattern(),
+            '<span class="weekhelper-weekpattern-dim">$1</span>',
+            $title
+        );
+    }
+
+    /**
+     * Check the config and the task and then prepend some the correct icon
+     * (or maybe icons in the future) around the title to show some
+     * quick infos.
+     *
+     * @param  array  $task
+     * @return string
+     */
+    public function prepareIconInFrontOfTitle($task = [])
+    {
+        // the icon strings, which could be used
+        $block_str = '<i class="fa fa-ban" style="color:rgb(200, 0, 0);font-size:1.25em;" title="' . t('Is blocked by other task') . '"></i> ';
+        $todo_str = '<i class="fa fa-check-square-o" style="color:rgb(120, 150, 220);font-size:1em;" title="' . t('Has open tasks (in description or comments only)') . '"></i> ';
+
+        // the logic, which icon(s) should be used finally
+        $task_should_show_blocked = $this->showBlockedIcon($task);
+        $task_should_show_todo = $this->showTodoIcon($task);
+
+        // blocked status has priority over todos
+        if ($task_should_show_blocked) {
+            $icon_str = $block_str;
+        // otherwise the todo-icon can be shown, if enabled
+        } elseif ($task_should_show_todo) {
+            $icon_str = $todo_str;
+        // fallback is no icon, after all
+        } else {
+            $icon_str = '';
+        }
+
+
+        return $icon_str;
+    }
+
+    /**
+     * The logic with which a task is interpreted as "blocked" for the
+     * icon prepending in the title, depending on the configuration
+     * and also the logic, if other tasks do block it after all.
+     *
+     * @param  array  $task
+     * @return boolean
+     */
+    public function showBlockedIcon($task = [])
+    {
+        $out = false;
         if ($this->configModel->get('weekhelper_block_icon_before_task_title', 1) == 1) {
             $all_links = $this->taskLinkModel->getAllGroupedByLabel($task['id']);
             foreach ($all_links as $label => $link) {
@@ -228,19 +277,66 @@ class WeekHelperHelper extends Base
                         $columns = $this->configModel->get('weekhelper_block_ignore_columns', 'done');
                         $columns = explode(',', $columns);
                         if ($task['is_active'] == 1 && !in_array($task['column_title'], $columns)) {
-                            $block_str = '<i class="fa fa-ban" style="color:rgb(200, 0, 0);font-size:1.25em;" title="' . t('Is blocked by other task') . '"></i> ';
+                            $out = true;
                             break;
                         }
                     }
                 }
             }
         }
+        return $out;
+    }
 
-        return $block_str . preg_replace(
-            $this->createRegexFromWeekpattern(),
-            '<span class="weekhelper-weekpattern-dim">$1</span>',
-            $title
-        );
+    /**
+     * The logic with which a task is interpreted as "open tasks" for the
+     * icon prepending in the title, depending on the configuration
+     * and also the logic, if it has open tasks in the description or the
+     * comments.
+     *
+     * @param  array  $task
+     * @return boolean
+     */
+    public function showTodoIcon($task = [])
+    {
+        $out = false;
+        if ($this->configModel->get('weekhelper_todo_icon_before_task_title', 1) == 1) {
+            $task_has_open_task_in_description = $this->stringHasOpenTask($task['description']);
+            $task_has_open_task_in_comments = $this->tasksCommentsHaveOpenTask($task);
+            $out = $task_has_open_task_in_description || $task_has_open_task_in_comments;
+        }
+        return $out;
+    }
+
+    /**
+     * Go through the tasks comments and check if they contain open tasks.
+     *
+     * @param  array  $task
+     * @return boolean
+     */
+    public function tasksCommentsHaveOpenTask($task = [])
+    {
+        $out = false;
+        $comments = $this->commentModel->getAll($task['id']);
+        foreach ($comments as $comment) {
+            if ($this->stringHasOpenTask($comment['comment'])) {
+                $out = true;
+                break;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Checks if the given string contains the logic for an open task.
+     * Initially it is the string "[ ]", but maybe I could change it
+     * over time.
+     *
+     * @param  string $string
+     * @return boolean
+     */
+    public function stringHasOpenTask($string = '')
+    {
+        return strpos($string, "[ ]") != false;
     }
 
     /**
