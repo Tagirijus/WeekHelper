@@ -1,3 +1,7 @@
+<?php
+    $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
+?>
+
 <div class="
         task-board
         <?= $task['is_draggable'] ? 'draggable-item ' : '' ?>
@@ -31,7 +35,7 @@
                     <?= $this->text->e($this->user->getInitials($task['assignee_name'] ?: $task['assignee_username'])) ?>
                 </span> -
             <?php endif ?>
-            <?= $this->url->link($this->text->e($task['title']), 'TaskViewController', 'show', array('task_id' => $task['id']), false, '', $this->text->e($task['title'])) ?>
+            <?= $this->url->link($title_prepared, 'TaskViewController', 'show', array('task_id' => $task['id']), false, '', $this->text->e($task['title'])) ?>
         </div>
     <?php else: ?>
         <div class="task-board-expanded">
@@ -57,9 +61,6 @@
 
             <?= $this->hook->render('template:board:private:task:before-title', array('task' => $task)) ?>
             <div class="task-board-title">
-                <?php
-                    $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
-                ?>
                 <?= $this->url->link($title_prepared, 'TaskViewController', 'show', array('task_id' => $task['id'])) ?>
             </div>
             <?= $this->hook->render('template:board:private:task:after-title', array('task' => $task)) ?>
