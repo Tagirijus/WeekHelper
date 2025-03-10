@@ -336,7 +336,7 @@ class WeekHelperHelper extends Base
      */
     public function stringHasOpenTask($string = '')
     {
-        return strpos($string, "- [ ]") != false;
+        return strpos($string, "- [ ]") !== false;
     }
 
     /**
