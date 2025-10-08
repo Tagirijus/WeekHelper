@@ -527,7 +527,12 @@ class HoursViewHelper extends Base
     public function getEstimatedTimeForTask(&$task)
     {
         if ($this->getNonTimeModeEnabled()) {
-            return $this->getNonTimeModeMinutes() * $task['score'] / 60;
+            if (array_key_exists('score', $task)) {
+                $score = $task['score'];
+            } else {
+                $score = 0;
+            }
+            return $this->getNonTimeModeMinutes() * $score / 60;
         } else {
             return $task['time_estimated'];
         }
