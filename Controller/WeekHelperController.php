@@ -122,6 +122,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $form = $this->request->getValues();
 
         $values = [
+            'hoursview_non_time_mode_minutes' => $form['non_time_mode_minutes'],
             'hoursview_level_1_columns' => $form['level_1_columns'],
             'hoursview_level_2_columns' => $form['level_2_columns'],
             'hoursview_level_3_columns' => $form['level_3_columns'],

@@ -453,6 +453,7 @@ class HoursViewHelper extends Base
     {
         return [
             'title' => t('HoursView') . ' &gt; ' . t('Settings'),
+            'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
             'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
             'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),

@@ -56,6 +56,7 @@ class WeekHelperHelper extends Base
             'todo_icon_before_task_title' => $this->configModel->get('weekhelper_todo_icon_before_task_title', 1),
 
             // HoursView
+            'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
             'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
             'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),

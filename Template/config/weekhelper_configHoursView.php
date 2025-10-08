@@ -286,6 +286,30 @@
 
     </div>
 
+    <br>
+    <br>
+
+
+    <!-- TOOLTIP -->
+
+    <p>
+        <h3><?= t('Non-time mode') ?></h3>
+    </p>
+
+    <p>
+        <?= t('Do not use task times, but amount of subtasks of a task in combination with complexity. This will affect percentages and calculate task estimated time according to the settings in this section. Spent and remaining time will me calculated from done subtasks.') ?>
+    </p>
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Defines how many minutes 1 complexity should represent. (0 disables the non-time-mode feature)'), 'non_time_mode_minutes') ?>
+            <?= $this->form->text('non_time_mode_minutes', ['non_time_mode_minutes' => $non_time_mode_minutes], [], [
+                'autofocus'
+            ]) ?>
+        </div>
+
+    </div>
+
 
 
     <div class="task-form-bottom">
