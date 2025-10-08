@@ -1,6 +1,15 @@
 # Changelog
 
 
+## v2.14
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Added non-time-mode feature.
+- Hard coded removed some icons from task cards and list.
+
+
 ## v2.13
 
 ### What's Changed
