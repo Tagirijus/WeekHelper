@@ -1,3 +1,11 @@
+<!--
+
+TODO:
+In this file I commented out some icons from the task cards. I might consider doing
+this with a config. Also the row should be hidden, if no icon is visible at all.
+
+-->
+
 <?php
 
 $hoursview_config = $this->hoursViewHelper->getConfig();
@@ -43,19 +51,24 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
 
 
 <div class="task-board-icons">
-    <div class="task-board-icons-row">
+
+    <!-- HARD CODED HIDE -->
+    <!-- <div class="task-board-icons-row">
         <?php if ($task['reference']): ?>
             <span class="task-board-reference" title="<?= t('Reference') ?>">
                 <span class="ui-helper-hidden-accessible"><?= t('Reference') ?> </span><?= $this->task->renderReference($task) ?>
             </span>
         <?php endif ?>
-    </div>
+    </div> -->
+
     <div class="task-board-icons-row">
-        <?php if ($task['is_milestone'] == 1): ?>
+
+        <!-- HARD CODED HIDE -->
+        <!-- <?php if ($task['is_milestone'] == 1): ?>
             <span title="<?= t('Milestone') ?>">
                 <i class="fa fa-flag flag-milestone" role="img" aria-label="<?= t('Milestone') ?>"></i>
             </span>
-        <?php endif ?>
+        <?php endif ?> -->
 
         <?php if ($task['score']): ?>
             <span class="task-score" title="<?= t('Complexity') ?>">
@@ -65,9 +78,8 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
         <?php endif ?>
 
         <?php if (! empty($this->hoursViewHelper->getEstimatedTimeForTask($task)) || ! empty($this->hoursViewHelper->getSpentTimeForTask($task))): ?>
-            <span class="task-time-estimated" title="<?= t('Time remaining, spent and estimated') ?>">
-                <span class="ui-helper-hidden-accessible"><?= t('Time remaining, spent and estimated') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
-                    <i>(<?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?>h / <?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?>h)</i>
+            <span class="task-time-estimated" title="<?= t('Time remaining') ?>">
+                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
             </span>
         <?php endif ?>
 
@@ -94,9 +106,10 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
             <?= $this->app->tooltipLink('<i class="fa fa-bars fa-fw"></i>'.round($task['nb_completed_subtasks'] / $task['nb_subtasks'] * 100, 0).'%', $this->url->href('BoardTooltipController', 'subtasks', array('task_id' => $task['id']))) ?>
         <?php endif ?>
 
-        <?php if (! empty($task['nb_files'])): ?>
+        <!-- HARD CODED HIDE -->
+        <!-- <?php if (! empty($task['nb_files'])): ?>
             <?= $this->app->tooltipLink('<i class="fa fa-paperclip fa-fw"></i>'.$task['nb_files'], $this->url->href('BoardTooltipController', 'attachments', array('task_id' => $task['id']))) ?>
-        <?php endif ?>
+        <?php endif ?> -->
 
         <?php if ($task['nb_comments'] > 0): ?>
             <?php if ($not_editable): ?>
@@ -119,10 +132,11 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
         <?php endif ?>
 
         <?php if ($task['is_active'] == 1): ?>
-            <div class="task-icon-age">
+            <!-- HARD CODED HIDE -->
+            <!-- <div class="task-icon-age">
                 <span title="<?= t('Task age in days')?>" class="task-icon-age-total"><span class="ui-helper-hidden-accessible"><?= t('Task age in days') ?> </span><?= $this->dt->age($task['date_creation']) ?></span>
                 <span title="<?= t('Days in this column')?>" class="task-icon-age-column"><span class="ui-helper-hidden-accessible"><?= t('Days in this column') ?> </span><?= $this->dt->age($task['date_moved']) ?></span>
-            </div>
+            </div> -->
         <?php else: ?>
             <span class="task-board-closed"><i class="fa fa-ban fa-fw"></i><?= t('Closed') ?></span>
         <?php endif ?>
