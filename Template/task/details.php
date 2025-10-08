@@ -98,20 +98,20 @@
             </div>
             <div class="task-summary-column">
                 <ul class="no-bullet">
-                    <?php if ($task['time_estimated']): ?>
+                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task)): ?>
                     <li>
                         <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipTaskTimes&amp;task_id=<?= $task['id'] ?>"><i class="fa fa-bars"></i></span>
                         <strong><?= t('Time estimated:') ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($task['time_estimated'])) ?></span>
+                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?></span>
                     </li>
                     <?php endif ?>
-                    <?php if ($task['time_spent']): ?>
+                    <?php if ($this->hoursViewHelper->getSpentTimeForTask($task)): ?>
                     <li>
                         <strong><?= t('Time spent:') ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($task['time_spent'])) ?></span>
+                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?></span>
                     </li>
                     <?php endif ?>
-                    <?php if ($task['time_estimated'] && $task['time_spent']): ?>
+                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) && $this->hoursViewHelper->getSpentTimeForTask($task)): ?>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterSign($task) ?>)</i></span>
@@ -191,11 +191,11 @@
         $hoursview_config = $this->hoursViewHelper->getConfig();
     ?>
 
-    <?php if ($task['time_estimated'] > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
         <?php
             $percent = $this->hoursViewHelper->getPercentForTask($task);
-            $percent_txt = $percent;
+            $percent_txt = $percent . '%';
             $percent_opacity = 1;
             if ($percent > 100) {
                 $percent = 100;
@@ -204,7 +204,7 @@
 
         <div class="container-task-progress-bar task-summary-progress-bar" style="opacity: <?= $percent_opacity; ?>;">
             <div class="task-progress-bar <?= $this->hoursViewHelper->getPercentCSSClass($percent, $task); ?>" style="width:<?= $percent . '%'; ?>;">
-                <?= $percent_txt . '%' ?>
+                <?= $percent_txt ?>
             </div>
         </div>
 

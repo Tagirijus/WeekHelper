@@ -64,10 +64,10 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
             </span>
         <?php endif ?>
 
-        <?php if (! empty($task['time_estimated']) || ! empty($task['time_spent'])): ?>
+        <?php if (! empty($this->hoursViewHelper->getEstimatedTimeForTask($task)) || ! empty($this->hoursViewHelper->getSpentTimeForTask($task))): ?>
             <span class="task-time-estimated" title="<?= t('Time remaining, spent and estimated') ?>">
                 <span class="ui-helper-hidden-accessible"><?= t('Time remaining, spent and estimated') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
-                    <i>(<?= $this->text->e($this->hoursViewHelper->floatToHHMM($task['time_spent'])) ?>h / <?= $this->text->e($this->hoursViewHelper->floatToHHMM($task['time_estimated'])) ?>h)</i>
+                    <i>(<?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?>h / <?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?>h)</i>
             </span>
         <?php endif ?>
 
@@ -132,11 +132,11 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
 
         <!-- Task Progress Bar -->
 
-        <?php if ($task['time_estimated'] > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+        <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
             <?php
                 $percent = $this->hoursViewHelper->getPercentForTask($task);
-                $percent_txt = $percent;
+                $percent_txt = $percent . '%';
                 $percent_opacity = $hoursview_config['progressbar_opacity'];
                 if ($percent > 100) {
                     $percent = 100;
@@ -147,7 +147,7 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
 
             <div class="container-task-progress-bar" style="opacity: <?= $percent_opacity; ?>;">
                 <div class="task-progress-bar <?= $this->hoursViewHelper->getPercentCSSClass($percent, $task); ?>" style="width:<?= $percent . '%'; ?>;">
-                    <?= $percent_txt . '%' ?>
+                    <?= $percent_txt ?>
                 </div>
             </div>
 

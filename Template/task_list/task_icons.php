@@ -17,10 +17,10 @@
         </span>
     <?php endif ?>
 
-    <?php if (! empty($task['time_estimated']) || ! empty($task['time_spent'])): ?>
+    <?php if (! empty($this->hoursViewHelper->getEstimatedTimeForTask($task)) || ! empty($this->hoursViewHelper->getSpentTimeForTask($task))): ?>
         <span class="task-time-estimated" title="<?= t('Time spent and estimated') ?>">
             <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
-                    <i>(<?= $this->text->e($this->hoursViewHelper->floatToHHMM($task['time_spent'])) ?>h / <?= $this->text->e($this->hoursViewHelper->floatToHHMM($task['time_estimated'])) ?>h)</i> - <?= $this->hoursViewHelper->getPercentForTaskAsString($task, '%', true) ?>
+                    <i>(<?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?>h / <?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?>h)</i> - <?= $this->hoursViewHelper->getPercentForTaskAsString($task, '%', true) ?>
         </span>
     <?php endif ?>
 

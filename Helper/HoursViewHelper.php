@@ -57,6 +57,22 @@ class HoursViewHelper extends Base
     var $subtask_ids_do_not_have_ignore_substring_in_title = [];
 
     /**
+     * The minutes which stand for 1 complexity of a task.
+     * If 0 the non-time-mode is disabled. The value is -1
+     * for this class to know it has to be initialized.
+     *
+     * @var integer
+     **/
+    var $non_time_mode_minutes = -1;
+
+    /**
+     * The bool if the non-time-mode is enabled or not.
+     *
+     * @var boolean
+     **/
+    var $non_time_mode_enabled = false;
+
+    /**
      * Init and/or ge the ignored subtask titles.
      *
      * @return array
@@ -168,14 +184,14 @@ class HoursViewHelper extends Base
             $this->setTimeCalcKey($level_4, $col_name);
 
             // all: column times
-            $all[$col_name]['estimated'] += $task['time_estimated'];
-            $all[$col_name]['spent'] += $task['time_spent'];
+            $all[$col_name]['estimated'] += $this->getEstimatedTimeForTask($task);
+            $all[$col_name]['spent'] += $this->getSpentTimeForTask($task);
             $all[$col_name]['remaining'] += $this->getRemainingTimeForTask($task);
             $all[$col_name]['overtime'] += $this->getOvertimeForTask($task);
 
             // all: total times
-            $all['_total']['estimated'] += $task['time_estimated'];
-            $all['_total']['spent'] += $task['time_spent'];
+            $all['_total']['estimated'] += $this->getEstimatedTimeForTask($task);
+            $all['_total']['spent'] += $this->getSpentTimeForTask($task);
             $all['_total']['remaining'] += $this->getRemainingTimeForTask($task);
             $all['_total']['overtime'] += $this->getOvertimeForTask($task);
             $this->modifyHasTimes($all);
@@ -272,14 +288,14 @@ class HoursViewHelper extends Base
 
         if ($exists) {
             // dashbord: column times
-            $level[$col_name]['estimated'] += $task['time_estimated'];
-            $level[$col_name]['spent'] += $task['time_spent'];
+            $level[$col_name]['estimated'] += $this->getEstimatedTimeForTask($task);
+            $level[$col_name]['spent'] += $this->getSpentTimeForTask($task);
             $level[$col_name]['remaining'] += $this->getRemainingTimeForTask($task);
             $level[$col_name]['overtime'] += $this->getOvertimeForTask($task);
 
             // level: total times
-            $level['_total']['estimated'] += $task['time_estimated'];
-            $level['_total']['spent'] += $task['time_spent'];
+            $level['_total']['estimated'] += $this->getEstimatedTimeForTask($task);
+            $level['_total']['spent'] += $this->getSpentTimeForTask($task);
             $level['_total']['remaining'] += $this->getRemainingTimeForTask($task);
             $level['_total']['overtime'] += $this->getOvertimeForTask($task);
             $this->modifyHasTimes($level);
@@ -325,13 +341,37 @@ class HoursViewHelper extends Base
         $out = ['estimated' => 0, 'spent' => 0, 'remaining' => 0, 'overtime' => 0];
         if (isset($column['tasks'])) {
             foreach ($column['tasks'] as $task) {
-                $out['estimated'] += $task['time_estimated'];
-                $out['spent'] += $task['time_spent'];
+                $out['estimated'] += $this->getEstimatedTimeForTask($task);
+                $out['spent'] += $this->getSpentTimeForTask($task);
                 $out['remaining'] += $this->getRemainingTimeForTask($task);
                 $out['overtime'] += $this->getOvertimeForTask($task);
             }
         }
         return $out;
+    }
+
+    /**
+     * Get the config value for the non-time-mode minutes,
+     * but just make a call once; while the original value
+     * is still -1.
+     */
+    public function getNonTimeModeMinutes()
+    {
+        if ($this->non_time_mode_minutes == -1) {
+            $this->non_time_mode_minutes = $this->configModel->get('hoursview_non_time_mode_minutes', 0);
+        }
+        return $this->non_time_mode_minutes;
+    }
+
+    /**
+     * Get the bool if the non-time-mode is enabled or not.
+     */
+    public function getNonTimeModeEnabled()
+    {
+        if ($this->non_time_mode_minutes == -1) {
+            $this->non_time_mode_minutes = $this->configModel->get('hoursview_non_time_mode_minutes', 0);
+        }
+        return $this->non_time_mode_minutes > 0;
     }
 
     /**
@@ -479,6 +519,75 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get the estimated time of a given task according to internal settings.
+     *
+     * @param  array  &$task
+     * @return float
+     */
+    public function getEstimatedTimeForTask(&$task)
+    {
+        if ($this->getNonTimeModeEnabled()) {
+            return $this->getNonTimeModeMinutes() * $task['score'] / 60;
+        } else {
+            return $task['time_estimated'];
+        }
+    }
+
+    /**
+     * Get the spent time of a given task according to internal settings.
+     *
+     * @param  array  &$task
+     * @param  integer   $use_ignore
+     *         1: get times and skip ignored subtasks
+     *         2: get only ignored subtask times
+     *         3: get ignored AND non-ignored subtasks times
+     * @return float
+     */
+    public function getSpentTimeForTask(&$task, $use_ignore = 1)
+    {
+        if (!array_key_exists('open_subtasks', $task)) {
+            $task['open_subtasks'] = 0;
+        }
+        if ($this->getNonTimeModeEnabled()) {
+            $subtasks = $this->getSubtasksByTaskId($task['id']);
+
+            // get data from the subtasks
+            $subtasks_count = 0;
+            $subtask_progress = 0;
+            foreach ($subtasks as $subtask) {
+                if ($this->ignoreLogic($subtask, $use_ignore)) {
+                    continue;
+                }
+
+                // I make it x2, because the "in progress" status and the
+                // "done" status are two states, which should affect the
+                // progress
+                $subtasks_count += 2;
+
+                // subtask status 1 == in progress, 2 == done;
+                // I want done to count twice.
+                $subtask_progress += $subtask['status'];
+                if ($subtask['status'] != 2) {
+                    $task['open_subtasks']++;
+                }
+
+            }
+
+            // get the times according to the complexity
+            $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
+            if ($subtasks_count != 0) {
+                $one_subtask_time = $full_hours / $subtasks_count;
+            } else {
+                $one_subtask_time = $full_hours;
+            }
+
+            return $subtask_progress * $one_subtask_time;
+        } else {
+            return $task['time_spent'];
+        }
+    }
+
+    /**
      * Init maybe and then return the remaining time
      * for the given task.
      *
@@ -491,10 +600,14 @@ class HoursViewHelper extends Base
      */
     public function getRemainingTimeForTask(&$task, $use_ignore = 1)
     {
-        if (!array_key_exists('time_remaining', $task)) {
-            $this->initRemainingTimeForTask($task, $use_ignore);
+        if ($this->getNonTimeModeEnabled()) {
+            return $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
+        } else {
+            if (!array_key_exists('time_remaining', $task)) {
+                $this->initRemainingTimeForTask($task, $use_ignore);
+            }
+            return $task['time_remaining'];
         }
-        return $task['time_remaining'];
     }
 
     /**
@@ -682,10 +795,14 @@ class HoursViewHelper extends Base
      */
     public function getOvertimeForTask(&$task, $use_ignore = 1)
     {
-        if (!array_key_exists('time_overtime', $task)) {
-            $this->initOvertimeTimeForTask($task, $use_ignore);
+        if ($this->getNonTimeModeEnabled()) {
+            return 0;
+        } else {
+            if (!array_key_exists('time_overtime', $task)) {
+                $this->initOvertimeTimeForTask($task, $use_ignore);
+            }
+            return $task['time_overtime'];
         }
-        return $task['time_overtime'];
     }
 
     /**
@@ -785,8 +902,8 @@ class HoursViewHelper extends Base
     public function getSlowerOrFasterThanEstimatedForTask(&$task)
     {
         $remaining = $this->getRemainingTimeForTask($task);
-        $estimated = $task['time_estimated'];
-        $spent = $task['time_spent'];
+        $estimated = $this->getEstimatedTimeForTask($task);
+        $spent = $this->getSpentTimeForTask($task);
         return $estimated - $spent - $remaining;
     }
 
@@ -838,26 +955,10 @@ class HoursViewHelper extends Base
         // Yet I can only do so, if the given $task is really a
         // task array with an 'id'; otherwise just do the normal
         // calculation instead ...
-        if (isset($task['time_estimated']) && isset($task['time_spent'])) {
-            $estimated = $task['time_estimated'];
-
-            // the given task must be a normal task-array
-            if (array_key_exists('id', $task)) {
-                $remaining = $this->getRemainingTimeForTask($task);
-                $spent = $estimated - $remaining;
-
-            // the given task might be a pseudo_task from
-            // the project_times_summary_single.php; so no
-            // real task-array with an id is given, but
-            // probably a pre-calculated remaining instead
-            } elseif (array_key_exists('time_remaining', $task)) {
-                $remaining = $task['time_remaining'];
-                $spent = $estimated - $remaining;
-
-            // fallback: just use the normal time_spent
-            } else {
-                $spent = $task['time_spent'];
-            }
+        if ($this->getEstimatedTimeForTask($task) != 0) {
+            $estimated = $this->getEstimatedTimeForTask($task);
+            $remaining = $this->getRemainingTimeForTask($task);
+            $spent = $estimated - $remaining;
 
             if ($estimated != 0) {
                 $out = round($spent / $estimated * 100, 0);
@@ -1234,10 +1335,10 @@ class HoursViewHelper extends Base
      */
     public function addTimesFromOneTaskToAnother(&$modify_task, $add_task)
     {
-        $modify_task['time_estimated'] += $add_task['time_estimated'];
-        $modify_task['time_spent'] += $add_task['time_spent'];
-        $modify_task['time_remaining'] += $add_task['time_remaining'];
-        $modify_task['time_overtime'] += $add_task['time_overtime'];
+        $modify_task['time_estimated'] += $this->getEstimatedTimeForTask($add_task);
+        $modify_task['time_spent'] += $this->getSpentTimeForTask($add_task);
+        $modify_task['time_remaining'] += $this->getRemainingTimeForTask($add_task);
+        $modify_task['time_overtime'] += $this->getOvertimeForTask($add_task);
         return $modify_task;
     }
 
