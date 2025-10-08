@@ -135,6 +135,15 @@ class Plugin extends Base
                 ]
             );
         }
+        // info about non-time-mode
+        $non_time_mode_minutes = $this->configModel->get('hoursview_non_time_mode_minutes', 0);
+        if ($non_time_mode_minutes != 0) {
+            $this->template->hook->attach(
+                'template:task:form:first-column',
+                'WeekHelper:task_creation_modal/complexity_explanation',
+                ['non_time_mode_minutes' => $non_time_mode_minutes]
+            );
+        }
 
         // Template Overrides
         $this->template->setTemplateOverride('board/task_public', 'WeekHelper:board/task_public');

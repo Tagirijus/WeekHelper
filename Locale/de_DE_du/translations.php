@@ -69,4 +69,5 @@ return array(
     'Non-time mode' => 'Non-Time Modus',
     'Do not use task times, but amount of subtasks of a task in combination with complexity. This will affect percentages and calculate task estimated time according to the settings in this section. Spent and remaining time will me calculated from done subtasks.' => 'Nutze nicht Task Zeiten, sondern die Anzahl der Subtasks eines Tasks in Kombination mit der Komplexität. Das betrifft Prozente und berechnet erwartete Zeit eines Tasks anhand der Settings in dieser Sektion. Getätigte und übrige Zeit werden durch fertige Subtasks errechnet.',
     'Defines how many minutes 1 complexity should represent. (0 disables the non-time-mode feature)' => 'Gibt an, wie viele minuten 1 Komplexität sein sollen. (0 deaktiviert den Non-Time-Modus)',
+    '1 complexity stands for' => '1 Komplexität steht für',
 );
