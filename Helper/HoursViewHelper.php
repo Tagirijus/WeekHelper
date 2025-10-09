@@ -606,7 +606,27 @@ class HoursViewHelper extends Base
     public function getRemainingTimeForTask(&$task, $use_ignore = 1)
     {
         if ($this->getNonTimeModeEnabled()) {
-            return $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
+            $subtasks = $this->getSubtasksByTaskId($task['id']);
+
+            // get data from the subtasks
+            $last_remaining_override = -1;
+            foreach ($subtasks as $subtask) {
+                if ($this->ignoreLogic($subtask, $use_ignore)) {
+                    continue;
+                }
+                if (is_numeric($subtask['title'])) {
+                    if ($subtask['status'] == 1) {
+                        $last_remaining_override = (float) $subtask['title'] / 2;
+                    } elseif ($subtask['status'] == 0) {
+                        $last_remaining_override = (float) $subtask['title'];
+                    }
+                }
+            }
+            if ($last_remaining_override != -1) {
+                return $last_remaining_override;
+            } else {
+                return $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
+            }
         } else {
             if (!array_key_exists('time_remaining', $task)) {
                 $this->initRemainingTimeForTask($task, $use_ignore);

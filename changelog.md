@@ -1,6 +1,14 @@
 # Changelog
 
 
+## v2.15
+
+### What's Changed
+
+_(most recent changes are listed on top):_
+- Last subtask's title in a task can override the remaining time, when it's a numeric value and the non-time-mode is enabled.
+
+
 ## v2.14
 
 ### What's Changed
