@@ -7,6 +7,7 @@
 
 _(most recent changes are listed on top):_
 - Last subtask's title in a task can override the remaining time, when it's a numeric value and the non-time-mode is enabled.
+- Subtask can contain "N%" in title in non-time-mode, which can make them have a certain percentage of the whole estimated time.
 
 
 ## v2.14

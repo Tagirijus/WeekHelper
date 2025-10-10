@@ -519,6 +519,34 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get a percentage float from the given string. E.g.
+     * maybe it's a subtask with the title "30% todo".
+     * In that case this function would return 0.3.
+     * Otherwise it returns -1.
+     *
+     * @param  string $string
+     * @return float
+     */
+    public function getPercentFromString($string = '')
+    {
+        if (!is_string($string) || $string === '') {
+            return -1.0;
+        }
+
+        // search for a number followed by an optional whitespace and '%'
+        if (preg_match('/([+-]?\d+(?:[.,]\d+)?)\s*%/u', $string, $m)) {
+            // normalize decimal to a dot
+            $num = str_replace(',', '.', $m[1]);
+            // try to convert to a float
+            if (is_numeric($num)) {
+                $val = (float) $num;
+                return $val / 100.0;
+            }
+        }
+        return -1.0;
+    }
+
+    /**
      * Get the estimated time of a given task according to internal settings.
      *
      * @param  array  &$task
@@ -539,6 +567,62 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Extend the given subtasks array and add 'percentage'
+     * to their keys. The logic is basically that a subtasks
+     * title can contain a percentage string like "30 %" or "30%"
+     * which would tell the system how much this subtask occupies
+     * in time of the whole.
+     *
+     * exmaple 1:
+     * 5 subtasks with no percentages. this means that every subtask
+     * should have 20% automatically.
+     *
+     * example 2:
+     * 5 subtasks with 1 with 40% and 1 with 10%. this means that
+     * these two already occupy 50% of all subtasks. means that
+     * the remaining 3 subtasks have to share 50%, means that one
+     * subtask of them is 16,6% of the whole subtasks sum.
+     *
+     * @param  array &$subtasks
+     */
+    public function extendSubtasksWithPercentage(&$subtasks)
+    {
+        $countWithout = 0;
+        $percentRemaining = 1.0;
+
+        // first run: parse, set known percentages, count unknowns
+        foreach ($subtasks as $k => $s) {
+            $p = $this->getPercentFromString($s['title']);
+            if ($p != -1) {
+                $subtasks[$k]['percentage'] = $p;
+                $percentRemaining -= $p;
+            } else {
+                // mark otherwise, assigning later, count increasing
+                $subtasks[$k]['percentage'] = null;
+                $countWithout++;
+            }
+        }
+
+        if ($countWithout === 0) {
+            return;
+        }
+
+        // rounding fixing
+        if ($percentRemaining <= 0.0) {
+            $fill = 0.0;
+        } else {
+            $fill = $percentRemaining / $countWithout;
+        }
+
+        // fill in subtasks without given percentage
+        foreach ($subtasks as $k => $s) {
+            if ($s['percentage'] === null) {
+                $subtasks[$k]['percentage'] = $fill;
+            }
+        }
+    }
+
+    /**
      * Get the spent time of a given task according to internal settings.
      *
      * @param  array  &$task
@@ -550,43 +634,42 @@ class HoursViewHelper extends Base
      */
     public function getSpentTimeForTask(&$task, $use_ignore = 1)
     {
+        // this has to be initialized if not existend; it's needed
+        // at another point in the plugin. it counts the open subtasks
+        // which have not the status 2
         if (!array_key_exists('open_subtasks', $task)) {
             $task['open_subtasks'] = 0;
         }
         if ($this->getNonTimeModeEnabled()) {
             $subtasks = $this->getSubtasksByTaskId($task['id']);
 
-            // get data from the subtasks
-            $subtasks_count = 0;
-            $subtask_progress = 0;
+            // add 'percentage' to the subtasks keys
+            $this->extendSubtasksWithPercentage($subtasks);
+
+            // now get the full hours and calculate how many subtasks
+            // did work on that already, while the status also means
+            // if 1 == half of its percentage is done on the full
+            // hours and 2 == its percentage is done fully.
+            $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
+            $worked = 0.0;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
                 }
 
-                // I make it x2, because the "in progress" status and the
-                // "done" status are two states, which should affect the
-                // progress
-                $subtasks_count += 2;
-
-                // subtask status 1 == in progress, 2 == done;
-                // I want done to count twice.
-                $subtask_progress += $subtask['status'];
-                if ($subtask['status'] != 2) {
+                if ($subtask['status'] == 0) {
                     $task['open_subtasks']++;
+                } elseif ($subtask['status'] == 1 ) {
+                    $task['open_subtasks']++;
+                    // a begun subtask should stand for 50% of its time already ...
+                    $worked += $full_hours * ($subtask['percentage'] / 2);
+                } elseif ($subtask['status'] == 2 ) {
+                    $worked += $full_hours * $subtask['percentage'];
                 }
-
             }
 
-            // get the times according to the complexity
-            $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
-            if ($subtasks_count != 0) {
-                $one_subtask_time = $full_hours / $subtasks_count;
-            } else {
-                $one_subtask_time = $full_hours;
-            }
+            return $worked;
 
-            return $subtask_progress * $one_subtask_time;
         } else {
             return $task['time_spent'];
         }
