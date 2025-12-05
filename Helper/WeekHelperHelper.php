@@ -423,14 +423,16 @@ class WeekHelperHelper extends Base
         $datetime2->setTime(0, 0, 0, 0);
         $datetime2->setTimestamp($unix);
 
-        // year difference of both
-        $year_diff = abs($datetime2->format('Y') - $datetime1->format('Y'));
+        // Calculate the difference in weeks
+        $interval = $datetime1->diff($datetime2);
+        $weeksDifference = $interval->days / 7;
 
-        // get calendar weeks
-        $week1 = $datetime1->format('W');
-        $week2 = $datetime2->format('W') + $year_diff * 52;
+        // Check if the target date is in the past
+        if ($datetime2 < $datetime1) {
+            $weeksDifference = -$weeksDifference;
+        }
 
-        return $week2 - $week1;
+        return round($weeksDifference);
     }
 
     /**
