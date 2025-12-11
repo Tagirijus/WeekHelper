@@ -28,6 +28,8 @@ class Plugin extends Base
         // Helper
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
         $this->helper->register('hoursViewHelper', '\Kanboard\Plugin\WeekHelper\Helper\HoursViewHelper');
+        $this->helper->register('projectInfoParser', '\Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser');
+        $this->helper->register('automaticPlannerHelper', '\Kanboard\Plugin\WeekHelper\Helper\AutomaticPlannerHelper');
 
         // CSS - Asset Hook
         $this->hook->on('template:layout:css', array('template' => 'plugins/WeekHelper/Assets/css/week-helper.min.css'));
@@ -52,6 +54,8 @@ class Plugin extends Base
             'template:config:sidebar', 'WeekHelper:config/weekhelper_configHoursView_sidebar');
         $this->template->hook->attach(
             'template:config:sidebar', 'WeekHelper:config/weekhelper_configRemainingBox_sidebar');
+        $this->template->hook->attach(
+            'template:config:sidebar', 'WeekHelper:config/weekhelper_configAutomaticPlanner_sidebar');
         if ($this->configModel->get('weekhelper_time_box_enabled', 1) == 1) {
             $this->template->hook->attach(
                 'template:layout:bottom', 'WeekHelper:time_box');
@@ -160,8 +164,10 @@ class Plugin extends Base
         $this->route->addRoute('/weekhelper/configWeeks', 'WeekHelperController', 'showConfigWeeks', 'WeekHelper');
         $this->route->addRoute('/weekhelper/configHoursView', 'WeekHelperController', 'showConfigHoursView', 'WeekHelper');
         $this->route->addRoute('/weekhelper/configRemainingBox', 'WeekHelperController', 'showConfigRemainingBox', 'WeekHelper');
+        $this->route->addRoute('/weekhelper/configAutomaticPlanner', 'WeekHelperController', 'showConfigAutomaticPlanner', 'WeekHelper');
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
         $this->route->addRoute('/weekhelper/dashboard_level/:level', 'WeekHelperController', 'showLevelHoverAsPage', 'WeekHelper');
+        $this->route->addRoute('/weekhelper/automaticplan', 'WeekHelperController', 'getAutomaticPlan', 'WeekHelper');
     }
 
     public function onStartup()

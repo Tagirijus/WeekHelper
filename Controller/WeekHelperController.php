@@ -50,6 +50,20 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
+     * Show one of the settings pages of the WeekHelper plugin.
+     *
+     * @return HTML response
+     */
+    public function showConfigAutomaticPlanner()
+    {
+        // !!!!!
+        // When I want to add new config options, I also have to add them
+        // in the WeekHelperHelper.php in the getConfig() Method !
+        // !!!!!
+        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_configAutomaticPlanner', $this->helper->weekHelperHelper->getConfig()));
+    }
+
+    /**
      * Show one of the levels as a new page, instead of just a tooltip
      * like on the dashboard hovers.
      *
@@ -159,7 +173,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
-     * Save the setting for WeekHelper Weeks.
+     * Save the setting for WeekHelper remaining box.
      */
     public function saveConfigRemainingBox()
     {
@@ -181,6 +195,28 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         }
 
         return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigRemainingBox', ['plugin' => 'WeekHelper']), true);
+    }
+
+    /**
+     * Save the setting for WeekHelper automatic planner.
+     */
+    public function saveConfigAutomaticPlanner()
+    {
+        $form = $this->request->getValues();
+
+        $values = [
+            'weekhelper_automatic_planner_sticky_enabled' => isset($form['automatic_planner_sticky_enabled']) ? 1 : 0,
+        ];
+
+        $this->languageModel->loadCurrentLanguage();
+
+        if ($this->configModel->save($values)) {
+            $this->flash->success(t('Settings saved successfully.'));
+        } else {
+            $this->flash->failure(t('Unable to save your settings.'));
+        }
+
+        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigAutomaticPlanner', ['plugin' => 'WeekHelper']), true);
     }
 
     /**
@@ -269,5 +305,28 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'week_times' => $week_times,
             'day_times' => $day_times
         ]));
+    }
+
+    /**
+     * Get the automatic planned week as plaintext, HTML or JSON.
+     * TODO: HTML + JSON; with "?type=html" or "?type=json"
+     *
+     * @return Response
+     */
+    public function getAutomaticPlan()
+    {
+        $type = $this->request->getStringParam('type', 'text');
+        if ($type == 'html') {
+            // TODO
+            // $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsHTML();
+            $automatic_plan = 'TODO HTML';
+        } elseif ($type == 'json') {
+            // TODO
+            // $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsJSON();
+            $automatic_plan = 'TODO JSON';
+        } else {
+            $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsText();
+        }
+        return $this->response->text($automatic_plan);
     }
 }

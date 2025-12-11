@@ -85,6 +85,9 @@ class WeekHelperHelper extends Base
             'remaining_lvl_days' =>  $this->configModel->get('weekhelper_remaining_lvl_days', ''),
             'remaining_weeks_enabled' => $this->configModel->get('weekhelper_remaining_weeks_enabled', 1),
             'remaining_lvl_weeks' =>  $this->configModel->get('weekhelper_remaining_lvl_weeks', ''),
+
+            // Automatic Planner
+            'automatic_planner_sticky_enabled' => $this->configModel->get('weekhelper_automatic_planner_sticky_enabled', 0),
         ];
     }
 
@@ -123,7 +126,7 @@ class WeekHelperHelper extends Base
         // try to use the week from the given title, if wanted
         if (!$fromNow) {
             $dateFromWeekpatternInTitle = $this->getDateFromWeekPatternString(
-                $this->getWeekPatterStringFromTitle($title)
+                $this->getWeekPatternStringFromTitle($title)
             );
             if ($dateFromWeekpatternInTitle) {
                 $baseDate = $dateFromWeekpatternInTitle;
@@ -150,7 +153,7 @@ class WeekHelperHelper extends Base
      * @param  string $title
      * @return string
      */
-    public function getWeekPatterStringFromTitle($title)
+    public function getWeekPatternStringFromTitle($title)
     {
         if (preg_match($this->createRegexFromWeekpattern(), $title, $matches)) {
             return $matches[0];
