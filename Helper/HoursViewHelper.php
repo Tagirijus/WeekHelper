@@ -702,6 +702,8 @@ class HoursViewHelper extends Base
                         $last_remaining_override = (float) $subtask['title'] / 2;
                     } elseif ($subtask['status'] == 0) {
                         $last_remaining_override = (float) $subtask['title'];
+                    } elseif ($subtask['status'] == 2) {
+                        $last_remaining_override = 0;
                     }
                 }
             }
