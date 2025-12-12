@@ -652,9 +652,19 @@ class HoursViewHelper extends Base
             // hours and 2 == its percentage is done fully.
             $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
             $worked = 0.0;
+            $last_remaining_override = -1;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
+                }
+                if (is_numeric($subtask['title'])) {
+                    if ($subtask['status'] == 1) {
+                        $last_remaining_override = (float) $subtask['title'] / 2;
+                    } elseif ($subtask['status'] == 0) {
+                        $last_remaining_override = (float) $subtask['title'];
+                    } elseif ($subtask['status'] == 2) {
+                        $last_remaining_override = 0;
+                    }
                 }
 
                 if ($subtask['status'] == 0) {
@@ -666,6 +676,11 @@ class HoursViewHelper extends Base
                 } elseif ($subtask['status'] == 2 ) {
                     $worked += $full_hours * $subtask['percentage'];
                 }
+
+            }
+
+            if ($last_remaining_override != -1) {
+                $worked = $full_hours - $last_remaining_override;
             }
 
             return $worked;
