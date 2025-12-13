@@ -98,20 +98,15 @@
             </div>
             <div class="task-summary-column">
                 <ul class="no-bullet">
-                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task)): ?>
                     <li>
                         <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipTaskTimes&amp;task_id=<?= $task['id'] ?>"><i class="fa fa-bars"></i></span>
                         <strong><?= t('Time estimated:') ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?></span>
                     </li>
-                    <?php endif ?>
-                    <?php if ($this->hoursViewHelper->getSpentTimeForTask($task)): ?>
                     <li>
                         <strong><?= t('Time spent:') ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?></span>
                     </li>
-                    <?php endif ?>
-                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) || $this->hoursViewHelper->getSpentTimeForTask($task)): ?>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterSign($task) ?>)</i></span>
@@ -120,7 +115,6 @@
                         <strong><?= t('Time remaining:') ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?></span>
                     </li>
-                    <?php endif ?>
 
                     <?= $this->hook->render('template:task:details:third-column', array('task' => $task)) ?>
                 </ul>

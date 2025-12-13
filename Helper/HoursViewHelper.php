@@ -749,22 +749,29 @@ class HoursViewHelper extends Base
 
             // override is positive: it stands for remaining
             if ($time_override > 0) {
-                return $time_override;
+                $new_remaining = $time_override;
 
             // override is negative: it stans for spent
             } elseif ($time_override < 0) {
                 $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
                 $new_remaining = $full_hours - ($time_override * -1);
-                if ($new_remaining > 0) {
-                    return $new_remaining;
-                } else {
-                    return 0;
+                // i guess the first check was "enable non-time mode"
+                // and this check is now to correct the newly calculated new_remaining
+                // and cap it at 0 at least
+                if ($new_remaining <= 0) {
+                    $new_remaining = 0;
                 }
 
             // no override
             } else {
-                return $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
+                $new_remaining = $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
             }
+
+            // also set time_remaining key
+            if (!array_key_exists('time_remaining', $task)) {
+                $task['time_remaining'] = $new_remaining;
+            }
+            return $new_remaining;
 
         } else {
             if (!array_key_exists('time_remaining', $task)) {
@@ -964,11 +971,13 @@ class HoursViewHelper extends Base
             $new_spent = $this->getSpentTimeForTask($task, $use_ignore);
             $new_remaining = $this->getRemainingTimeForTask($task, $use_ignore);
             $new_overtime = $new_spent - $full_hours;
-            if ($new_spent > $full_hours) {
-                return $new_overtime;
-            } else {
-                return 0;
+            if ($new_spent <= $full_hours) {
+                $new_overtime = 0;
             }
+            if (!array_key_exists('time_overtime', $task)) {
+                $task['time_overtime'] = $new_overtime;
+            }
+            return $new_overtime;
         } else {
             if (!array_key_exists('time_overtime', $task)) {
                 $this->initOvertimeTimeForTask($task, $use_ignore);
