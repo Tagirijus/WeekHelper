@@ -74,5 +74,13 @@ return array(
     '1 complexity stands for' => '1 Komplexität steht für',
     'WeekHelper automatic planner configuration' => 'WeekHelper "automatic planner" Konfiguration',
     'Show sticky week plan' => 'Zeige angehefteten Wochenplan',
-    'Show a sticky div on the screen, which contains the automatic week planning.' => 'Zeige ein angeheftetes Div auf dem Bildschirm. Es enthält die automatisch geplante Woche.'
+    'Show a sticky div on the screen, which contains the automatic week planning.' => 'Zeige ein angeheftetes Div auf dem Bildschirm. Es enthält die automatisch geplante Woche.',
+    'A slot should contain 24h format starting and end times (e.g. "6:00-9:00"). It can also contain a single project type after that times, separated with a single whitespace. Final example: "6:00-9:00 office". Multiple lines for time slots are possible.' => 'Ein Slot sollte im 24h Format Start- und Endzeit enthalten (z.B. "6:00-9:00"). Es kann also einen einzelnen Projekttypen nach diesem Zeitslot, getrennt mit einem Leerzeichen, enthalten. Finales Beispiel: "6:00-9:00 office". Mehrere Zeilen für Time-Slots sind möglich.',
+    'Monday time slots' => 'Montag Zeit Slots',
+    'Tuesday time slots' => 'Dienstag Zeit Slots',
+    'Wednesday time slots' => 'Mittwoch Zeit Slots',
+    'Thursday time slots' => 'Donnerstag Zeit Slots',
+    'Friday time slots' => 'Freitag Zeit Slots',
+    'Saturday time slots' => 'Samstag Zeit Slots',
+    'Sunday time slots' => 'Sonntag Zeit Slots',
 );

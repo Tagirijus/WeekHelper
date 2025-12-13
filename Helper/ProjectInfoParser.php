@@ -23,6 +23,15 @@ class ProjectInfoParser extends Base
             // tasks priority.
             'priority' => 0,
 
+            // the project type can be any string with which
+            // the user can assign this project a project type.
+            // with this in the settings can be set "whitelist" for
+            // times in which this project type can be planned.
+            // it can include multiple strings; e.g. comma separated.
+            // the logic later will just search the substring in this
+            // big string
+            'project_type' => '',
+
             // the max hours the projects tasks can be
             // planned for one day.
             'max_hours' => 8,
@@ -50,6 +59,9 @@ class ProjectInfoParser extends Base
 
             if (str_starts_with($line, 'priority=')) {
                 $data['priority'] = (int) str_replace('priority=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_type=')) {
+                $data['project_type'] = (int) str_replace('project_type=', '', $line);
 
             } elseif (str_starts_with($line, 'max_hours=')) {
                 $data['max_hours'] = (int) str_replace('max_hours=', '', $line);
