@@ -652,19 +652,29 @@ class HoursViewHelper extends Base
             // hours and 2 == its percentage is done fully.
             $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
             $worked = 0.0;
-            $last_remaining_override = 0;
+            $time_override = 0;
+            $has_override = false;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
                 }
                 if (is_numeric($subtask['title'])) {
-                    if ($subtask['status'] == 1) {
-                        $last_remaining_override = (float) $subtask['title'] / 2;
-                    } elseif ($subtask['status'] == 0) {
-                        $last_remaining_override = (float) $subtask['title'];
-                    } elseif ($subtask['status'] == 2) {
-                        $last_remaining_override = 0;
+                    $has_override = true;
+                    if ($subtask['title'] > 0) {
+                        if ($subtask['status'] == 1) {
+                            $time_override = (float) $subtask['title'] / 2;
+                        } elseif ($subtask['status'] == 0) {
+                            $time_override = (float) $subtask['title'];
+                        } elseif ($subtask['status'] == 2) {
+                            $time_override = 0;
+                        }
+                    } else {
+                        $time_override = (float) $subtask['title'];
                     }
+                } else {
+                    // if this happens with the last subtask, it really should
+                    // not be overwritten.
+                    $has_override = false;
                 }
 
                 if ($subtask['status'] == 0) {
@@ -679,13 +689,18 @@ class HoursViewHelper extends Base
 
             }
 
-            // override is positive: it stands for remaining
-            if ($last_remaining_override > 0) {
-                $worked = $full_hours - $last_remaining_override;
+            if ($has_override) {
+                // override is positive: it stands for remaining
+                if ($time_override >= 0) {
+                    $worked = $full_hours - $time_override;
+                    if ($worked < 0) {
+                        $worked = 0;
+                    }
 
-            // override is negative: it stans for spent
-            } elseif ($last_remaining_override < 0) {
-                $worked = $full_hours - ($full_hours - ($last_remaining_override * -1));
+                // override is negative: it stans for spent
+                } elseif ($time_override < 0) {
+                    $worked = $full_hours - ($full_hours - ($time_override * -1));
+                }
             }
 
             return $worked;
@@ -712,30 +727,39 @@ class HoursViewHelper extends Base
             $subtasks = $this->getSubtasksByTaskId($task['id']);
 
             // get data from the subtasks
-            $last_remaining_override = 0;
+            $time_override = 0;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
                 }
                 if (is_numeric($subtask['title'])) {
-                    if ($subtask['status'] == 1) {
-                        $last_remaining_override = (float) $subtask['title'] / 2;
-                    } elseif ($subtask['status'] == 0) {
-                        $last_remaining_override = (float) $subtask['title'];
-                    } elseif ($subtask['status'] == 2) {
-                        $last_remaining_override = 0;
+                    if ($subtask['title'] > 0) {
+                        if ($subtask['status'] == 1) {
+                            $time_override = (float) $subtask['title'] / 2;
+                        } elseif ($subtask['status'] == 0) {
+                            $time_override = (float) $subtask['title'];
+                        } elseif ($subtask['status'] == 2) {
+                            $time_override = 0;
+                        }
+                    } else {
+                        $time_override = (float) $subtask['title'];
                     }
                 }
             }
 
             // override is positive: it stands for remaining
-            if ($last_remaining_override > 0) {
-                return $last_remaining_override;
+            if ($time_override > 0) {
+                return $time_override;
 
             // override is negative: it stans for spent
-            } elseif ($last_remaining_override < 0) {
+            } elseif ($time_override < 0) {
                 $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
-                return $full_hours - ($last_remaining_override * -1);
+                $new_remaining = $full_hours - ($time_override * -1);
+                if ($new_remaining > 0) {
+                    return $new_remaining;
+                } else {
+                    return 0;
+                }
 
             // no override
             } else {
@@ -936,7 +960,15 @@ class HoursViewHelper extends Base
     public function getOvertimeForTask(&$task, $use_ignore = 1)
     {
         if ($this->getNonTimeModeEnabled()) {
-            return 0;
+            $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
+            $new_spent = $this->getSpentTimeForTask($task, $use_ignore);
+            $new_remaining = $this->getRemainingTimeForTask($task, $use_ignore);
+            $new_overtime = $new_spent - $full_hours;
+            if ($new_spent > $full_hours) {
+                return $new_overtime;
+            } else {
+                return 0;
+            }
         } else {
             if (!array_key_exists('time_overtime', $task)) {
                 $this->initOvertimeTimeForTask($task, $use_ignore);

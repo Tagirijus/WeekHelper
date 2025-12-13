@@ -111,7 +111,7 @@
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?></span>
                     </li>
                     <?php endif ?>
-                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) && $this->hoursViewHelper->getSpentTimeForTask($task)): ?>
+                    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) || $this->hoursViewHelper->getSpentTimeForTask($task)): ?>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterSign($task) ?>)</i></span>
