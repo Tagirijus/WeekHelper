@@ -29,7 +29,7 @@ class Plugin extends Base
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
         $this->helper->register('hoursViewHelper', '\Kanboard\Plugin\WeekHelper\Helper\HoursViewHelper');
         $this->helper->register('projectInfoParser', '\Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser');
-        $this->helper->register('automaticPlannerHelper', '\Kanboard\Plugin\WeekHelper\Helper\AutomaticPlannerHelper');
+        $this->helper->register('automaticPlanner', '\Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner');
 
         // CSS - Asset Hook
         $this->hook->on('template:layout:css', array('template' => 'plugins/WeekHelper/Assets/css/week-helper.min.css'));
