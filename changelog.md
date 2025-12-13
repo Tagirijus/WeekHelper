@@ -9,6 +9,7 @@ _(most recent changes are listed on top):_
 - Added that in non-time mode the last subtask can not only overwrite "remaining time" with a positive number, but also overwrite "spent time" instead, if negative.
 - Fixed some override calculation sub last subtask in non-time mode.
 - Fixed some internal calculations which lead to buggy numbers and percentage bars.
+- Changes: This little details for times wont' be shown, if non-time mode is enabled (it might not even makes sense, but mostly it's buggy anyway).
 
 
 ## v2.15
