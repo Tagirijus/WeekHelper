@@ -206,6 +206,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
 
         $values = [
             'weekhelper_automatic_planner_sticky_enabled' => isset($form['automatic_planner_sticky_enabled']) ? 1 : 0,
+            'weekhelper_level_active_week' => $form['level_active_week'],
+            'weekhelper_level_planned_week' => $form['level_planned_week'],
             'weekhelper_monday_slots' => $form['monday_slots'],
             'weekhelper_tuesday_slots' => $form['tuesday_slots'],
             'weekhelper_wednesday_slots' => $form['wednesday_slots'],

@@ -82,4 +82,7 @@ return array(
     'Friday time slots' => 'Freitag Zeit Slots',
     'Saturday time slots' => 'Samstag Zeit Slots',
     'Sunday time slots' => 'Sonntag Zeit Slots',
+    'Technically the automatic planner will plan the task form the "active week" into the actual running week and the task from the "planned week" onto the next week. Tell the system which level stands for which of those weeks.' => 'Technisch plant der "automatic planner" die Tasks der "active week" in die gerade laufende Woche und die Tasks für die "planned week" in die Woche danach. Sag dem System, welches "level" für welche dieser Wochen steht.',
+    'Level to use for the active week.' => 'Level, das zu nutzen ist, für die "active week".',
+    'Level to use for the planned week.' => 'Level, das zu nutzen ist, für die "planned week".',
 );

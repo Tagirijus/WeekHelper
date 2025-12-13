@@ -20,6 +20,40 @@
         <?= t('Show a sticky div on the screen, which contains the automatic week planning.') ?>
     </p>
 
+    <br>
+    <br>
+
+    <span>Active / planned week</span>
+
+
+    <!-- which levels are planned vs. active week? -->
+
+    <p class="weekhelper-config-weak-text">
+        <?= t('Technically the automatic planner will plan the task form the "active week" into the actual running week and the task from the "planned week" onto the next week. Tell the system which level stands for which of those weeks.') ?>
+    </p>
+
+    <div class="task-form-container">
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Level to use for the active week.'), 'level_active_week') ?>
+            <?= $this->form->text('level_active_week', ['level_active_week' => $level_active_week], [], [
+                'autofocus',
+                'tabindex="9"',
+                'placeholder="e.g. \'level_1\' or \'all\'"'
+            ]) ?>
+        </div>
+    </div>
+
+    <div class="task-form-container">
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Level to use for the planned week.'), 'level_planned_week') ?>
+            <?= $this->form->text('level_planned_week', ['level_planned_week' => $level_planned_week], [], [
+                'autofocus',
+                'tabindex="9"',
+                'placeholder="e.g. \'level_1\' or \'all\'"'
+            ]) ?>
+        </div>
+    </div>
+
 
     <!-- time slots help text -->
     <?php $slots_help = 'A slot should contain 24h format starting and end times (e.g. "6:00-9:00"). It can also contain a single project type after that times, separated with a single whitespace. Final example: "6:00-9:00 office". Multiple lines for time slots are possible.' ?>

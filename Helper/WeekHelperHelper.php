@@ -88,6 +88,8 @@ class WeekHelperHelper extends Base
 
             // Automatic Planner
             'automatic_planner_sticky_enabled' => $this->configModel->get('weekhelper_automatic_planner_sticky_enabled', 0),
+            'level_active_week' =>  $this->configModel->get('weekhelper_level_active_week', ''),
+            'level_planned_week' =>  $this->configModel->get('weekhelper_level_planned_week', ''),
             'monday_slots' =>  $this->configModel->get('weekhelper_monday_slots', ''),
             'tuesday_slots' =>  $this->configModel->get('weekhelper_tuesday_slots', ''),
             'wednesday_slots' =>  $this->configModel->get('weekhelper_wednesday_slots', ''),
