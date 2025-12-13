@@ -652,7 +652,7 @@ class HoursViewHelper extends Base
             // hours and 2 == its percentage is done fully.
             $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
             $worked = 0.0;
-            $last_remaining_override = -1;
+            $last_remaining_override = 0;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
@@ -679,8 +679,13 @@ class HoursViewHelper extends Base
 
             }
 
-            if ($last_remaining_override != -1) {
+            // override is positive: it stands for remaining
+            if ($last_remaining_override > 0) {
                 $worked = $full_hours - $last_remaining_override;
+
+            // override is negative: it stans for spent
+            } elseif ($last_remaining_override < 0) {
+                $worked = $full_hours - ($full_hours - ($last_remaining_override * -1));
             }
 
             return $worked;
@@ -707,7 +712,7 @@ class HoursViewHelper extends Base
             $subtasks = $this->getSubtasksByTaskId($task['id']);
 
             // get data from the subtasks
-            $last_remaining_override = -1;
+            $last_remaining_override = 0;
             foreach ($subtasks as $subtask) {
                 if ($this->ignoreLogic($subtask, $use_ignore)) {
                     continue;
@@ -722,11 +727,21 @@ class HoursViewHelper extends Base
                     }
                 }
             }
-            if ($last_remaining_override != -1) {
+
+            // override is positive: it stands for remaining
+            if ($last_remaining_override > 0) {
                 return $last_remaining_override;
+
+            // override is negative: it stans for spent
+            } elseif ($last_remaining_override < 0) {
+                $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
+                return $full_hours - ($last_remaining_override * -1);
+
+            // no override
             } else {
                 return $this->getEstimatedTimeForTask($task) - $this->getSpentTimeForTask($task);
             }
+
         } else {
             if (!array_key_exists('time_remaining', $task)) {
                 $this->initRemainingTimeForTask($task, $use_ignore);
