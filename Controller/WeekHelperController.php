@@ -327,14 +327,14 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $type = $this->request->getStringParam('type', 'text');
         if ($type == 'html') {
             // TODO
-            // $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsHTML();
+            // $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsHTML();
             $automatic_plan = 'TODO HTML';
         } elseif ($type == 'json') {
             // TODO
-            // $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsJSON();
+            // $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsJSON();
             $automatic_plan = 'TODO JSON';
         } else {
-            $automatic_plan = $this->helper->automaticPlannerHelper->getAutomaticPlanAsText();
+            $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText();
         }
         return $this->response->text($automatic_plan);
     }

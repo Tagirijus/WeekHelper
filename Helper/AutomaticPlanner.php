@@ -5,7 +5,7 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 use Kanboard\Core\Base;
 
 
-class AutomaticPlannerHelper extends Base
+class AutomaticPlanner extends Base
 {
 
     public function getAutomaticPlanAsText()
