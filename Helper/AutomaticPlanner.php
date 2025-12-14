@@ -7,7 +7,40 @@ use Kanboard\Core\Base;
 
 class AutomaticPlanner extends Base
 {
+    /**
+     * This is the most important output. This method basically will get
+     * all other "getAutomaticPlan..." methods their base to work with.
+     * It is an array, which holds the week plan and further data.
+     *
+     * The array structure is:
+     *     [
+     *         'active' => [
+     *             'mon' => [array with sorted tasks],
+     *             'tue' => [array with sorted tasks],
+     *             ...
+     *             'sun' => [array with sorted tasks],
+     *         ],
+     *         'planned' => [
+     *             'mon' => [array with sorted tasks],
+     *             'tue' => [array with sorted tasks],
+     *             ...
+     *             'sun' => [array with sorted tasks],
+     *         ],
+     *         maybe more data here later ...
+     *     ]
+     *
+     * @return array
+     */
+    public function getAutomaticPlanAsArray()
+    {
+        return [];
+    }
 
+    /**
+     * Get the automatic plan as plaintext.
+     *
+     * @return string
+     */
     public function getAutomaticPlanAsText()
     {
         // So kann ich hier Config abrufen:
