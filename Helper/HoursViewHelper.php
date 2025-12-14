@@ -73,6 +73,18 @@ class HoursViewHelper extends Base
     var $non_time_mode_enabled = false;
 
     /**
+     * The class attribute, holding the tasks per level.
+     *
+     * @var array
+     **/
+    var $tasks_per_level = [
+        'level_1' => [],
+        'level_2' => [],
+        'level_3' => [],
+        'level_4' => [],
+    ];
+
+    /**
      * Init and/or ge the ignored subtask titles.
      *
      * @return array
@@ -287,18 +299,33 @@ class HoursViewHelper extends Base
         }
 
         if ($exists) {
+            // calculations
+            $estimated = $this->getEstimatedTimeForTask($task);
+            $spent = $this->getSpentTimeForTask($task);
+            $remaining = $this->getRemainingTimeForTask($task);
+            $overtime = $this->getOvertimeForTask($task);
+
             // dashbord: column times
-            $level[$col_name]['estimated'] += $this->getEstimatedTimeForTask($task);
-            $level[$col_name]['spent'] += $this->getSpentTimeForTask($task);
-            $level[$col_name]['remaining'] += $this->getRemainingTimeForTask($task);
-            $level[$col_name]['overtime'] += $this->getOvertimeForTask($task);
+            $level[$col_name]['estimated'] += $estimated;
+            $level[$col_name]['spent'] += $spent;
+            $level[$col_name]['remaining'] += $remaining;
+            $level[$col_name]['overtime'] += $overtime;
 
             // level: total times
-            $level['_total']['estimated'] += $this->getEstimatedTimeForTask($task);
-            $level['_total']['spent'] += $this->getSpentTimeForTask($task);
-            $level['_total']['remaining'] += $this->getRemainingTimeForTask($task);
-            $level['_total']['overtime'] += $this->getOvertimeForTask($task);
+            $level['_total']['estimated'] += $estimated;
+            $level['_total']['spent'] += $spent;
+            $level['_total']['remaining'] += $remaining;
+            $level['_total']['overtime'] += $overtime;
             $this->modifyHasTimes($level);
+
+            // prepare native task and modify it, so that it has more data
+            // which I need later. Then add it to the internal array of tasks
+            // per level.
+            $task['time_estimated'] = $estimated;
+            $task['time_spent'] = $spent;
+            $task['time_remaining'] = $remaining;
+            $task['time_overtime'] = $overtime;
+            array_push($this->tasks_per_level[$level_key], $task);
         }
     }
 

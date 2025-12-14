@@ -15,8 +15,10 @@ class AutomaticPlanner extends Base
 
         // $project_times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
         // $this->logger->info(json_encode($project_times));
+        // $this->logger->info(json_encode($this->helper->hoursViewHelper->tasks_per_level));
 
-        $project_info = $this->helper->projectInfoParser->getProjectInfoById(11);
+        // so bekomme ich Projekt Metadatan per ProjectID
+        // $project_info = $this->helper->projectInfoParser->getProjectInfoById(11);
         // $this->logger->info(json_encode($project_info));
 
         return 'TODO';
