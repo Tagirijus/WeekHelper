@@ -280,6 +280,9 @@ class AutomaticPlanner extends Base
         $sorter = new SortingLogic;
         $sorted_tasks = $sorter->sortTasks($tasks);
         $this->logger->info(json_encode($sorted_tasks));
+        // foreach ($sorted_tasks as $task) {
+        //     $this->logger->info(json_encode($task['title']));
+        // }
 
         $distributor = new DistributionLogic;
         $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
