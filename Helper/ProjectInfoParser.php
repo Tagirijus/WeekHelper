@@ -57,8 +57,8 @@ class ProjectInfoParser
         $lines = explode("\r\n", $description ?? '');
         foreach ($lines as $line) {
 
-            if (str_starts_with($line, 'priority=')) {
-                $data['priority'] = (int) str_replace('priority=', '', $line);
+            if (str_starts_with($line, 'project_priority=')) {
+                $data['project_priority'] = (int) str_replace('project_priority=', '', $line);
 
             } elseif (str_starts_with($line, 'project_type=')) {
                 $data['project_type'] = str_replace('project_type=', '', $line);
