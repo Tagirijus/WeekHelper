@@ -21,7 +21,7 @@ class ProjectInfoParser
             // the priority for the project. basically this
             // priority will always be added to the projects
             // tasks priority.
-            'priority' => 0,
+            'project_priority' => 0,
 
             // the project type can be any string with which
             // the user can assign this project a project type.
@@ -34,7 +34,7 @@ class ProjectInfoParser
 
             // the max hours the projects tasks can be
             // planned for one day.
-            'max_hours' => 8,
+            'project_max_hours' => 8,
         ];
 
         $this->parseData($data, $project['description']);
@@ -58,7 +58,7 @@ class ProjectInfoParser
                 $data['priority'] = (int) str_replace('priority=', '', $line);
 
             } elseif (str_starts_with($line, 'project_type=')) {
-                $data['project_type'] = (int) str_replace('project_type=', '', $line);
+                $data['project_type'] = str_replace('project_type=', '', $line);
 
             } elseif (str_starts_with($line, 'max_hours=')) {
                 $data['max_hours'] = (int) str_replace('max_hours=', '', $line);
