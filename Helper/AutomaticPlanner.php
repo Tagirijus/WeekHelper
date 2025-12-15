@@ -19,6 +19,15 @@ class AutomaticPlanner extends Base
     var $projects = null;
 
     /**
+     * The raw config for the time slots / distribution logic.
+     * It is an array with the weekdays (short) as key and the
+     * raw config string from the user.
+     *
+     * @var array
+     **/
+    var $distribution_config = null;
+
+    /**
      * Get (and if needed first initialize it) the internal projects
      * array with the active projects and their additional meta data.
      *
@@ -46,6 +55,37 @@ class AutomaticPlanner extends Base
             $projects[$project_id] = array_merge($project, $metadata);
         }
         $this->projects = $projects;
+    }
+
+    /**
+     * Get (and if needed first initialize it) the internal distribution
+     * config array.
+     *
+     * @return array
+     */
+    public function getDistributionConfig()
+    {
+        if (is_null($this->distribution_config)) {
+            $this->initDistributionConfig();
+        }
+        return $this->distribution_config;
+    }
+
+    /**
+     * Initialize the distribution config and store it in the
+     * internal attribute for this value.
+     */
+    private function initDistributionConfig()
+    {
+        $this->distribution_config = [
+            'mon' => $this->configModel->get('weekhelper_monday_slots', ''),
+            'tue' => $this->configModel->get('weekhelper_tuesday_slots', ''),
+            'wed' => $this->configModel->get('weekhelper_wednesday_slots', ''),
+            'thu' => $this->configModel->get('weekhelper_thursday_slots', ''),
+            'fri' => $this->configModel->get('weekhelper_friday_slots', ''),
+            'sat' => $this->configModel->get('weekhelper_saturday_slots', ''),
+            'sun' => $this->configModel->get('weekhelper_sunday_slots', '')
+        ];
     }
 
     /**
@@ -122,7 +162,7 @@ class AutomaticPlanner extends Base
         $sorted_tasks = $sorter->sortTasks($tasks);
 
         $distributor = new DistributionLogic;
-        $distribution = $distributor->distributeTasks($sorted_tasks);
+        $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
 
         return $distribution;
     }

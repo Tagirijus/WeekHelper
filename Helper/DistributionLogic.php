@@ -34,7 +34,7 @@ class DistributionLogic
      * @param  array $time_slots
      * @return array
      */
-    public function distributeTasks($tasks)
+    public function distributeTasks($tasks, $time_slots)
     {
         return [
             'mon' => [],

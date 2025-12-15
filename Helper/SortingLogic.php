@@ -14,6 +14,9 @@ class SortingLogic
      */
     public function sortTasks($tasks)
     {
+        // WEITER HIER
+        // Sortier-Logik etablieren;
+        // ggf. auch neue Config hinzufügen, sodass ich die Logik sogar dynamisch verändern kann!?
         return $tasks;
     }
 }
