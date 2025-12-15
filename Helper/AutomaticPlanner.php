@@ -73,8 +73,8 @@ class AutomaticPlanner extends Base
         $projects = array_column($projects, null, 'id');
         $project_info_parser = new ProjectInfoParser;
         foreach ($projects as $project_id => $project) {
-            $metadata = $project_info_parser->getProjectInfoByProject($project);
-            $projects[$project_id] = array_merge($project, $metadata);
+            $info = $project_info_parser->getProjectInfoByProject($project);
+            $projects[$project_id]['info'] = $info;
         }
         $this->projects = $projects;
     }
@@ -156,7 +156,7 @@ class AutomaticPlanner extends Base
         $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
         // the project_times variable has to be initiated as well;
         // so I will just call the getter, which will initiliaze it, if needed
-        $this->getProjects();
+        $this->getProjectTimes();
         if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->tasks_per_level)) {
             $this->tasks_active_week = $this->helper->hoursViewHelper->tasks_per_level[$level_active_week];
         } else {
@@ -165,6 +165,15 @@ class AutomaticPlanner extends Base
                 . '"' . $level_active_week . '" '
                 . 'in "' . $this->helper->hoursViewHelper->tasks_per_level . '"'
             );
+        }
+
+        // also extend the project array to each task
+        $projects = $this->getProjects();
+        foreach ($this->tasks_active_week as $key => $task) {
+            // if I need other (native Kanboard) project values to sort on,
+            // I should add them here. Otherwise with just the key "info"
+            // there are the ones added / parsed by my plugin.
+            $this->tasks_active_week[$key] = array_merge($task, $projects[$task['project_id']]['info']);
         }
     }
 
@@ -191,15 +200,24 @@ class AutomaticPlanner extends Base
         $level_planned_week = $this->configModel->get('weekhelper_level_planned_week', '');
         // the project_times variable has to be initiated as well;
         // so I will just call the getter, which will initiliaze it, if needed
-        $this->getProjects();
+        $this->getProjectTimes();
         if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->tasks_per_level)) {
             $this->tasks_planned_week = $this->helper->hoursViewHelper->tasks_per_level[$level_planned_week];
         } else {
             $this->logger->info(
-                'AutomaticPlanner->initTasksActiveWeek() cannot access '
+                'AutomaticPlanner->initTasksPlannedWeek() cannot access '
                 . '"' . $level_planned_week . '" '
                 . 'in "' . $this->helper->hoursViewHelper->tasks_per_level . '"'
             );
+        }
+
+        // also extend the project info to each task
+        $projects = $this->getProjects();
+        foreach ($this->tasks_planned_week as $key => $task) {
+            // if I need other (native Kanboard) project values to sort on,
+            // I should add them here. Otherwise with just the key "info"
+            // there are the ones added / parsed by my plugin.
+            $this->tasks_planned_week[$key] = array_merge($task, $projects[$task['project_id']]['info']);
         }
     }
 
@@ -261,6 +279,7 @@ class AutomaticPlanner extends Base
     {
         $sorter = new SortingLogic;
         $sorted_tasks = $sorter->sortTasks($tasks);
+        $this->logger->info(json_encode($sorted_tasks));
 
         $distributor = new DistributionLogic;
         $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
@@ -287,7 +306,7 @@ class AutomaticPlanner extends Base
         // $this->logger->info(json_encode($project_info));
 
         $final_plan = $this->getAutomaticPlanAsArray();
-        $this->logger->info(json_encode($final_plan));
+        // $this->logger->info(json_encode($final_plan));
 
         return 'TODO';
     }
