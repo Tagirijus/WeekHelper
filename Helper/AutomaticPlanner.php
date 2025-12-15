@@ -28,6 +28,28 @@ class AutomaticPlanner extends Base
     var $distribution_config = null;
 
     /**
+     * Cache variable for the hours view helper output of the
+     * project times getter method.
+     *
+     * @var array
+     **/
+    var $project_times = null;
+
+    /**
+     * The cache variable for the tasks of the active week.
+     *
+     * @var array
+     **/
+    var $tasks_active_week = null;
+
+    /**
+     * The cache variable for the tasks of the planned week.
+     *
+     * @var array
+     **/
+    var $tasks_planned_week = null;
+
+    /**
      * Get (and if needed first initialize it) the internal projects
      * array with the active projects and their additional meta data.
      *
@@ -89,6 +111,99 @@ class AutomaticPlanner extends Base
     }
 
     /**
+     * Get (and if needed first initialize it) the internal array
+     * for the project times; the output of the hours view method.
+     *
+     * @return array
+     */
+    public function getProjectTimes()
+    {
+        if (is_null($this->project_times)) {
+            $this->initProjectTimes();
+        }
+        return $this->project_times;
+    }
+
+    /**
+     * Initialize the tasks of the active week. Also attach the
+     * projects metadata to each task for easier access later on.
+     */
+    private function initProjectTimes()
+    {
+        $this->project_times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+    }
+
+    /**
+     * Get (and if needed first initialize it) the internal array
+     * for the tasks of the active week.
+     *
+     * @return array
+     */
+    public function getTasksActiveWeek()
+    {
+        if (is_null($this->tasks_active_week)) {
+            $this->initTasksActiveWeek();
+        }
+        return $this->tasks_active_week;
+    }
+
+    /**
+     * Initialize the tasks of the active week. Also attach the
+     * projects metadata to each task for easier access later on.
+     */
+    private function initTasksActiveWeek()
+    {
+        $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
+        // the project_times variable has to be initiated as well;
+        // so I will just call the getter, which will initiliaze it, if needed
+        $this->getProjects();
+        if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->tasks_per_level)) {
+            $this->tasks_active_week = $this->helper->hoursViewHelper->tasks_per_level[$level_active_week];
+        } else {
+            $this->logger->info(
+                'AutomaticPlanner->initTasksActiveWeek() cannot access '
+                . '"' . $level_active_week . '" '
+                . 'in "' . $this->helper->hoursViewHelper->tasks_per_level . '"'
+            );
+        }
+    }
+
+    /**
+     * Get (and if needed first initialize it) the internal array
+     * for the tasks of the planned week.
+     *
+     * @return array
+     */
+    public function getTasksPlannedWeek()
+    {
+        if (is_null($this->tasks_planned_week)) {
+            $this->initTasksPlannedWeek();
+        }
+        return $this->tasks_planned_week;
+    }
+
+    /**
+     * Initialize the tasks of the active week. Also attach the
+     * projects metadata to each task for easier access later on.
+     */
+    private function initTasksPlannedWeek()
+    {
+        $level_planned_week = $this->configModel->get('weekhelper_level_planned_week', '');
+        // the project_times variable has to be initiated as well;
+        // so I will just call the getter, which will initiliaze it, if needed
+        $this->getProjects();
+        if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->tasks_per_level)) {
+            $this->tasks_planned_week = $this->helper->hoursViewHelper->tasks_per_level[$level_planned_week];
+        } else {
+            $this->logger->info(
+                'AutomaticPlanner->initTasksActiveWeek() cannot access '
+                . '"' . $level_planned_week . '" '
+                . 'in "' . $this->helper->hoursViewHelper->tasks_per_level . '"'
+            );
+        }
+    }
+
+    /**
      * This is the most important output. This method basically will get
      * all other "getAutomaticPlan..." methods their base to work with.
      * It is an array, which holds the week plan and further data.
@@ -115,22 +230,8 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsArray()
     {
-        $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
-        $level_planned_week = $this->configModel->get('weekhelper_level_planned_week', '');
-        $project_times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
-
-        $tasks_active_week = [];
-        $tasks_planned_week = [];
-
-        if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->tasks_per_level)) {
-            $tasks_active_week = $this->helper->hoursViewHelper->tasks_per_level[$level_active_week];
-        }
-        if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->tasks_per_level)) {
-            $tasks_planned_week = $this->helper->hoursViewHelper->tasks_per_level[$level_planned_week];
-        }
-
-        $active_week = $this->prepareWeek($tasks_active_week);
-        $planned_week = $this->prepareWeek($tasks_planned_week);
+        $active_week = $this->prepareWeek($this->getTasksActiveWeek());
+        $planned_week = $this->prepareWeek($this->getTasksPlannedWeek());
 
         return [
             'active' => $active_week,
