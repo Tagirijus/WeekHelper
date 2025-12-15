@@ -35,6 +35,9 @@ class ProjectInfoParser
             // the max hours the projects tasks can be
             // planned for one day.
             'project_max_hours' => 8,
+
+            // the hourly wage for the project
+            'project_wage' => 0,
         ];
 
         $this->parseData($data, $project['description']);
@@ -60,8 +63,11 @@ class ProjectInfoParser
             } elseif (str_starts_with($line, 'project_type=')) {
                 $data['project_type'] = str_replace('project_type=', '', $line);
 
-            } elseif (str_starts_with($line, 'max_hours=')) {
-                $data['max_hours'] = (int) str_replace('max_hours=', '', $line);
+            } elseif (str_starts_with($line, 'project_max_hours=')) {
+                $data['project_max_hours'] = (int) str_replace('project_max_hours=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_wage=')) {
+                $data['project_wage'] = (int) str_replace('project_wage=', '', $line);
 
             }
         }
