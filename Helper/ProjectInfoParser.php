@@ -2,20 +2,20 @@
 
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
-use Kanboard\Core\Base;
 
-
-class ProjectInfoParser extends Base
+class ProjectInfoParser
 {
 
     /**
-     * With this method I can get info for projects as variables.
-     * These info will be parsed from the project descriptions texts.
+     * With this method I can get info for the given project
+     * as variables. These info will be parsed from the project
+     * descriptions texts. So the input should be a proper
+     * project array, having at least the "description" key.
      *
-     * @param  integer $projectId
+     * @param  array $project
      * @return array
      */
-    public function getProjectInfoById($projectId)
+    public function getProjectInfoByProject($project)
     {
         $data = [
             // the priority for the project. basically this
@@ -37,10 +37,7 @@ class ProjectInfoParser extends Base
             'max_hours' => 8,
         ];
 
-        $project = $this->projectModel->getById($projectId);
-        if ($project) {
-            $this->parseData($data, $project['description']);
-        }
+        $this->parseData($data, $project['description']);
 
         return $data;
     }
@@ -54,7 +51,7 @@ class ProjectInfoParser extends Base
      */
     public function parseData(&$data, $description)
     {
-        $lines = explode("\r\n", $description);
+        $lines = explode("\r\n", $description ?? '');
         foreach ($lines as $line) {
 
             if (str_starts_with($line, 'priority=')) {

@@ -3,10 +3,51 @@
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Kanboard\Core\Base;
+use Kanboard\Model\ProjectModel;
+use Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser;
+use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
+use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 
 
 class AutomaticPlanner extends Base
 {
+    /**
+     * All active projects, parsed with their additional meta data.
+     *
+     * @var array
+     **/
+    var $projects = null;
+
+    /**
+     * Get (and if needed first initialize it) the internal projects
+     * array with the active projects and their additional meta data.
+     *
+     * @return array
+     */
+    public function getProjects()
+    {
+        if (is_null($this->projects)) {
+            $this->initProjects();
+        }
+        return $this->projects;
+    }
+
+    /**
+     * Initialize all active projects and parse their additional
+     * meta data. Store it in the internal attribute.
+     */
+    private function initProjects()
+    {
+        $projects = $this->projectModel->getAllByStatus(ProjectModel::ACTIVE);
+        $projects = array_column($projects, null, 'id');
+        $project_info_parser = new ProjectInfoParser;
+        foreach ($projects as $project_id => $project) {
+            $metadata = $project_info_parser->getProjectInfoByProject($project);
+            $projects[$project_id] = array_merge($project, $metadata);
+        }
+        $this->projects = $projects;
+    }
+
     /**
      * This is the most important output. This method basically will get
      * all other "getAutomaticPlan..." methods their base to work with.
@@ -34,7 +75,56 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsArray()
     {
-        return [];
+        $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
+        $level_planned_week = $this->configModel->get('weekhelper_level_planned_week', '');
+        $project_times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+
+        $tasks_active_week = [];
+        $tasks_planned_week = [];
+
+        if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->tasks_per_level)) {
+            $tasks_active_week = $this->helper->hoursViewHelper->tasks_per_level[$level_active_week];
+        }
+        if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->tasks_per_level)) {
+            $tasks_planned_week = $this->helper->hoursViewHelper->tasks_per_level[$level_planned_week];
+        }
+
+        $active_week = $this->prepareWeek($tasks_active_week);
+        $planned_week = $this->prepareWeek($tasks_planned_week);
+
+        return [
+            'active' => $active_week,
+            'planned' => $planned_week,
+        ];
+    }
+
+    /**
+     * Prepare an active week with the given tasks.
+     * This method gets an array of tasks, sorts them
+     * with the sorter class, splits these task
+     * over the time slots, defined in the config and
+     * finally returns an array with the following
+     * structure:
+     *     [
+     *         'mon' => [array with sorted tasks],
+     *         'tue' => [array with sorted tasks],
+     *         ...
+     *         'sun' => [array with sorted tasks],
+     *         'overflow' => [array with sorted tasks]
+     *     ]
+     *
+     * @param  array $tasks
+     * @return array
+     */
+    public function prepareWeek($tasks)
+    {
+        $sorter = new SortingLogic;
+        $sorted_tasks = $sorter->sortTasks($tasks);
+
+        $distributor = new DistributionLogic;
+        $distribution = $distributor->distributeTasks($sorted_tasks);
+
+        return $distribution;
     }
 
     /**
@@ -54,6 +144,9 @@ class AutomaticPlanner extends Base
         // so bekomme ich Projekt Metadatan per ProjectID
         // $project_info = $this->helper->projectInfoParser->getProjectInfoById(11);
         // $this->logger->info(json_encode($project_info));
+
+        $final_plan = $this->getAutomaticPlanAsArray();
+        $this->logger->info(json_encode($final_plan));
 
         return 'TODO';
     }
