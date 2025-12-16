@@ -68,9 +68,9 @@ class DistributionLogic
     {
         $this->parseTimeSlots($time_slots_config);
         foreach ($tasks as $key => &$task) {
-            foreach ($this->time_slot_days as $day => &$time_slot_day) {
+            foreach ($this->time_slot_days as &$time_slot_day) {
                 // for this (or none type) no more time left to assign on this day
-                if (!$time_slot_day->timeLeft($task['project_type'])) {
+                if ($time_slot_day->nextSlot($task['project_type']) == -1) {
                     continue;
 
                 // plan the task onto the day, as much as you can

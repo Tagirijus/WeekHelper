@@ -125,27 +125,26 @@ class TimeSlotDay
     }
 
     /**
-     * Return if there is still time left in general for this day
-     * and the given type. If none is given, check for all.
+     * Find the next slot. This function retuns -1, if no
+     * slot was found (maybe, because no time left for the day).
+     * Otherwise it will return the key of the internal slot array
+     * for the slot, which still has remaining time to plan left.
      *
      * @param  string $type
-     * @return bool
+     * @return int
      */
-    public function timeLeft($type = '')
+    public function nextSlot($type = '')
     {
-        if ($type == '') {
-            return $this->available_time > 0;
-        } else {
-            $time_left = 0;
-            foreach ($this->slots as $slot) {
-                // if a slot type is empty, it means that every project_type
-                // may be planned here!
-                if ($slot['type'] == $type || $slot['type'] == '') {
-                    $time_left += $slot['remain'];
-                }
+        foreach ($this->slots as $key => $slot) {
+            // if a slot type is empty, it means that every project_type
+            // may be planned here!
+            $type_is_valid = $slot['type'] == $type || $slot['type'] == '';
+            $has_remaining_time = $slot['remain'] > 0;
+            if ($type_is_valid && $has_remaining_time) {
+                return $key;
             }
-            return $time_left > 0;
         }
+        return -1;
     }
 
     /**
