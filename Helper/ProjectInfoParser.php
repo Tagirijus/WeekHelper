@@ -67,6 +67,7 @@ class ProjectInfoParser
     public function parseData(&$data, $description)
     {
         $lines = explode("\r\n", $description ?? '');
+        $has_max_hours_block = false;
         foreach ($lines as $line) {
 
             if (str_starts_with($line, 'project_priority=')) {
@@ -80,6 +81,7 @@ class ProjectInfoParser
 
             } elseif (str_starts_with($line, 'project_max_hours_block=')) {
                 $data['project_max_hours_block'] = (int) str_replace('project_max_hours_block=', '', $line);
+                $has_max_hours_block = true;
 
             } elseif (str_starts_with($line, 'project_wage=')) {
                 $data['project_wage'] = (int) str_replace('project_wage=', '', $line);
@@ -88,6 +90,12 @@ class ProjectInfoParser
                 $data['project_alias'] = str_replace('project_alias=', '', $line);
 
             }
+        }
+
+        // if no "project_max_hours_block" was set manually, this value should
+        // always copy the "project_max_hours_day" value.
+        if (!$has_max_hours_block) {
+            $data['project_max_hours_block'] = $data['project_max_hours_day'];
         }
     }
 }
