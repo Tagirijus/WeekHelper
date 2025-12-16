@@ -278,7 +278,10 @@ class AutomaticPlanner extends Base
     public function prepareWeek($tasks)
     {
         $sorter = new SortingLogic;
-        $sorted_tasks = $sorter->sortTasks($tasks);
+        $sorted_tasks = $sorter->sortTasks(
+            $tasks,
+            $this->configModel->get('weekhelper_sorting_logic', '')
+        );
         // $this->logger->info(json_encode($sorted_tasks));
         foreach ($sorted_tasks as $task) {
             $this->logger->info(json_encode($task['title']));

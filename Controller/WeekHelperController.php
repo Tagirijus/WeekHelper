@@ -205,6 +205,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $form = $this->request->getValues();
 
         $values = [
+            'weekhelper_sorting_logic' => $form['sorting_logic'],
             'weekhelper_automatic_planner_sticky_enabled' => isset($form['automatic_planner_sticky_enabled']) ? 1 : 0,
             'weekhelper_level_active_week' => $form['level_active_week'],
             'weekhelper_level_planned_week' => $form['level_planned_week'],

@@ -64,29 +64,35 @@ class SortingLogic
      * return the sorted array again.
      *
      * @param  array $tasks
+     * @param  string $sort_logic_config
      * @return array
      */
-    public function sortTasks(&$tasks)
+    public function sortTasks(&$tasks, $sort_logic_config)
     {
-        // WEITER HIER
-        // Sortier-Logik etablieren;
-        // ggf. auch neue Config hinzufügen, sodass ich die Logik sogar dynamisch verändern kann!?
-        //
-        // Es könnte noch weitere custom "keys" geben.
-        // Z.B. "position_absolute" berücksichtigt nicht nur "position" sondern auch
-        // die Position in Kombination mit "column_position". Denn Position 1 in Column 2
-        // ist höher gewichtet als Position 1 in Column 1.
-        // Dafür oben im comparator so custom checks "if $key == 'position_abs'" oder so;
-        // sodass ich dann intern im comparator() $va['column_pos'] * 100 + $va['position']
-        // oder so ähnlich mache (muss mir noch etwas ausdenken, da niedrigere Position in
-        // einer Spalte ja höher gewichtet ist, aber höhere Spalte hingegen höher).
-        $sort_spec = [
-            'column_pos' => 'desc',
-            'priority' => 'desc',
-            'project_priority' => 'desc',
-            'position' => 'asc'
-        ];
+        $sort_spec = $this->parseSortLogic($sort_logic_config);
         usort($tasks, comparator($sort_spec));
         return $tasks;
+    }
+
+    /**
+     * Parse the given sort logic string from the config and convert
+     * it into a sort_spec array.
+     *
+     * @param  string $sort_logic_config
+     * @return array
+     */
+    public function parseSortLogic($sort_logic_config)
+    {
+        $lines = explode("\r\n", $sort_logic_config ?? '');
+        $sort_spec = [];
+        foreach ($lines as $line) {
+            $parts = preg_split('/\s+/', $line);
+            if (count($parts) > 1) {
+                $column = $parts[0];
+                $direction = $parts[1];
+                $sort_spec[$column] = $direction;
+            }
+        }
+        return $sort_spec;
     }
 }

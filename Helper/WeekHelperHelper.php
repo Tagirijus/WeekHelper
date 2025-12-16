@@ -87,6 +87,7 @@ class WeekHelperHelper extends Base
             'remaining_lvl_weeks' =>  $this->configModel->get('weekhelper_remaining_lvl_weeks', ''),
 
             // Automatic Planner
+            'sorting_logic' =>  $this->configModel->get('weekhelper_sorting_logic', ''),
             'automatic_planner_sticky_enabled' => $this->configModel->get('weekhelper_automatic_planner_sticky_enabled', 0),
             'level_active_week' =>  $this->configModel->get('weekhelper_level_active_week', ''),
             'level_planned_week' =>  $this->configModel->get('weekhelper_level_planned_week', ''),

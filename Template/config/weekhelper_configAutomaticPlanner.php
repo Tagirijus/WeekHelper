@@ -6,6 +6,26 @@
 
     <br>
 
+    <!-- Sorting logic -->
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Sorting logic'), 'sorting_logic') ?>
+            <?= $this->form->textarea('sorting_logic', ['sorting_logic' => $sorting_logic], [], [
+                "placeholder='priority desc\ncolumn_pos desc\nposition asc'"
+            ], 'weekhelper-textarea-config') ?>
+        </div>
+
+    </div>
+    <p class="weekhelper-config-weak-text">
+        <?= t('This is the core sorting logic for the automatic planner feature. Here you can define a sorting "column" (of a task) with asc/desc per line (column + whitespace + direction). Some important available columns are: project_priority, project_wage, project_max_hours, project_type, priority, column_pos, position, score. All "project_" keys are from my plugin. Further columns are the one from a native Kanbaord task array (see source code if in doubt).') ?>
+    </p>
+
+    <br>
+    <br>
+
+
     <!-- Enable sticky planner -->
 
     <div class="task-form-container">
