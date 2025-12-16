@@ -80,7 +80,13 @@ class SortingLogic
         // sodass ich dann intern im comparator() $va['column_pos'] * 100 + $va['position']
         // oder so ähnlich mache (muss mir noch etwas ausdenken, da niedrigere Position in
         // einer Spalte ja höher gewichtet ist, aber höhere Spalte hingegen höher).
-        usort($tasks, comparator(['priority' => 'desc']));
+        $sort_spec = [
+            'column_pos' => 'desc',
+            'priority' => 'desc',
+            'project_priority' => 'desc',
+            'position' => 'asc'
+        ];
+        usort($tasks, comparator($sort_spec));
         return $tasks;
     }
 }
