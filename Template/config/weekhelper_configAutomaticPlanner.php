@@ -87,7 +87,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Monday time slots'), 'monday_slots') ?>
-            <?= $this->form->textarea('monday_slots', ['monday_slots' => $monday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('monday_slots', ['monday_slots' => $monday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -104,7 +106,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Tuesday time slots'), 'tuesday_slots') ?>
-            <?= $this->form->textarea('tuesday_slots', ['tuesday_slots' => $tuesday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('tuesday_slots', ['tuesday_slots' => $tuesday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -121,7 +125,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Wednesday time slots'), 'wednesday_slots') ?>
-            <?= $this->form->textarea('wednesday_slots', ['wednesday_slots' => $wednesday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('wednesday_slots', ['wednesday_slots' => $wednesday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -138,7 +144,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Thursday time slots'), 'thursday_slots') ?>
-            <?= $this->form->textarea('thursday_slots', ['thursday_slots' => $thursday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('thursday_slots', ['thursday_slots' => $thursday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -155,7 +163,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Friday time slots'), 'friday_slots') ?>
-            <?= $this->form->textarea('friday_slots', ['friday_slots' => $friday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('friday_slots', ['friday_slots' => $friday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -172,7 +182,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Saturday time slots'), 'saturday_slots') ?>
-            <?= $this->form->textarea('saturday_slots', ['saturday_slots' => $saturday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('saturday_slots', ['saturday_slots' => $saturday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
@@ -189,7 +201,9 @@
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Sunday time slots'), 'sunday_slots') ?>
-            <?= $this->form->textarea('sunday_slots', ['sunday_slots' => $sunday_slots], [], [], 'weekhelper-textarea-config') ?>
+            <?= $this->form->textarea('sunday_slots', ['sunday_slots' => $sunday_slots], [], [
+                "placeholder='6:00-9:00 office\n11:00-13:00 studio'"
+            ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
