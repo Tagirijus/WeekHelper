@@ -163,9 +163,7 @@ class TimeSlotDay
      */
     public function planTask(&$task)
     {
-        if (!array_key_exists('_timeslotday_remaining', $task)) {
-            $task['_timeslotday_remaining'] = (int) round((float) $task['time_remaining'] * 60);
-        }
+        $this->initAdditionalTaskValues($task);
 
         // TODO / WEITER HIER
         // Planungs-Algorithus hier etablieren!
@@ -174,6 +172,21 @@ class TimeSlotDay
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * Initialize additional keys with values for the given task.
+     * They will be used by the "Automatic Planner" feature.
+     *
+     * @param  array &$task
+     */
+    public function initAdditionalTaskValues(&$task)
+    {
+        // if this key does not exist, all other should also not exist
+        // and thus should be "initialized"
+        if (!array_key_exists('_timeslotday_remaining', $task)) {
+            $task['_timeslotday_remaining'] = (int) round((float) $task['time_remaining'] * 60);
         }
     }
 
