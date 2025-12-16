@@ -76,7 +76,6 @@ class DistributionLogic
                 // plan the task onto the day, as much as you can
                 } else {
                     if ($time_slot_day->planTask($task)) {
-                        $this->logger->info(json_encode($task));
                         // basically means "go to the next task"
                         break;
                     }

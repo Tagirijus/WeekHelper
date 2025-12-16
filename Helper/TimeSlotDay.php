@@ -159,7 +159,7 @@ class TimeSlotDay
      * day keys onto the tasks array for further processing.
      *
      * @param  array &$task
-     * @return bool
+     * @return bool  "true" == task fully planned, "false" == still time to plan
      */
     public function planTask(&$task)
     {
