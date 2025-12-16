@@ -43,7 +43,7 @@ class ProjectInfoParser
             // the actual sorting by skipping tasks from the
             // same project and taking the next best task
             // of another project to be planned.
-            'project_max_hours_block' => 4,
+            'project_max_hours_block' => 8,
 
             // the hourly wage for the project
             'project_wage' => 0,
