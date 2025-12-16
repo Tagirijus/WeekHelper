@@ -19,6 +19,15 @@ class AutomaticPlanner extends Base
     var $projects = null;
 
     /**
+     * The raw config for the sorting logic. It's a cache variable
+     * so that for getting this config no DB query has to be done
+     * everytime.
+     *
+     * @var string
+     **/
+    var $sorting_logic_config = null;
+
+    /**
      * The raw config for the time slots / distribution logic.
      * It is an array with the weekdays (short) as key and the
      * raw config string from the user.
@@ -77,6 +86,29 @@ class AutomaticPlanner extends Base
             $projects[$project_id]['info'] = $info;
         }
         $this->projects = $projects;
+    }
+
+    /**
+     * Get (and if needed first initialize it) the internal sorting
+     * logic config array.
+     *
+     * @return array
+     */
+    public function getSortingLogicConfig()
+    {
+        if (is_null($this->sorting_logic_config)) {
+            $this->initSortingLogicConfig();
+        }
+        return $this->sorting_logic_config;
+    }
+
+    /**
+     * Initialize the sorting logic config and store it in the
+     * internal attribute for this value.
+     */
+    private function initSortingLogicConfig()
+    {
+        $this->sorting_logic_config = $this->configModel->get('weekhelper_sorting_logic', '');
     }
 
     /**
@@ -280,15 +312,12 @@ class AutomaticPlanner extends Base
         $sorter = new SortingLogic;
         $sorted_tasks = $sorter->sortTasks(
             $tasks,
-            $this->configModel->get('weekhelper_sorting_logic', '')
+            $this->getSortingLogicConfig()
         );
-        // $this->logger->info(json_encode($sorted_tasks));
-        foreach ($sorted_tasks as $task) {
-            $this->logger->info(json_encode($task['title']));
-        }
 
         $distributor = new DistributionLogic;
         $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
+        $this->logger->info(json_encode($distribution));
 
         return $distribution;
     }

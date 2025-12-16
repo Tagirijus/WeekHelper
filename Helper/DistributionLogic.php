@@ -30,11 +30,19 @@ class DistributionLogic
      * While "overflow" will hold the tasks, which did not
      * fit anymore into the time slots.
      *
+     * The time_slots_config hold the raw config data for
+     * every weekday:
+     *     [
+     *         'mon' => raw_config_string,
+     *         'tue' => raw_config_string,
+     *         ...
+     *     ]
+     *
      * @param  array $tasks
-     * @param  array $time_slots
+     * @param  array $time_slots_config
      * @return array
      */
-    public function distributeTasks($tasks, $time_slots)
+    public function distributeTasks($tasks, $time_slots_config)
     {
         return [
             'mon' => [],
