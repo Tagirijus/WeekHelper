@@ -47,6 +47,9 @@ class ProjectInfoParser
 
             // the hourly wage for the project
             'project_wage' => 0,
+
+            // an individual project alias
+            'project_alias' => '',
         ];
 
         $this->parseData($data, $project['description']);
@@ -80,6 +83,9 @@ class ProjectInfoParser
 
             } elseif (str_starts_with($line, 'project_wage=')) {
                 $data['project_wage'] = (int) str_replace('project_wage=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_alias=')) {
+                $data['project_alias'] = str_replace('project_alias=', '', $line);
 
             }
         }
