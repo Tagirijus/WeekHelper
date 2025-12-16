@@ -317,7 +317,7 @@ class AutomaticPlanner extends Base
 
         $distributor = new DistributionLogic;
         $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
-        $this->logger->info(json_encode($distribution));
+        $this->logger->info(json_encode($distributor->time_slot_days));
 
         return $distribution;
     }
