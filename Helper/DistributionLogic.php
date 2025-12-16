@@ -67,6 +67,22 @@ class DistributionLogic
     public function distributeTasks($tasks, $time_slots_config)
     {
         $this->parseTimeSlots($time_slots_config);
+        foreach ($tasks as $key => &$task) {
+            foreach ($this->time_slot_days as $day => &$time_slot_day) {
+                // for this (or none type) no more time left to assign on this day
+                if (!$time_slot_day->timeLeft($task['project_type'])) {
+                    continue;
+
+                // plan the task onto the day, as much as you can
+                } else {
+                    if ($time_slot_day->planTask($task)) {
+                        $this->logger->info(json_encode($task));
+                        // basically means "go to the next task"
+                        break;
+                    }
+                }
+            }
+        }
         return [
             'mon' => [],
             'tue' => [],

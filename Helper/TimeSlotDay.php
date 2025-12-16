@@ -38,6 +38,13 @@ class TimeSlotDay
     var $available_time = 0;
 
     /**
+     * All the planned tasks for this day in the hopefully correct order.
+     *
+     * @var array
+     **/
+    var $tasks = [];
+
+    /**
      * Initialize a time slot day instance with the given
      * raw config string for this day.
      *
@@ -139,5 +146,45 @@ class TimeSlotDay
             }
             return $time_left > 0;
         }
+    }
+
+    /**
+     * Plan the given task to this day as much as you can.
+     * Returns a bool, while "true" means that the whole
+     * task could be planned to this day and "false" means
+     * that there is still time left to be planned for this
+     * task.
+     *
+     * Also this method might create the temporary time-slot-
+     * day keys onto the tasks array for further processing.
+     *
+     * @param  array &$task
+     * @return bool
+     */
+    public function planTask(&$task)
+    {
+        if (!array_key_exists('_timeslotday_remaining', $task)) {
+            $task['_timeslotday_remaining'] = (int) round((float) $task['time_remaining'] * 60);
+        }
+
+        // TODO / WEITER HIER
+        // Planungs-Algorithus hier etablieren!
+
+        if ($task['_timeslotday_remaining'] == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Return the internal tasks array, which should contain all the
+     * (referenced) planned tasks!
+     *
+     * @return array
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }
