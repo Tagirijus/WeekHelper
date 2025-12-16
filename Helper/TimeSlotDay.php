@@ -39,10 +39,22 @@ class TimeSlotDay
 
     /**
      * All the planned tasks for this day in the hopefully correct order.
+     * Also there will be start and end (and other) values added to the
+     * task array.
      *
      * @var array
      **/
     var $tasks = [];
+
+    /**
+     * An array, keeping track of the planned time per project,
+     * basically. The key is the project_id and the values are
+     * the planned time for the project. This one is to keep
+     * track of the "project_max_hours_day" project info.
+     *
+     * @var array
+     **/
+    var $planned_time_per_project_ids = [];
 
     /**
      * Initialize a time slot day instance with the given
@@ -164,14 +176,111 @@ class TimeSlotDay
     {
         $this->initAdditionalTaskValues($task);
 
-        // TODO / WEITER HIER
-        // Planungs-Algorithus hier etablieren!
+        $slot_key = $this->nextSlot($task['project_type']);
+        if ($slot_key != -1) {
+            $slot = $this->slots[$slot_key];
+            $start = $slot['next'];
+            $end = $this->calculateEndOfSlot($task, $slot);
 
-        if ($task['_timeslotday_remaining'] == 0) {
+            $project_remaining_time_for_day = $this->projectMaxHoursDayRemain($task);
+            $project_remaining_time_for_block = $this->projectMaxHoursBlockRemain($task, $start);
+
+            if (
+                $slot_key != -1
+                && $project_remaining_time_for_day > 0
+                && $project_remaining_time_for_block > 0
+            ) {
+                $this->addTaskToSlot($task, $slot_key, $start, $end);
+            }
+        }
+
+        if ($task['time_remaining_minutes'] == 0) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * Check if the max hours for this task is already reached for
+     * this day. Calculate how much time could be planned for this
+     * project on this day. If this is 0, it basically means ...
+     * no time left, obvisouly.
+     *
+     * @param  array &$task
+     * @return int
+     */
+    public function projectMaxHoursDayRemain(&$task)
+    {
+        $max_minutes_day = (int) round($task['project_max_hours_day'] * 60);
+
+        $project_id = (int) $task['project_id'];
+        if (!array_key_exists($project_id, $this->planned_time_per_project_ids)) {
+            $this->planned_time_per_project_ids[$project_id] = 0;
+        }
+        return $max_minutes_day - $this->planned_time_per_project_ids[$project_id];
+    }
+
+    /**
+     * Check if the max hours for this task is already reached for
+     * consecutive blocks. Means: is there a block for this project
+     * before the next-to-be-planned block? If so: how much time
+     * would be left? If there is no block, technically the max
+     * can be used.
+     *
+     * @param  array &$task
+     * @param  int   $start
+     * @return int
+     */
+    public function projectMaxHoursBlockRemain(&$task, $start)
+    {
+        $max_minutes_block = (int) round($task['project_max_hours_block'] * 60);
+
+        // maybe there is not even a slot planned at all yet?
+        if (empty($this->tasks)) {
+            return $max_minutes_block;
+        }
+
+        // if the last planned project is not the same
+        if (end($this->tasks)['project_id'] != $task['project_id']) {
+            return $max_minutes_block;
+
+        } else {
+            // maybe the last project is the same; check if the end time
+            // of it is greater than 5 minutes; then it's okay, I'd say
+            if ($start - end($this->tasks)['timeslotday_end'] > 5) {
+                return $max_minutes_block;
+            } else {
+                // otherwise get the difference, which could still be planned
+                return $max_minutes_block - end($this->tasks)['timeslotday_length'];
+            }
+        }
+    }
+
+    /**
+     * With the given task and the given slot calculate a
+     * possible end time for the task to be planned.
+     *
+     * E.g. the end cannot exceed the slots end time.
+     * Also the method calculates the possible max time
+     * for the task to be planned, according to the
+     * project info.
+     *
+     * @param  array $task
+     * @param  array $slot
+     * @return int
+     */
+    public function calculateEndOfSlot($task, $slot)
+    {
+        $max_minutes_block = (int) round($task['project_max_hours_block'] * 60);
+        $remaining_time_of_task = $task['time_remaining_minutes'];
+        if ($remaining_time_of_task > $max_minutes_block) {
+            $remaining_time_of_task = $max_minutes_block;
+        }
+        if ($remaining_time_of_task > $slot['remain']) {
+            $remaining_time_of_task = $slot['remain'];
+        }
+        return $slot['next'] + $remaining_time_of_task;
     }
 
     /**
@@ -184,14 +293,48 @@ class TimeSlotDay
     {
         // if this key does not exist, all other should also not exist
         // and thus should be "initialized"
-        if (!array_key_exists('_timeslotday_remaining', $task)) {
-            $task['_timeslotday_remaining'] = (int) round((float) $task['time_remaining'] * 60);
+        if (!array_key_exists('time_remaining_minutes', $task)) {
+            // this value is needed for the overall planning in comparison to
+            // all other tasks as well. That's why it has to be set in the
+            // referenced task so that it will be available again in another
+            // call of the planTask() method later on.
+            // it is basically the remaining time for the task in minutes. also
+            // this value will be modified for the global task item after adding.
+            $task['time_remaining_minutes'] = (int) round((float) $task['time_remaining'] * 60);
         }
     }
 
     /**
+     * Finally add a task to the internal tasks array and update the
+     * internal slot array.
+     *
+     * @param array $task
+     * @param int $slot_key
+     * @param int $start
+     * @param int $end
+     */
+    public function addTaskToSlot(&$task, $slot_key, $start, $end)
+    {
+        $length = $end - $start;
+        $prepared_task = array_merge($task, [
+            'timeslotday_start' => $start,
+            'timeslotday_end' => $end,
+            'timeslotday_length' => $length,
+        ]);
+        $this->tasks[] = $prepared_task;
+
+        $task['time_remaining_minutes'] -= $length;
+
+        $this->slots[$slot_key]['start'] += $length;
+        $this->slots[$slot_key]['next'] += $length;
+        $this->slots[$slot_key]['remain'] -= $length;
+
+        $this->available_time -= $length;
+    }
+
+    /**
      * Return the internal tasks array, which should contain all the
-     * (referenced) planned tasks!
+     * planned tasks!
      *
      * @return array
      */

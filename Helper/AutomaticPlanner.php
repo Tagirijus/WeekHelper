@@ -317,7 +317,6 @@ class AutomaticPlanner extends Base
 
         $distributor = new DistributionLogic;
         $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
-        $this->logger->info(json_encode($distributor->time_slot_days));
 
         return $distribution;
     }
@@ -329,20 +328,49 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsText()
     {
-        // So kann ich hier Config abrufen:
-        // $stick_enabled = $this->configModel->get('weekhelper_automatic_planner_sticky_enabled', 1);
-
-        // $project_times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
-        // $this->logger->info(json_encode($project_times));
-        // $this->logger->info(json_encode($this->helper->hoursViewHelper->tasks_per_level));
-
-        // so bekomme ich Projekt Metadatan per ProjectID
-        // $project_info = $this->helper->projectInfoParser->getProjectInfoById(11);
-        // $this->logger->info(json_encode($project_info));
-
         $final_plan = $this->getAutomaticPlanAsArray();
-        // $this->logger->info(json_encode($final_plan));
+        $out = "active week\n";
+        $out .= "\n";
+        $out .= "monday tasks:\n";
+        foreach ($final_plan['active']['mon'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "tuesday tasks:\n";
+        foreach ($final_plan['active']['tue'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "wednesday tasks:\n";
+        foreach ($final_plan['active']['wed'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "thursday tasks:\n";
+        foreach ($final_plan['active']['thu'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "friday tasks:\n";
+        foreach ($final_plan['active']['fri'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "saturday tasks:\n";
+        foreach ($final_plan['active']['sat'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "sunday tasks:\n";
+        foreach ($final_plan['active']['sun'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
+        $out .= "\n";
+        $out .= "overflow tasks:\n";
+        foreach ($final_plan['active']['overflow'] as $task) {
+            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+        }
 
-        return 'TODO';
+        return $out;
     }
 }

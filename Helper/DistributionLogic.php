@@ -67,30 +67,41 @@ class DistributionLogic
     public function distributeTasks($tasks, $time_slots_config)
     {
         $this->parseTimeSlots($time_slots_config);
-        foreach ($tasks as $key => &$task) {
-            foreach ($this->time_slot_days as &$time_slot_day) {
-                // for this (or none type) no more time left to assign on this day
-                if ($time_slot_day->nextSlot($task['project_type']) == -1) {
-                    continue;
-
-                // plan the task onto the day, as much as you can
-                } else {
+        foreach ($this->time_slot_days as &$time_slot_day) {
+            // I iter through the tasks times the tasks itself, since
+            // sometimes the same project / task may not be planned
+            // consecutively, thus has to be put back and the next
+            // task has to be checked. but the other task might
+            // still have remaining time to be planned. so I should
+            // re-check this this task again.
+            // I am doing probably the most noobish thing here by
+            // itering through the tasks and inside through the tasks
+            // again, making it count(tasks) x the tasks.
+            // I tried with a while loop, but this one got stuck in a loop.
+            foreach ($tasks as $iter_task) {
+                $remove_task_keys = [];
+                foreach ($tasks as $key => &$task) {
                     if ($time_slot_day->planTask($task)) {
-                        // basically means "go to the next task"
-                        break;
+                        $remove_task_keys[] = $key;
                     }
+                }
+                // remove the tasks from the array so that the iteration
+                // might be more efficient ... maybe it's premature
+                // optimization ...
+                foreach ($remove_task_keys as $key) {
+                    unset($tasks[$key]);
                 }
             }
         }
         return [
-            'mon' => [],
-            'tue' => [],
-            'wed' => [],
-            'thu' => [],
-            'fri' => [],
-            'sat' => [],
-            'sun' => [],
-            'overflow' => []
+            'mon' => $this->time_slot_days['mon']->getTasks(),
+            'tue' => $this->time_slot_days['tue']->getTasks(),
+            'wed' => $this->time_slot_days['wed']->getTasks(),
+            'thu' => $this->time_slot_days['thu']->getTasks(),
+            'fri' => $this->time_slot_days['fri']->getTasks(),
+            'sat' => $this->time_slot_days['sat']->getTasks(),
+            'sun' => $this->time_slot_days['sun']->getTasks(),
+            'overflow' => $this->time_slot_days['overflow']->getTasks(),
         ];
     }
 
