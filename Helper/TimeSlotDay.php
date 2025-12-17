@@ -94,7 +94,6 @@ class TimeSlotDay
     {
         $this->slots = [];
         $lines = explode("\r\n", $config_string ?? '');
-        sort($lines);
         foreach ($lines as $line) {
             // splitting initial config string into times and type
             $parts = preg_split('/\s+/', $line);
@@ -236,6 +235,23 @@ class TimeSlotDay
      */
     public function projectMaxHoursBlockRemain(&$task, $start)
     {
+        // TODO:
+        // The logic in this method is still flawed. It can happen that
+        // a task with higher priority will be planned before another task,
+        // which is planned in an earlier slot (due to project type). This
+        // would make a last planned task be in another time slot and the
+        // check for the "last planned task" would be useless.
+        // E.g. the next task to plan will be planned at 8:00 in a block
+        // from 6:00 to 9:00. But the last task was planned at 11:00
+        // in a slot from 11:00 to 13:00. The last task, which would be
+        // connected to the slot this next task will be planned in, is not
+        // the last added task, but the one added in the slot before at
+        // maybe 7:00 to 8:00. So this one would be the task before this one,
+        // actually.
+        //
+        // I have to fix the "planned_time_block" array and maybe move it
+        // to the slots array, so that every slot would hav its own variable
+        // of this kind, maybe.
         $max_minutes_block = (int) round($task['project_max_hours_block'] * 60);
         $project_id = $task['project_id'];
         if ($this->planned_time_block['project_id'] == $project_id) {
@@ -371,6 +387,20 @@ class TimeSlotDay
      */
     public function getTasks()
     {
+        // sort the tasks on their start time. it can happen that tasks
+        // will be planned on another slot, due to the project type.
+        // in that case the last planned task could be added into another
+        // slot and after that another task will fit into a slot before
+        // the other slot. so in that case the tasks would be mixed
+        // up a bit (basically only sorted after their priority, but
+        // with this whole distribution logic I do want the sorting
+        // according to the time slots).
+        usort($this->tasks, function ($a, $b) {
+            if ($a['timeslotday_start'] == $b['timeslotday_start']) {
+                return 0;
+            }
+            return ($a['timeslotday_start'] < $b['timeslotday_start']) ? -1 : 1;
+        });
         return $this->tasks;
     }
 }
