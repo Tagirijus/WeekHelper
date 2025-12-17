@@ -31,13 +31,6 @@ class TimeSlotDay
     var $slots = [];
 
     /**
-     * The left minutes available to plan for this day.
-     *
-     * @var int
-     **/
-    var $available_time = 0;
-
-    /**
      * All the planned tasks for this day in the hopefully correct order.
      * Also there will be start and end (and other) values added to the
      * task array.
@@ -55,6 +48,19 @@ class TimeSlotDay
      * @var array
      **/
     var $planned_time_per_project_ids = [];
+
+    /**
+     * An array holding the last planned time in total
+     * for a consecutive block of the same project.
+     * This one is for the check of the
+     * "project_max_hours_block" project info.
+     *
+     * @var array
+     **/
+    var $planned_time_block = [
+        'project_id' => -1,
+        'time' => 0
+    ];
 
     /**
      * Initialize a time slot day instance with the given
@@ -87,7 +93,6 @@ class TimeSlotDay
     public function initSlots($config_string)
     {
         $this->slots = [];
-        $this->available_time = 0;
         $lines = explode("\r\n", $config_string ?? '');
         sort($lines);
         foreach ($lines as $line) {
@@ -118,9 +123,6 @@ class TimeSlotDay
                 'next' => $start,
                 'type' => $type
             ];
-
-            // also add to the overall left time contingent
-            $this->available_time += $end - $start;
         }
     }
 
@@ -235,25 +237,11 @@ class TimeSlotDay
     public function projectMaxHoursBlockRemain(&$task, $start)
     {
         $max_minutes_block = (int) round($task['project_max_hours_block'] * 60);
-
-        // maybe there is not even a slot planned at all yet?
-        if (empty($this->tasks)) {
-            return $max_minutes_block;
-        }
-
-        // if the last planned project is not the same
-        if (end($this->tasks)['project_id'] != $task['project_id']) {
-            return $max_minutes_block;
-
+        $project_id = $task['project_id'];
+        if ($this->planned_time_block['project_id'] == $project_id) {
+            return $max_minutes_block - $this->planned_time_block['time'];
         } else {
-            // maybe the last project is the same; check if the end time
-            // of it is greater than 5 minutes; then it's okay, I'd say
-            if ($start - end($this->tasks)['timeslotday_end'] > 5) {
-                return $max_minutes_block;
-            } else {
-                // otherwise get the difference, which could still be planned
-                return $max_minutes_block - end($this->tasks)['timeslotday_length'];
-            }
+            return $max_minutes_block;
         }
     }
 
@@ -315,6 +303,7 @@ class TimeSlotDay
      */
     public function addTaskToSlot(&$task, $slot_key, $start, $end)
     {
+        // prepare values and add the task
         $length = $end - $start;
         $prepared_task = array_merge($task, [
             'timeslotday_start' => $start,
@@ -323,13 +312,55 @@ class TimeSlotDay
         ]);
         $this->tasks[] = $prepared_task;
 
+        // update the tasks internal values; this is needed, in case
+        // the task will be processed by another TimeSlotDay instance.
         $task['time_remaining_minutes'] -= $length;
 
+        // update the internal slots
         $this->slots[$slot_key]['start'] += $length;
         $this->slots[$slot_key]['next'] += $length;
         $this->slots[$slot_key]['remain'] -= $length;
 
-        $this->available_time -= $length;
+        // update the internal values, which are important for the
+        // "project_max_hours_day" and "project_max_hours_block"
+        // project info.
+        $project_id = $task['project_id'];
+        if (!array_key_exists($project_id, $this->planned_time_per_project_ids)) {
+            $this->planned_time_per_project_ids[$project_id] = $length;
+        } else {
+            $this->planned_time_per_project_ids[$project_id] += $length;
+        }
+        if ($this->planned_time_block['project_id'] == $project_id) {
+            // check if there is a last planned task at all
+            if (count($this->tasks) >= 2) {
+                // check if the planned task before this one
+                // is of the same project and if its end time
+                // is apart <= 5 minutes from this newly added
+                // tasks start time. in that case it would be
+                // considered as the same block and the time
+                // would be added to the block cache count.
+                // otherwise it would be considered to be a new
+                // block and the length is the "fresh start" of
+                // the new block.
+                $other_project_id = $this->tasks[count($this->tasks) - 2]['project_id'];
+                $other_end_time = $this->tasks[count($this->tasks) - 2]['timeslotday_end'];
+                if (
+                    $other_project_id == $project_id
+                    && $start - $other_end_time <= 5
+                ) {
+                    $this->planned_time_block['time'] += $length;
+                } else {
+                    $this->planned_time_block['time'] = $length;
+                }
+            } else {
+                // no last planned task means it is considered a new
+                // fresh block start
+                $this->planned_time_block['time'] = $length;
+            }
+        } else {
+            $this->planned_time_block['project_id'] = $project_id;
+            $this->planned_time_block['time'] = $length;
+        }
     }
 
     /**
