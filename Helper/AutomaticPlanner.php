@@ -333,44 +333,78 @@ class AutomaticPlanner extends Base
         $out .= "\n";
         $out .= "monday tasks:\n";
         foreach ($final_plan['active']['mon'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "tuesday tasks:\n";
         foreach ($final_plan['active']['tue'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "wednesday tasks:\n";
         foreach ($final_plan['active']['wed'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "thursday tasks:\n";
         foreach ($final_plan['active']['thu'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "friday tasks:\n";
         foreach ($final_plan['active']['fri'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "saturday tasks:\n";
         foreach ($final_plan['active']['sat'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "sunday tasks:\n";
         foreach ($final_plan['active']['sun'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
         $out .= "\n";
         $out .= "overflow tasks:\n";
         foreach ($final_plan['active']['overflow'] as $task) {
-            $out .= "- " . $task['title'] . "(" . $task['timeslotday_length'] . " min)" . "\n";
+            $out .= $this->formatSinglePlaintextTask($task);
         }
 
+        return $out;
+    }
+
+    /**
+     * Format teh given task into a predefined line, which shall
+     * represent a single task.
+     *
+     * Maybe one day it might even be configurable via the settings.
+     *
+     * @param  array $task
+     * @return string
+     */
+    public function formatSinglePlaintextTask($task)
+    {
+        $out = '';
+        $start_daytime = (
+            (string) round($task['timeslotday_start'] / 60)
+            . ':'
+            . (string) sprintf('%02d', round($task['timeslotday_start'] % 60))
+        );
+        $end_daytime = (
+            (string) round($task['timeslotday_end'] / 60)
+            . ':'
+            . (string) sprintf('%02d', round($task['timeslotday_end'] % 60))
+        );
+        $length = (
+            (string) round($task['timeslotday_length'] / 60)
+            . ':'
+            . (string) sprintf('%02d', round($task['timeslotday_length'] % 60))
+        );
+
+        $out .= $start_daytime . ' - ' . $end_daytime;
+        $out .=  '  >  ' . $task['title'];
+        $out .= " (" . $length . " h)" . "\n";
         return $out;
     }
 }
