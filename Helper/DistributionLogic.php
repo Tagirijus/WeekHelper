@@ -113,13 +113,13 @@ class DistributionLogic
      */
     public function parseTimeSlots($time_slots_config)
     {
-        $this->time_slot_days['mon'] = new TimeSlotDay($time_slots_config['mon']);
-        $this->time_slot_days['tue'] = new TimeSlotDay($time_slots_config['tue']);
-        $this->time_slot_days['wed'] = new TimeSlotDay($time_slots_config['wed']);
-        $this->time_slot_days['thu'] = new TimeSlotDay($time_slots_config['thu']);
-        $this->time_slot_days['fri'] = new TimeSlotDay($time_slots_config['fri']);
-        $this->time_slot_days['sat'] = new TimeSlotDay($time_slots_config['sat']);
-        $this->time_slot_days['sun'] = new TimeSlotDay($time_slots_config['sun']);
+        $this->time_slot_days['mon'] = new TimeSlotDay($time_slots_config['mon'], 'mon');
+        $this->time_slot_days['tue'] = new TimeSlotDay($time_slots_config['tue'], 'tue');
+        $this->time_slot_days['wed'] = new TimeSlotDay($time_slots_config['wed'], 'wed');
+        $this->time_slot_days['thu'] = new TimeSlotDay($time_slots_config['thu'], 'thu');
+        $this->time_slot_days['fri'] = new TimeSlotDay($time_slots_config['fri'], 'fri');
+        $this->time_slot_days['sat'] = new TimeSlotDay($time_slots_config['sat'], 'sat');
+        $this->time_slot_days['sun'] = new TimeSlotDay($time_slots_config['sun'], 'sun');
         $this->time_slot_days['overflow'] = new TimeSlotDay('0:00-100:00');
     }
 }

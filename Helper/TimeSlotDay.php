@@ -6,6 +6,20 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 class TimeSlotDay
 {
     /**
+     * The day, which this TimeSlotDay is for.
+     *
+     * @var string
+     **/
+    var $day = 'mon';
+
+    /**
+     * The cache variable for the "now" time.
+     *
+     * @var array
+     **/
+    var $now = null;
+
+    /**
      * All slots for this day. This contains the set times,
      * the still-available times and their type, of course.
      *
@@ -74,10 +88,37 @@ class TimeSlotDay
      * raw config string for this day.
      *
      * @param string $config_string
+     * @param string $day
      */
-    public function __construct($config_string)
+    public function __construct($config_string, $day = 'mon')
     {
         $this->initSlots($config_string);
+        $this->day = $day;
+    }
+
+    /**
+     * Get the actual day (now) and its time in minutes of the day.
+     * Structure of the output array is:
+     *     [
+     *         'day' => 'mon',
+     *         'time' => 360
+     *     ]
+     * Above example would be Monday at 6:00 am.
+     *
+     * @return array
+     */
+    public function now()
+    {
+        if (is_null($this->now)) {
+            $day = strtolower(date('D'));
+            $t = localtime(time(), true);
+            $time = (int) round($t['tm_hour'] * 60 + $t['tm_min']);
+            $this->now = [
+                'day' => $day,
+                'time' => $time
+            ];
+        }
+        return $this->now;
     }
 
     /**
