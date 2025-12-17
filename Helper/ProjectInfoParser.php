@@ -34,7 +34,7 @@ class ProjectInfoParser
 
             // the max hours the projects tasks can be
             // planned for one day.
-            'project_max_hours_day' => 8,
+            'project_max_hours_day' => 8.0,
 
             // the max hours the projects tasks can be
             // planned for one consecutive work block.
@@ -43,10 +43,10 @@ class ProjectInfoParser
             // the actual sorting by skipping tasks from the
             // same project and taking the next best task
             // of another project to be planned.
-            'project_max_hours_block' => 8,
+            'project_max_hours_block' => 8.0,
 
             // the hourly wage for the project
-            'project_wage' => 0,
+            'project_wage' => 0.0,
 
             // an individual project alias
             'project_alias' => '',
@@ -77,14 +77,14 @@ class ProjectInfoParser
                 $data['project_type'] = str_replace('project_type=', '', $line);
 
             } elseif (str_starts_with($line, 'project_max_hours_day=')) {
-                $data['project_max_hours_day'] = (int) str_replace('project_max_hours_day=', '', $line);
+                $data['project_max_hours_day'] = (float) str_replace('project_max_hours_day=', '', $line);
 
             } elseif (str_starts_with($line, 'project_max_hours_block=')) {
-                $data['project_max_hours_block'] = (int) str_replace('project_max_hours_block=', '', $line);
+                $data['project_max_hours_block'] = (float) str_replace('project_max_hours_block=', '', $line);
                 $has_max_hours_block = true;
 
             } elseif (str_starts_with($line, 'project_wage=')) {
-                $data['project_wage'] = (int) str_replace('project_wage=', '', $line);
+                $data['project_wage'] = (float) str_replace('project_wage=', '', $line);
 
             } elseif (str_starts_with($line, 'project_alias=')) {
                 $data['project_alias'] = str_replace('project_alias=', '', $line);
