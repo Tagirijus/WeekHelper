@@ -19,7 +19,7 @@
 
     </div>
     <p class="weekhelper-config-weak-text">
-        <?= t('This is the core sorting logic for the automatic planner feature. Here you can define a sorting "column" (of a task) with asc/desc per line (column + whitespace + direction). Some important available columns are: project_priority, project_wage, project_max_hours, project_type, priority, column_pos, position, score. All "project_" keys are from my plugin. Further columns are the one from a native Kanbaord task array (see source code if in doubt).') ?>
+        <?= t('This is the core sorting logic for the automatic planner feature. Here you can define a sorting "column" (of a task) with asc/desc per line (column + whitespace + direction). Some important available columns are: project_priority, project_wage, project_max_hours, project_type, priority, column_position, position, score. All "project_" keys are from my plugin. Further columns are the one from a native Kanbaord task array (see source code if in doubt).') ?>
     </p>
 
     <br>
