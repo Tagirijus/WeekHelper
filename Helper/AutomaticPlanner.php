@@ -387,17 +387,17 @@ class AutomaticPlanner extends Base
     {
         $out = '';
         $start_daytime = (
-            (string) round($task['timeslotday_start'] / 60)
+            (string) floor($task['timeslotday_start'] / 60)
             . ':'
             . (string) sprintf('%02d', round($task['timeslotday_start'] % 60))
         );
         $end_daytime = (
-            (string) round($task['timeslotday_end'] / 60)
+            (string) floor($task['timeslotday_end'] / 60)
             . ':'
             . (string) sprintf('%02d', round($task['timeslotday_end'] % 60))
         );
         $length = (
-            (string) round($task['timeslotday_length'] / 60)
+            (string) floor($task['timeslotday_length'] / 60)
             . ':'
             . (string) sprintf('%02d', round($task['timeslotday_length'] % 60))
         );
