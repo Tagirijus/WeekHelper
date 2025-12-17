@@ -214,6 +214,16 @@ class TimeSlotDay
                 && $project_remaining_time_for_day > 0
                 && $project_remaining_time_for_block > 0
             ) {
+                // The max hours day/block minutes have to be used as well,
+                // in case otherwise the end time would be exceeded ...
+                $end_with_remain_for_day = $start + $project_remaining_time_for_day;
+                if ($end > $end_with_remain_for_day) {
+                    $end = $end_with_remain_for_day;
+                }
+                $end_with_remain_for_block = $start + $project_remaining_time_for_block;
+                if ($end > $end_with_remain_for_block) {
+                    $end = $end_with_remain_for_block;
+                }
                 $this->addTaskToSlot($task, $slot_key, $start, $end);
             }
         }
