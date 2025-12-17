@@ -23,7 +23,9 @@ class TimeSlotDay
      *                   starting point might increase. I do not
      *                   want the original 'start' value to be altered,
      *                   though, so I have this temporary value as well,
-     *         'type' => type of this slot or empty string for ALL
+     *         'type' => type of this slot or empty string for ALL,
+     *         'tasks' => the "final" array, holding all the planned tasks
+     *                    for this slot only
      *     ]
      *
      * @var array
@@ -55,12 +57,17 @@ class TimeSlotDay
      * This one is for the check of the
      * "project_max_hours_block" project info.
      *
+     * Structure will be:
+     *     [
+     *         slot_key => [
+     *             'project_id' => -1,
+     *             'time' => 0
+     *         ]
+     *     ]
+     *
      * @var array
      **/
-    var $planned_time_block = [
-        'project_id' => -1,
-        'time' => 0
-    ];
+    var $planned_time_block = [];
 
     /**
      * Initialize a time slot day instance with the given
@@ -121,6 +128,13 @@ class TimeSlotDay
                 'remain' => $end - $start,
                 'next' => $start,
                 'type' => $type
+            ];
+
+            // init the check variable for the project_hours_max_bloxk
+            // check later as well, since it depends on the slots
+            $this->planned_time_block[count($this->slots) - 1] = [
+                'project_id' => -1,
+                'time' => 0
             ];
         }
     }
@@ -184,7 +198,7 @@ class TimeSlotDay
             $end = $this->calculateEndOfSlot($task, $slot);
 
             $project_remaining_time_for_day = $this->projectMaxHoursDayRemain($task);
-            $project_remaining_time_for_block = $this->projectMaxHoursBlockRemain($task, $start);
+            $project_remaining_time_for_block = $this->projectMaxHoursBlockRemain($task, $slot_key);
 
             if (
                 $slot_key != -1
@@ -230,32 +244,15 @@ class TimeSlotDay
      * can be used.
      *
      * @param  array &$task
-     * @param  int   $start
+     * @param  int   $slot_key
      * @return int
      */
-    public function projectMaxHoursBlockRemain(&$task, $start)
+    public function projectMaxHoursBlockRemain(&$task, $slot_key)
     {
-        // TODO:
-        // The logic in this method is still flawed. It can happen that
-        // a task with higher priority will be planned before another task,
-        // which is planned in an earlier slot (due to project type). This
-        // would make a last planned task be in another time slot and the
-        // check for the "last planned task" would be useless.
-        // E.g. the next task to plan will be planned at 8:00 in a block
-        // from 6:00 to 9:00. But the last task was planned at 11:00
-        // in a slot from 11:00 to 13:00. The last task, which would be
-        // connected to the slot this next task will be planned in, is not
-        // the last added task, but the one added in the slot before at
-        // maybe 7:00 to 8:00. So this one would be the task before this one,
-        // actually.
-        //
-        // I have to fix the "planned_time_block" array and maybe move it
-        // to the slots array, so that every slot would hav its own variable
-        // of this kind, maybe.
         $max_minutes_block = (int) round($task['project_max_hours_block'] * 60);
         $project_id = $task['project_id'];
-        if ($this->planned_time_block['project_id'] == $project_id) {
-            return $max_minutes_block - $this->planned_time_block['time'];
+        if ($this->planned_time_block[$slot_key]['project_id'] == $project_id) {
+            return $max_minutes_block - $this->planned_time_block[$slot_key]['time'];
         } else {
             return $max_minutes_block;
         }
@@ -326,7 +323,6 @@ class TimeSlotDay
             'timeslotday_end' => $end,
             'timeslotday_length' => $length,
         ]);
-        $this->tasks[] = $prepared_task;
 
         // update the tasks internal values; this is needed, in case
         // the task will be processed by another TimeSlotDay instance.
@@ -336,6 +332,7 @@ class TimeSlotDay
         $this->slots[$slot_key]['start'] += $length;
         $this->slots[$slot_key]['next'] += $length;
         $this->slots[$slot_key]['remain'] -= $length;
+        $this->slots[$slot_key]['tasks'][] = $prepared_task;
 
         // update the internal values, which are important for the
         // "project_max_hours_day" and "project_max_hours_block"
@@ -346,9 +343,9 @@ class TimeSlotDay
         } else {
             $this->planned_time_per_project_ids[$project_id] += $length;
         }
-        if ($this->planned_time_block['project_id'] == $project_id) {
+        if ($this->planned_time_block[$slot_key]['project_id'] == $project_id) {
             // check if there is a last planned task at all
-            if (count($this->tasks) >= 2) {
+            if (count($this->slots[$slot_key]['tasks']) >= 2) {
                 // check if the planned task before this one
                 // is of the same project and if its end time
                 // is apart <= 5 minutes from this newly added
@@ -358,24 +355,28 @@ class TimeSlotDay
                 // otherwise it would be considered to be a new
                 // block and the length is the "fresh start" of
                 // the new block.
-                $other_project_id = $this->tasks[count($this->tasks) - 2]['project_id'];
-                $other_end_time = $this->tasks[count($this->tasks) - 2]['timeslotday_end'];
+                $other_project_id = $this->slots[$slot_key]['tasks'][
+                    count($this->slots[$slot_key]['tasks']) - 2
+                ]['project_id'];
+                $other_end_time = $this->slots[$slot_key]['tasks'][
+                    count($this->slots[$slot_key]['tasks']) - 2
+                ]['timeslotday_end'];
                 if (
                     $other_project_id == $project_id
                     && $start - $other_end_time <= 5
                 ) {
-                    $this->planned_time_block['time'] += $length;
+                    $this->planned_time_block[$slot_key]['time'] += $length;
                 } else {
-                    $this->planned_time_block['time'] = $length;
+                    $this->planned_time_block[$slot_key]['time'] = $length;
                 }
             } else {
                 // no last planned task means it is considered a new
                 // fresh block start
-                $this->planned_time_block['time'] = $length;
+                $this->planned_time_block[$slot_key]['time'] = $length;
             }
         } else {
-            $this->planned_time_block['project_id'] = $project_id;
-            $this->planned_time_block['time'] = $length;
+            $this->planned_time_block[$slot_key]['project_id'] = $project_id;
+            $this->planned_time_block[$slot_key]['time'] = $length;
         }
     }
 
@@ -387,20 +388,6 @@ class TimeSlotDay
      */
     public function getTasks()
     {
-        // sort the tasks on their start time. it can happen that tasks
-        // will be planned on another slot, due to the project type.
-        // in that case the last planned task could be added into another
-        // slot and after that another task will fit into a slot before
-        // the other slot. so in that case the tasks would be mixed
-        // up a bit (basically only sorted after their priority, but
-        // with this whole distribution logic I do want the sorting
-        // according to the time slots).
-        usort($this->tasks, function ($a, $b) {
-            if ($a['timeslotday_start'] == $b['timeslotday_start']) {
-                return 0;
-            }
-            return ($a['timeslotday_start'] < $b['timeslotday_start']) ? -1 : 1;
-        });
-        return $this->tasks;
+        return array_merge(...array_column($this->slots, 'tasks'));
     }
 }
