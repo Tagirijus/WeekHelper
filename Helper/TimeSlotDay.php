@@ -130,6 +130,15 @@ class TimeSlotDay
                 'type' => $type
             ];
 
+            // sort the slots on their start time, in case
+            // the user entered the slots in a wild order
+            usort($this->slots, function ($a, $b) {
+                if ($a['start'] == $b['start']) {
+                    return 0;
+                }
+                return ($a['start'] < $b['start']) ? -1 : 1;
+            });
+
             // init the check variable for the project_hours_max_bloxk
             // check later as well, since it depends on the slots
             $this->planned_time_block[count($this->slots) - 1] = [
