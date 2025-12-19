@@ -144,9 +144,6 @@ class TasksPlan
         // update the limits in ProjectConditions
         $this->project_conditions->addTimeToDay($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
 
-        // WEITER HIER
-        // plan the task finally:
-        // - into the TasksPlan
         // add task to the internal planning array and update other
         // neede internal attributes
         $this->addPlannedTimeForTask($task['id'], $time_to_plan);
