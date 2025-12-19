@@ -43,6 +43,12 @@ class ProjectInfoParser
             // the actual sorting by skipping tasks from the
             // same project and taking the next best task
             // of another project to be planned.
+            //
+            // !!!!!!!!!   ATTENTION   !!!!!!!!!
+            // At the moment this value is not used internally.
+            // It was an idea of mine, but it was to hard to
+            // implement for now. Maybe later ...
+            // !!!!!!!!!   ATTENTION   !!!!!!!!!
             'project_max_hours_block' => 8.0,
 
             // the hourly wage for the project
@@ -94,6 +100,12 @@ class ProjectInfoParser
 
         // if no "project_max_hours_block" was set manually, this value should
         // always copy the "project_max_hours_day" value.
+        //
+        // !!!!!!!!!   ATTENTION   !!!!!!!!!
+        // At the moment max_hours_block is not used internally.
+        // It was an idea of mine, but it was to hard to
+        // implement for now. Maybe later ...
+        // !!!!!!!!!   ATTENTION   !!!!!!!!!
         if (!$has_max_hours_block) {
             $data['project_max_hours_block'] = $data['project_max_hours_day'];
         }

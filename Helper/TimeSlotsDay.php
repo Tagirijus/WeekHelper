@@ -8,6 +8,13 @@ use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
 class TimeSlotsDay
 {
     /**
+     * The day this instance is for.
+     *
+     * @var string
+     **/
+    var $day = 'mon';
+
+    /**
      * All slots for this day. This contains the set times,
      * the still-available times and their type, of course.
      * Basically mainly managed through the TimeSpan class.
@@ -15,7 +22,7 @@ class TimeSlotsDay
      * A slot might have the following structure:
      *     [
      *         'timespan' => TimeSpan instance,
-     *         'type' => type of this slot or empty string for ALL
+     *         'project_type' => type of this slot or empty string for ALL
      *     ]
      *
      * @var array
@@ -27,10 +34,12 @@ class TimeSlotsDay
      * raw config string for this day.
      *
      * @param string $config_string
+     * @param string $day
      */
-    public function __construct($config_string)
+    public function __construct($config_string, $day = 'mon')
     {
         $this->initSlots($config_string);
+        $this->day = $day;
     }
 
     /**
@@ -55,13 +64,13 @@ class TimeSlotsDay
         $this->slots = [];
         $lines = explode("\r\n", $config_string ?? '');
         foreach ($lines as $line) {
-            // splitting initial config string into times and type
+            // splitting initial config string into times and project_type
             $parts = preg_split('/\s+/', $line);
             $times = $parts[0];
             if (count($parts) > 1) {
-                $type = $parts[1];
+                $project_type = $parts[1];
             } else {
-                $type = '';
+                $project_type = '';
             }
 
             // now splitting times into start and end
@@ -77,7 +86,7 @@ class TimeSlotsDay
             // add a time slot finally
             $this->slots[] = [
                 'timespan' => new TimeSpan($start, $end),
-                'type' => $type
+                'project_type' => $project_type
             ];
         }
 
@@ -89,6 +98,16 @@ class TimeSlotsDay
             }
             return ($a['timespan']->getStart() < $b['timespan']->getStart()) ? -1 : 1;
         });
+    }
+
+    /**
+     * Return the day this time slots day instance is for.
+     *
+     * @return string
+     */
+    public function getDay()
+    {
+        return $this->day;
     }
 
     /**
@@ -109,16 +128,16 @@ class TimeSlotsDay
      * Otherwise it will return the key of the internal slot array
      * for the slot, which still has remaining time to plan left.
      *
-     * @param  string $type
+     * @param  string $project_type
      * @return int
      */
-    public function nextSlot($type = '')
+    public function nextSlot($project_type = '')
     {
         foreach ($this->slots as $key => $slot) {
             // if a slot type is empty, it means that every project_type
             // may be planned here!
-            $type_is_valid = $slot['type'] == $type || $slot['type'] == '';
-            $has_remaining_time = $slot['timeslot']->length() > 0;
+            $type_is_valid = $slot['project_type'] == $project_type || $slot['project_type'] == '';
+            $has_remaining_time = $slot['timespan']->length() > 0;
             if ($type_is_valid && $has_remaining_time) {
                 return $key;
             }
@@ -164,6 +183,22 @@ class TimeSlotsDay
             }
         } else {
             return 'Slot "' . $slot_key . '" does not exist.';
+        }
+        return '';
+    }
+
+    /**
+     * Reutrn the start for the wanted slot.
+     *
+     * @param  integer $slot_key
+     * @return integer
+     */
+    public function getStartOfSlot($slot_key)
+    {
+        if (array_key_exists($slot_key, $this->slots)) {
+            return $this->slots[$slot_key]['timespan']->getStart();
+        } else {
+            return -1;
         }
     }
 }

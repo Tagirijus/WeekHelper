@@ -315,8 +315,9 @@ class AutomaticPlanner extends Base
             $this->getSortingLogicConfig()
         );
 
-        $distributor = new DistributionLogic;
-        $distribution = $distributor->distributeTasks($sorted_tasks, $this->getDistributionConfig());
+        $distributor = new DistributionLogic($this->getDistributionConfig());
+        $distributor->distributeTasks($sorted_tasks);
+        $distribution = $distributor->getTasksPlan();
 
         return $distribution;
     }
@@ -387,23 +388,23 @@ class AutomaticPlanner extends Base
     {
         $out = '';
         $start_daytime = (
-            (string) floor($task['timeslotday_start'] / 60)
+            (string) floor($task['start'] / 60)
             . ':'
-            . (string) sprintf('%02d', round($task['timeslotday_start'] % 60))
+            . (string) sprintf('%02d', round($task['start'] % 60))
         );
         $end_daytime = (
-            (string) floor($task['timeslotday_end'] / 60)
+            (string) floor($task['end'] / 60)
             . ':'
-            . (string) sprintf('%02d', round($task['timeslotday_end'] % 60))
+            . (string) sprintf('%02d', round($task['end'] % 60))
         );
         $length = (
-            (string) floor($task['timeslotday_length'] / 60)
+            (string) floor($task['length'] / 60)
             . ':'
-            . (string) sprintf('%02d', round($task['timeslotday_length'] % 60))
+            . (string) sprintf('%02d', round($task['length'] % 60))
         );
 
         $out .= $start_daytime . ' - ' . $end_daytime;
-        $out .=  '  >  ' . $task['title'];
+        $out .=  '  >  ' . $task['task']['title'];
         $out .= " (" . $length . " h)" . "\n";
         return $out;
     }
