@@ -62,7 +62,7 @@ class TimeSlotsDay
     public function initSlots($config_string)
     {
         $this->slots = [];
-        $lines = explode("\r\n", $config_string ?? '');
+        $lines = explode("\n", $config_string ?? '');
         foreach ($lines as $line) {
             // splitting initial config string into times and project_type
             $parts = preg_split('/\s+/', $line);
@@ -136,7 +136,7 @@ class TimeSlotsDay
         foreach ($this->slots as $key => $slot) {
             // if a slot type is empty, it means that every project_type
             // may be planned here!
-            $type_is_valid = $slot['project_type'] == $project_type || $slot['project_type'] == '';
+            $type_is_valid = $project_type == '' || $slot['project_type'] == $project_type;
             $has_remaining_time = $slot['timespan']->length() > 0;
             if ($type_is_valid && $has_remaining_time) {
                 return $key;
@@ -188,7 +188,7 @@ class TimeSlotsDay
     }
 
     /**
-     * Reutrn the start for the wanted slot.
+     * Return the start for the wanted slot.
      *
      * @param  integer $slot_key
      * @return integer
@@ -199,6 +199,52 @@ class TimeSlotsDay
             return $this->slots[$slot_key]['timespan']->getStart();
         } else {
             return -1;
+        }
+    }
+
+    /**
+     * Return the length for the wanted slot.
+     *
+     * @param  integer $slot_key
+     * @return integer
+     */
+    public function getLengthOfSlot($slot_key)
+    {
+        if (array_key_exists($slot_key, $this->slots)) {
+            return $this->slots[$slot_key]['timespan']->length();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Return the end for the wanted slot.
+     *
+     * @param  integer $slot_key
+     * @return integer
+     */
+    public function getEndOfSlot($slot_key)
+    {
+        if (array_key_exists($slot_key, $this->slots)) {
+            return $this->slots[$slot_key]['timespan']->getEnd();
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     * Deplete the given slot. Return if succeeded.
+     *
+     * @param  integer $slot_key
+     * @return boolean
+     */
+    public function depleteSlot($slot_key)
+    {
+        if (array_key_exists($slot_key, $this->slots)) {
+            $this->slots[$slot_key]['timespan']->deplete();
+            return true;
+        } else {
+            return false;
         }
     }
 }
