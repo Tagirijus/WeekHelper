@@ -271,7 +271,8 @@ class AutomaticPlanner extends Base
      *             'mon' => [array with sorted tasks],
      *             'tue' => [array with sorted tasks],
      *             ...
-     *             'sun' => [array with sorted tasks]
+     *             'sun' => [array with sorted tasks],
+     *             'overflow' => [array with sorted tasks]
      *         ],
      *         maybe more data here later ...
      *     ]

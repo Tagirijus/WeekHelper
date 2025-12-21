@@ -36,6 +36,7 @@ class TasksPlan
         'fri' => [],
         'sat' => [],
         'sun' => [],
+        'overflow' => [],
     ];
 
     /**
