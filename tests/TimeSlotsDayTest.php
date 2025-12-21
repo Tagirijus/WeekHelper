@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Helper/TimeSpan.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
 
 use PHPUnit\Framework\TestCase;
