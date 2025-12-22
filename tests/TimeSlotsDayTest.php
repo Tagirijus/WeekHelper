@@ -20,7 +20,7 @@ final class TimeSlotsDayTest extends TestCase
         self::$time_slots = new TimeSlotsDay(self::$config);
     }
 
-    public function testtimeSlorsDayInitialize(): void
+    public function testTimeSlotsDayInitialize(): void
     {
         $this->assertSame(
             0,  # should be the first array key internally
