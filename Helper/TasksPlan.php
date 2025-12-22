@@ -65,9 +65,9 @@ class TasksPlan
      *
      * @param ProjectConditions $project_conditions
      */
-    public function __construct(&$project_conditions)
+    public function __construct()
     {
-        $this->project_conditions = $project_conditions;
+        $this->project_conditions = new ProjectConditions();
     }
 
     /**

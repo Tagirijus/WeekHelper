@@ -2,21 +2,12 @@
 
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
-use Kanboard\Plugin\WeekHelper\Helper\ProjectConditions;
 use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
 
 
 class DistributionLogic
 {
-    /**
-     * The class attribute, holding the ProjectConditions
-     * instance.
-     *
-     * @var ProjectConditions
-     **/
-    var $project_conditions;
-
     /**
      * The global tasks plan instance.
      *
@@ -52,8 +43,7 @@ class DistributionLogic
     public function __construct($time_slots_config = '')
     {
         $this->parseTimeSlots($time_slots_config);
-        $this->project_conditions = new ProjectConditions();
-        $this->tasks_plan = new TasksPlan($this->project_conditions);
+        $this->tasks_plan = new TasksPlan();
     }
 
     /**
