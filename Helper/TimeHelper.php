@@ -13,7 +13,7 @@ class TimeHelper
      * @param  float $hours
      * @return integer
      */
-    static function hoursToMinutes($hours)
+    public static function hoursToMinutes($hours)
     {
         return (int) round($hours * 60);
     }
