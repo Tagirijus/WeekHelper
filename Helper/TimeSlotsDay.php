@@ -101,6 +101,16 @@ class TimeSlotsDay
     }
 
     /**
+     * Return the internal slots.
+     *
+     * @return array
+     */
+    public function getSlots()
+    {
+        return $this->slots;
+    }
+
+    /**
      * Return the day this time slots day instance is for.
      *
      * @return string
