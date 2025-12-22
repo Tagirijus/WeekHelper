@@ -80,9 +80,8 @@ class AutomaticPlanner extends Base
     {
         $projects = $this->projectModel->getAllByStatus(ProjectModel::ACTIVE);
         $projects = array_column($projects, null, 'id');
-        $project_info_parser = new ProjectInfoParser;
         foreach ($projects as $project_id => $project) {
-            $info = $project_info_parser->getProjectInfoByProject($project);
+            $info = ProjectInfoParser::getProjectInfoByProject($project);
             $projects[$project_id]['info'] = $info;
         }
         $this->projects = $projects;

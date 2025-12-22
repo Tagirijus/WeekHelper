@@ -15,7 +15,7 @@ class ProjectInfoParser
      * @param  array $project
      * @return array
      */
-    public function getProjectInfoByProject($project)
+    public static function getProjectInfoByProject($project)
     {
         $data = [
             // the priority for the project. basically this
@@ -58,7 +58,7 @@ class ProjectInfoParser
             'project_alias' => '',
         ];
 
-        $this->parseData($data, $project['description']);
+        self::parseData($data, $project['description']);
 
         return $data;
     }
@@ -70,9 +70,9 @@ class ProjectInfoParser
      * @param array   &$data
      * @param  string $description
      */
-    public function parseData(&$data, $description)
+    public static function parseData(&$data, $description)
     {
-        $lines = explode("\r\n", $description ?? '');
+        $lines = explode("\n", $description ?? '');
         $has_max_hours_block = false;
         foreach ($lines as $line) {
 
