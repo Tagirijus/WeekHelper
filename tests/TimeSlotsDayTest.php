@@ -75,5 +75,14 @@ final class TimeSlotsDayTest extends TestCase
             self::$time_slots->getStartOfSlot($slot_key),
             '11:30 (690 minutes) was not feteched as next start. Either depletion or type fetching failed.'
         );
+
+        // now try to plan a project type, which does not exist,
+        // thus should be planned on the last slot, which has no
+        // type restrictions attached
+        $this->assertSame(
+            2,
+            self::$time_slots->nextSlot('other_type'),
+            'Slot without type restriction could not be fetched.'
+        );
     }
 }

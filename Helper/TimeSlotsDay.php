@@ -136,7 +136,11 @@ class TimeSlotsDay
         foreach ($this->slots as $key => $slot) {
             // if a slot type is empty, it means that every project_type
             // may be planned here!
-            $type_is_valid = $project_type == '' || $slot['project_type'] == $project_type;
+            $type_is_valid = (
+                $project_type == ''
+                || $slot['project_type'] == ''
+                || $slot['project_type'] == $project_type
+            );
             $has_remaining_time = $slot['timespan']->length() > 0;
             if ($type_is_valid && $has_remaining_time) {
                 return $key;
