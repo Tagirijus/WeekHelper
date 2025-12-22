@@ -88,10 +88,11 @@ class SortingLogic
      * @param  string $sort_logic_config
      * @return array
      */
-    public static function sortTasks(&$tasks, $sort_logic_config)
+    public static function sortTasks($tasks, $sort_logic_config)
     {
         $sort_spec = self::parseSortLogic($sort_logic_config);
-        usort($tasks, self::comparator($sort_spec));
-        return $tasks;
+        $sorted_tasks = $tasks;
+        usort($sorted_tasks, self::comparator($sort_spec));
+        return $sorted_tasks;
     }
 }
