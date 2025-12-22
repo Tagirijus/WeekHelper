@@ -3,75 +3,59 @@
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
 
-/**
- * This function can be used in a usort() method, while getting an array, describing
- * on which key of the array (to sort) it shoul be sorted in which direction.
- * Ket's say we have this array:
- *
- *     [
- *         ['name' => 'abc', 'age' => 30],
- *         ['name' => 'abc', 'age' => 31],
- *         ['name' => 'abc', 'age' => 29],
- *         ['name' => 'zzz', 'age' => 50],
- *         ['name' => 'zzz', 'age' => 49],
- *         ['name' => 'def', 'age' => 30]
- *     ]
- *
- * We now could use this array as sort_spec:
- *
- *     [
- *         ['name' => 'asc'],
- *         ['age' => 'desc']
- *     ]
- *
- * And should get this result:
- *
- *     [
- *         ['name' => 'abc', 'age' => 31],
- *         ['name' => 'abc', 'age' => 30],
- *         ['name' => 'abc', 'age' => 29],
- *         ['name' => 'def', 'age' => 30]
- *         ['name' => 'zzz', 'age' => 50],
- *         ['name' => 'zzz', 'age' => 49],
- *     ]
- *
- * Example:
- *   usort($data, comparator($spec));
- *
- * @param  array  $sort_pec
- * @return callable
- */
-function comparator(array $sort_spec) {
-    return function($a, $b) use ($sort_spec) {
-        foreach ($sort_spec as $key => $dir) {
-            $va = $a[$key] ?? null;
-            $vb = $b[$key] ?? null;
-            // handle numeric vs string naturally; use strcmp for strings if desired
-            if ($va == $vb) continue;
-            $cmp = ($va < $vb) ? -1 : 1;
-            if (strtolower($dir) === 'desc') $cmp *= -1;
-            return $cmp;
-        }
-        return 0;
-    };
-}
-
-
 class SortingLogic
 {
     /**
-     * Sort the given tasks with the wanted logic and finally
-     * return the sorted array again.
+     * This function can be used in a usort() method, while getting an array, describing
+     * on which key of the array (to sort) it shoul be sorted in which direction.
+     * Ket's say we have this array:
      *
-     * @param  array $tasks
-     * @param  string $sort_logic_config
-     * @return array
+     *     [
+     *         ['name' => 'abc', 'age' => 30],
+     *         ['name' => 'abc', 'age' => 31],
+     *         ['name' => 'abc', 'age' => 29],
+     *         ['name' => 'zzz', 'age' => 50],
+     *         ['name' => 'zzz', 'age' => 49],
+     *         ['name' => 'def', 'age' => 30]
+     *     ]
+     *
+     * We now could use this array as sort_spec:
+     *
+     *     [
+     *         ['name' => 'asc'],
+     *         ['age' => 'desc']
+     *     ]
+     *
+     * And should get this result:
+     *
+     *     [
+     *         ['name' => 'abc', 'age' => 31],
+     *         ['name' => 'abc', 'age' => 30],
+     *         ['name' => 'abc', 'age' => 29],
+     *         ['name' => 'def', 'age' => 30]
+     *         ['name' => 'zzz', 'age' => 50],
+     *         ['name' => 'zzz', 'age' => 49],
+     *     ]
+     *
+     * Example:
+     *   usort($data, comparator($spec));
+     *
+     * @param  array  $sort_pec
+     * @return callable
      */
-    public function sortTasks(&$tasks, $sort_logic_config)
-    {
-        $sort_spec = $this->parseSortLogic($sort_logic_config);
-        usort($tasks, comparator($sort_spec));
-        return $tasks;
+    private static function comparator(array $sort_spec) {
+        return function($a, $b) use ($sort_spec) {
+            foreach ($sort_spec as $key => $dir) {
+                $va = $a[$key] ?? null;
+                $vb = $b[$key] ?? null;
+                // handle numeric vs string naturally; use strcmp for strings if desired
+                if ($va == $vb) continue;
+                $cmp = ($va < $vb) ? -1 : 1;
+                if (strtolower($dir) === 'desc') $cmp *= -1;
+                return $cmp;
+            }
+            return 0;
+        };
     }
 
     /**
@@ -81,7 +65,7 @@ class SortingLogic
      * @param  string $sort_logic_config
      * @return array
      */
-    public function parseSortLogic($sort_logic_config)
+    private static function parseSortLogic($sort_logic_config)
     {
         $lines = explode("\r\n", $sort_logic_config ?? '');
         $sort_spec = [];
@@ -94,5 +78,20 @@ class SortingLogic
             }
         }
         return $sort_spec;
+    }
+
+    /**
+     * Sort the given tasks with the wanted logic and finally
+     * return the sorted array again.
+     *
+     * @param  array $tasks
+     * @param  string $sort_logic_config
+     * @return array
+     */
+    public static function sortTasks(&$tasks, $sort_logic_config)
+    {
+        $sort_spec = self::parseSortLogic($sort_logic_config);
+        usort($tasks, self::comparator($sort_spec));
+        return $tasks;
     }
 }

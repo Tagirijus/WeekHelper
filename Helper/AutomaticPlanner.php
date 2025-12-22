@@ -310,8 +310,7 @@ class AutomaticPlanner extends Base
      */
     public function prepareWeek($tasks)
     {
-        $sorter = new SortingLogic;
-        $sorted_tasks = $sorter->sortTasks(
+        $sorted_tasks = SortingLogic::sortTasks(
             $tasks,
             $this->getSortingLogicConfig()
         );
