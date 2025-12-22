@@ -1,0 +1,159 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Helper/TasksPlan.php';
+require_once __DIR__ . '/../tests/TestTask.php';
+require_once __DIR__ . '/../Helper/ProjectConditions.php';
+require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
+require_once __DIR__ . '/../Helper/TimeSpan.php';
+require_once __DIR__ . '/../Helper/TimeHelper.php';
+
+use PHPUnit\Framework\TestCase;
+use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
+use Kanboard\Plugin\WeekHelper\tests\TestTask;
+use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
+
+
+final class TasksPlanTest extends TestCase
+{
+    public function testTasksPlanConditions()
+    {
+        $tasks_plan = new TasksPlan();
+
+        //                         title, prio, project_id, type,     max_hours, remain, spent
+        $task_a = TestTask::create('a',   0,    1,          'studio', 2,         2,      0);
+        $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
+        $this->assertSame(
+            120,
+            $tasks_plan->minutesCanBePlanned($task_a, $time_slots_day_mon),
+            'Task a could not be planned correctly on the given time slots day.'
+        );
+        // plan it
+        $plan_success = $tasks_plan->planTask($task_a, $time_slots_day_mon);
+        // now task a should be completely planned already
+        $this->assertSame(
+            0,
+            $tasks_plan->getTasksActualRemaining($task_a),
+            'Task a actual remaining is wrong.'
+        );
+        // and planning should be a success accordingly
+        $this->assertTrue($plan_success, 'planTask() did not return true ...');
+
+        //                         title, prio, project_id, type,     max_hours, remain, spent
+        $task_b = TestTask::create('b',   0,    1,          'studio', 2,         3,      0);
+
+        // first check the actual remaining, which should be still 180 minutes
+        $this->assertSame(
+            180,
+            $tasks_plan->getTasksActualRemaining($task_b),
+            'Task b actual remaining is wrong.'
+        );
+        // for monday the day limit is full for this project
+        $this->assertSame(
+            0,
+            $tasks_plan->project_conditions->getLeftDailyTime($task_b, $time_slots_day_mon->getDay()),
+            'Task b should not be able to be planned on Monday, since limit should be full for project.'
+        );
+
+        // now try to plan task b on some days
+        $time_slots_day_tue = new TimeSlotsDay("6:00-9:00 office", 'tue');
+        $this->assertSame(
+            0,
+            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_tue),
+            'Task b could be planned on the given time slots day, but should not be able to.'
+        );
+        $time_slots_day_wed = new TimeSlotsDay("6:00-7:00\n10:00-13:00 office", 'wed');
+        $this->assertSame(
+            60,
+            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_wed),
+            'Task b should be able to be planned for 60 min on Wednesday, but could not.'
+        );
+        $time_slots_day_thu = new TimeSlotsDay("6:00-9:00", 'thu');
+        $this->assertSame(
+            120,
+            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_thu),
+            'Task b should be able to be planned for 120 min on Thursday, but could not.'
+        );
+    }
+
+    public function testTasksPlanPlanningA()
+    {
+        $tasks_plan = new TasksPlan();
+
+        // for Monday only task A should be planned
+        $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
+        //                         title, prio, project_id, type,     max_hours, remain, spent
+        $task_a = TestTask::create('a',   0,    1,          'studio', 2,         2,      0);
+        //                         title, prio, project_id, type,     max_hours, remain, spent
+        $task_b = TestTask::create('b',   0,    1,          'studio', 2,         3,      0);
+
+        // should be planned
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        // should not be planned, since project max is reached already
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+
+        // for Tuesday only 1 hour of task B should be planned
+        $time_slots_day_tue = new TimeSlotsDay("10:00-11:00", 'tue');
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+
+        // on Wednesday nothing should be planned
+        $time_slots_day_wed = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 office", 'wed');
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_wed
+        );
+
+        // on Thursday the remaining 2 hours of task B should be planned,
+        // but split into two different slots
+        $time_slots_day_thu = new TimeSlotsDay("12:00-13:00\n16:00-17:00", 'thu');
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_thu
+        );
+
+        $this->assertSame(
+            [
+                'mon' => [[
+                    'task' => $task_a,
+                    'start' => 660,
+                    'end' => 780,
+                    'length' => 120,
+                ]],
+                'tue' => [[
+                    'task' => $task_b,
+                    'start' => 600,
+                    'end' => 660,
+                    'length' => 60,
+                ]],
+                'wed' => [],
+                'thu' => [[
+                    'task' => $task_b,
+                    'start' => 720,
+                    'end' => 780,
+                    'length' => 60,
+                ], [
+                    'task' => $task_b,
+                    'start' => 960,
+                    'end' => 1020,
+                    'length' => 60,
+                ]],
+                'fri' => [],
+                'sat' => [],
+                'sun' => [],
+                'overflow' => [],
+            ],
+            $tasks_plan->getPlan(),
+            'TasksPlan is incorrect.'
+        );
+    }
+}

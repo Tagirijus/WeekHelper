@@ -131,26 +131,44 @@ class TasksPlan
      */
     public function planTask($task, &$time_slots_day)
     {
-        $time_to_plan = $this->minutesCanBePlanned($task, $time_slots_day);
-        if ($time_to_plan == 0) {
-            return false;
+        $success = false;
+
+        // try to plan the given task over all available time slots
+        // of the TimeSlotsDay instance. e.g. it can happen that
+        // there might be more than one slot for this task to be used,
+        // in case a single slot might not have enough time for the task,
+        // but other remaining slots would have.
+        foreach ($time_slots_day->getSlots() as $slot) {
+
+            // first it has to be checked, if there even is enough time
+            // for the task to be planned available
+            $time_to_plan = $this->minutesCanBePlanned($task, $time_slots_day);
+            if ($time_to_plan == 0) {
+                break;
+            }
+
+            // then there should be an available slot left on the day
+            $next_slot_key = $time_slots_day->nextSlot($task['project_type']);
+            if ($next_slot_key == -1) {
+                break;
+            }
+
+            // finally get some variables for the planning and plan it
+            $start = $time_slots_day->getStartOfSlot($next_slot_key);
+            $end = $start + $time_to_plan;
+            $plan_success = $time_slots_day->planTime($next_slot_key, $time_to_plan, $start);
+            $success = $plan_success == '';
+
+            // update the limits in ProjectConditions
+            $this->project_conditions->addTimeToDay($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
+
+            // add task to the internal planning array and update other
+            // needed internal attributes
+            $this->addPlannedTimeForTask($task['id'], $time_to_plan);
+            $this->addTaskToPlan($task, $time_slots_day->getDay(), $start, $end);
         }
 
-        // update the TimeSlotsDay contingent
-        $next_slot_key = $time_slots_day->nextSlot($task['project_type']);
-        $start = $time_slots_day->getStartOfSlot($next_slot_key);
-        $end = $start + $time_to_plan;
-        $time_slots_day->planTime($next_slot_key, $time_to_plan, $start);
-
-        // update the limits in ProjectConditions
-        $this->project_conditions->addTimeToDay($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
-
-        // add task to the internal planning array and update other
-        // neede internal attributes
-        $this->addPlannedTimeForTask($task['id'], $time_to_plan);
-        $this->addTaskToPlan($task, $time_slots_day->getDay(), $start, $end);
-
-        return true;
+        return $success;
     }
 
     /**
@@ -172,6 +190,8 @@ class TasksPlan
     }
 
     /**
+     * BASICALLY THIS IS THE CONDITION CHECKER FOR TASK.
+     *
      * Check the conditions on which a task can be planned.
      * Outputs the possible length of the task, which could
      * be planned. So basically "0" means that a condition
