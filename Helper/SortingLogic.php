@@ -65,9 +65,9 @@ class SortingLogic
      * @param  string $sort_logic_config
      * @return array
      */
-    private static function parseSortLogic($sort_logic_config)
+    public static function parseSortLogic($sort_logic_config)
     {
-        $lines = explode("\r\n", $sort_logic_config ?? '');
+        $lines = explode("\n", $sort_logic_config ?? '');
         $sort_spec = [];
         foreach ($lines as $line) {
             $parts = preg_split('/\s+/', $line);
