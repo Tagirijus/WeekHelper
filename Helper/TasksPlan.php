@@ -131,7 +131,7 @@ class TasksPlan
      */
     public function planTask($task, &$time_slots_day)
     {
-        $time_to_plan = $this->checkConditions($task, $time_slots_day);
+        $time_to_plan = $this->minutesCanBePlanned($task, $time_slots_day);
         if ($time_to_plan == 0) {
             return false;
         }
@@ -181,7 +181,7 @@ class TasksPlan
      * @param  TimeSlotsDay $time_slots_day
      * @return integer
      */
-    public function checkConditions($task, $time_slots_day)
+    public function minutesCanBePlanned($task, $time_slots_day)
     {
         // this task is completely planned already
         $tasks_actual_remaining = $this->getTasksActualRemaining($task);
@@ -208,11 +208,23 @@ class TasksPlan
             return 0;
         }
 
+        // available length of slot
+        $slot_length = $time_slots_day->getLengthOfSlot($next_slot_key);
+
         // get possible time to plan and return it
-        return (
+        // prios here are:
+        // - complete actual remaining of task, if project max and slot length allows it
+        // - otherwise only project max, if slot allows it
+        // - otherwisw only the available slot length
+        $out = (
             ($tasks_actual_remaining > $left_time_for_day)
             ? $left_time_for_day : $tasks_actual_remaining
         );
+        $out = (
+            ($left_time_for_day > $slot_length)
+            ? $slot_length : $left_time_for_day
+        );
+        return $out;
     }
 
     /**
@@ -220,7 +232,7 @@ class TasksPlan
      */
     public function sortPlan()
     {
-        foreach ($this->plan as $day => &$tasks) {
+        foreach ($this->plan as &$tasks) {
             usort($tasks, function ($a, $b) {
                 if ($a['start'] == $b['start']) {
                     return 0;
