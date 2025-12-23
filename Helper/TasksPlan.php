@@ -241,6 +241,13 @@ class TasksPlan
         // available length of slot
         $slot_length = $time_slots_day->getLengthOfSlot($next_slot_key);
 
+        // does the slot have enough time according to the config
+        // minimum slot length?
+        if ($slot_length < $this->min_slot_length) {
+            $time_slots_day->depleteSlot($next_slot_key);
+            return 0;
+        }
+
         // get possible time to plan and return it
         // prios here are:
         // - complete actual remaining of task, if project max and slot length allows it
@@ -282,5 +289,15 @@ class TasksPlan
     {
         $this->sortPlan();
         return $this->plan;
+    }
+
+    /**
+     * Set the internal minimum slot length.
+     *
+     * @param integer $min_slot_length
+     */
+    public function setMinSlotLength($min_slot_length = 0)
+    {
+        $this->min_slot_length = $min_slot_length;
     }
 }

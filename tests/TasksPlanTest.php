@@ -17,46 +17,52 @@ use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
 
 final class TasksPlanTest extends TestCase
 {
-    public function testTasksPlanConditions()
+    public function testTasksPlanRemainingMinutes()
+    {
+        $tasks_plan = new TasksPlan();
+
+        //                         title, project_id, type,     max_hours, remain, spent
+        $task = TestTask::create('a',   1,          'studio', 2,         2,      0);
+        $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
+        $this->assertSame(
+            120,
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day_mon),
+            'Task A could not be planned correctly on the given time slots day.'
+        );
+        // plan it
+        $plan_success = $tasks_plan->planTask($task, $time_slots_day_mon);
+        // now task a should be completely planned already
+        $this->assertSame(
+            0,
+            $tasks_plan->getTasksActualRemaining($task),
+            'Task A actual remaining is wrong.'
+        );
+        // and planning should be a success accordingly
+        $this->assertTrue($plan_success, 'planTask() did not return true ...');
+    }
+
+    public function testTasksPlanDailyLimits()
     {
         $tasks_plan = new TasksPlan();
 
         //                         title, project_id, type,     max_hours, remain, spent
         $task_a = TestTask::create('a',   1,          'studio', 2,         2,      0);
+        $task   = TestTask::create('b',   1,          'studio', 2,         3,      0);
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
-        $this->assertSame(
-            120,
-            $tasks_plan->minutesCanBePlanned($task_a, $time_slots_day_mon),
-            'Task A could not be planned correctly on the given time slots day.'
-        );
-        // plan it
-        $plan_success = $tasks_plan->planTask($task_a, $time_slots_day_mon);
-        // now task a should be completely planned already
-        $this->assertSame(
-            0,
-            $tasks_plan->getTasksActualRemaining($task_a),
-            'Task A actual remaining is wrong.'
-        );
-        // and planning should be a success accordingly
-        $this->assertTrue($plan_success, 'planTask() did not return true ...');
 
-        //
-        // TASK B
-        //
-
-        //                         title, project_id, type,     max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          'studio', 2,         3,      0);
+        // plan the task to deplete the projects daily limit for this day
+        $tasks_plan->planTask($task_a, $time_slots_day_mon);
 
         // first check the actual remaining, which should be still 180 minutes
         $this->assertSame(
             180,
-            $tasks_plan->getTasksActualRemaining($task_b),
+            $tasks_plan->getTasksActualRemaining($task),
             'Task B actual remaining is wrong.'
         );
-        // for monday the day limit is full for this project
+        // for monday the day limit is full for this project, though
         $this->assertSame(
             0,
-            $tasks_plan->project_conditions->getLeftDailyTime($task_b, $time_slots_day_mon->getDay()),
+            $tasks_plan->project_conditions->getLeftDailyTime($task, $time_slots_day_mon->getDay()),
             'Task B should not be able to be planned on Monday, since limit should be full for project.'
         );
 
@@ -64,7 +70,7 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_tue = new TimeSlotsDay("6:00-9:00 office", 'tue');
         $this->assertSame(
             0,
-            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_tue),
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day_tue),
             'Task B could be planned on the given time slots day, but should not be able to'
             . ' due to project type restriction. Time slot has "office", but task is from'
             . ' project with type "studio".'
@@ -72,34 +78,71 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_wed = new TimeSlotsDay("6:00-7:00\n10:00-13:00 office", 'wed');
         $this->assertSame(
             60,
-            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_wed),
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day_wed),
             'Task B should be able to be planned for 60 min on Wednesday, but could not.'
             . ' On Wednesday there is a non-type-restricting slot of 60 min available.'
         );
         $time_slots_day_thu = new TimeSlotsDay("6:00-9:00", 'thu');
         $this->assertSame(
             120,
-            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_thu),
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day_thu),
             'Task B should be able to be planned for 120 min on Thursday, but could not.'
             . ' On Thursday there is a non-type-restricting slot available for 180 min.'
             . ' The project daily max is 120, though. So not the whole task should be'
             . ' able to plan on that day.'
         );
+    }
 
+    public function testTasksPlanRemainingMinutesMaxFromTask()
+    {
+        $tasks_plan = new TasksPlan();
 
-        //
-        // TASK C
-        //
-
-        $task_c = TestTask::create('c', 3, '', 4, 0.5, 0.5);
+        $task = TestTask::create('c', 3, '', 4, 0.5, 0.5);
         $time_slots_day = new TimeSlotsDay("6:00-9:00", 'mon');
 
         // initially the whole task, but nothing more should be
         // plannable on the timeslots first slot
         $this->assertSame(
             30,
-            $tasks_plan->minutesCanBePlanned($task_c, $time_slots_day),
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day),
             'Task A has more or less minutes to be planned on the given time slot day.'
+        );
+    }
+
+    public function testTasksPlanMinSlotLength()
+    {
+        $tasks_plan = new TasksPlan(15);
+
+        $task_a = TestTask::create('a', 4, '', 4, 2.75, 0);
+        $task_b = TestTask::create('b', 5, '', 4, 0.5, 0);
+        $time_slots_day = new TimeSlotsDay("6:00-9:00", 'mon');
+
+        // task A should fill up 2:45 hours, making the remaining
+        // time for the lot to be 15 minutes
+        $tasks_plan->planTask($task_a, $time_slots_day);
+
+        // now task B should get these 15 minutes left
+        $this->assertSame(
+            15,
+            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day),
+            'Task B should now have 15 available minutes to be planned on that slot left.'
+        );
+
+        // but things change, if the threshold gets higher
+        $tasks_plan->setMinSlotLength(16);
+
+        // now the minutes to plan should be 0
+        $this->assertSame(
+            0,
+            $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day),
+            'Task B should not have available minutes to be planned on that slot.'
+        );
+
+        // also the slot should now be depleted automatically
+        $this->assertSame(
+            0,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot should be depleted and have 0 minutes in length in total.'
         );
     }
 
