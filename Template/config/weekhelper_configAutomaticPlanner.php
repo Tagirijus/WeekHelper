@@ -211,6 +211,24 @@
         <?= t($slots_help) ?>
     </p>
 
+    <br>
+    <br>
+
+
+
+    <!-- minimum block length -->
+
+    <p class="weekhelper-config-weak-text">
+        <?= t('While planing tasks into time slots, time slots get depleted, technically. This is the minimum amount of minutes a time slot should have available for a task to be planned on it. Otherwise the time slot gets depleted automatically without any task planned. This way I can have some "minimum block length" for task to be planned on. (Disabled with anything < 1)') ?>
+    </p>
+
+    <div class="task-form-container">
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Minimum slot length in minutes'), 'minimum_slot_length') ?>
+            <?= $this->form->text('minimum_slot_length', ['minimum_slot_length' => $minimum_slot_length], [], []) ?>
+        </div>
+    </div>
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
