@@ -225,4 +225,58 @@ final class TasksPlanTest extends TestCase
             'TasksPlan plan A is incorrect.'
         );
     }
+
+    public function testTasksPlanPlanningBForMinSlotLength()
+    {
+        $tasks_plan = new TasksPlan(16);
+
+        // for Monday only task A should be planned
+        $time_slots_day_mon = new TimeSlotsDay("6:00-8:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          '',   4,         1.75,   0);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
+
+        // should be planned
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        // should not be planned, since min slot length is not fulfilled
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+        // this should be planned instead
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+
+        $this->assertSame(
+            [
+                'mon' => [[
+                    'task' => $task_a,
+                    'start' => 360,
+                    'end' => 465,
+                    'length' => 105,
+                ]],
+                'tue' => [[
+                    'task' => $task_b,
+                    'start' => 360,
+                    'end' => 480,
+                    'length' => 120,
+                ]],
+                'wed' => [],
+                'thu' => [],
+                'fri' => [],
+                'sat' => [],
+                'sun' => [],
+                'overflow' => [],
+            ],
+            $tasks_plan->getPlan(),
+            'TasksPlan plan B is incorrect.'
+        );
+    }
 }
