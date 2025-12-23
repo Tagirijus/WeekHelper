@@ -24,7 +24,7 @@ class DistributionLogic
      *
      * @var array
      **/
-    var $time_slots_day = [
+    var $time_slots_days = [
         'mon' => null,
         'tue' => null,
         'wed' => null,
@@ -83,20 +83,23 @@ class DistributionLogic
      */
     public function distributeTasks($tasks)
     {
-        // TODO:
-        // "JETZT" bekommen und alle Slots vor "JETZT" sozusagen
-        // "depleten".
-        // Dann kann der Planner nur noch ab jetzt bis in die Zukunft
-        // die Tasks verteilen.
-
-        foreach ($this->time_slots_day as &$time_slots_day) {
+        foreach ($this->time_slots_days as $time_slots_day) {
             // TODO:
             // Deplete all slots before "NOW" and continue with next possible slot.
             // So:
             // - $day is before "today"? -> deplete all slots of this day, continued
             // - $day is exactly "today"? -> deplete slots until "NOW" is reached
             // - $day is after "now"? -> go on as usual
-            // CODE HERE
+            //
+            // I could need a method, whit which TimeSlotsDay can be depleted by
+            // TimeSpans. So I could have a time span and this would be planned
+            // or deplete the slots accordingly. This way I could on the one hand
+            // deplete whole days and time spans "till now". But on the other hand
+            // I could use this methods as well to "deplete" certain time spans
+            // in the week, which could stand for dates I already set in my
+            // calendar or so.
+            //
+            // CODE HERE LATER
 
             // I iter through the tasks times the tasks itself, since
             // sometimes the same project / task may not be planned
@@ -109,10 +112,8 @@ class DistributionLogic
             // again, making it count(tasks) x the tasks.
             // I tried with a while loop, but this one got stuck in an
             // endless loop, unfortunately.
-            foreach ($tasks as $iter_task) {
-                foreach ($tasks as &$task) {
-                    $this->tasks_plan->planTask($task, $time_slots_day);
-                }
+            foreach ($tasks as $task) {
+                $this->tasks_plan->planTask($task, $time_slots_day);
             }
         }
     }
@@ -125,14 +126,14 @@ class DistributionLogic
      */
     public function parseTimeSlots($time_slots_config)
     {
-        $this->time_slots_day['mon'] = new TimeSlotsDay($time_slots_config['mon'], 'mon');
-        $this->time_slots_day['tue'] = new TimeSlotsDay($time_slots_config['tue'], 'tue');
-        $this->time_slots_day['wed'] = new TimeSlotsDay($time_slots_config['wed'], 'wed');
-        $this->time_slots_day['thu'] = new TimeSlotsDay($time_slots_config['thu'], 'thu');
-        $this->time_slots_day['fri'] = new TimeSlotsDay($time_slots_config['fri'], 'fri');
-        $this->time_slots_day['sat'] = new TimeSlotsDay($time_slots_config['sat'], 'sat');
-        $this->time_slots_day['sun'] = new TimeSlotsDay($time_slots_config['sun'], 'sun');
-        $this->time_slots_day['overflow'] = new TimeSlotsDay('0:00-100:00', 'overflow');
+        $this->time_slots_days['mon'] = new TimeSlotsDay($time_slots_config['mon'], 'mon');
+        $this->time_slots_days['tue'] = new TimeSlotsDay($time_slots_config['tue'], 'tue');
+        $this->time_slots_days['wed'] = new TimeSlotsDay($time_slots_config['wed'], 'wed');
+        $this->time_slots_days['thu'] = new TimeSlotsDay($time_slots_config['thu'], 'thu');
+        $this->time_slots_days['fri'] = new TimeSlotsDay($time_slots_config['fri'], 'fri');
+        $this->time_slots_days['sat'] = new TimeSlotsDay($time_slots_config['sat'], 'sat');
+        $this->time_slots_days['sun'] = new TimeSlotsDay($time_slots_config['sun'], 'sun');
+        $this->time_slots_days['overflow'] = new TimeSlotsDay('0:00-100:00', 'overflow');
     }
 
     /**
