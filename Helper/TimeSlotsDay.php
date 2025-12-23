@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 
 
 class TimeSlotsDay
@@ -79,8 +80,8 @@ class TimeSlotsDay
             // now splitting times into start and end
             $times_parts = preg_split('/\-/', $times);
             if (count($times_parts) == 2) {
-                $start = $this->parseTimeIntoMinutes($times_parts[0]);
-                $end = $this->parseTimeIntoMinutes($times_parts[1]);
+                $start = TimeHelper::readableToMinutes($times_parts[0]);
+                $end = TimeHelper::readableToMinutes($times_parts[1]);
             } else {
                 $start = 0;
                 $end = 0;
@@ -121,18 +122,6 @@ class TimeSlotsDay
     public function getDay()
     {
         return $this->day;
-    }
-
-    /**
-     * Parse a time string like "6:35" into int minutes "95".
-     *
-     * @param  string $time_string
-     * @return int
-     */
-    public function parseTimeIntoMinutes($time_string)
-    {
-        list($hours, $minutes) = array_map('intval', explode(':', $time_string, 2));
-        return ($hours * 60) + $minutes;
     }
 
     /**

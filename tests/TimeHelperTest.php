@@ -38,4 +38,13 @@ final class TimeHelperTest extends TestCase
             'TimeHelper could not convert hours to minutes correctly.'
         );
     }
+
+    public function testReadableToMinutes()
+    {
+        $this->assertSame(
+            390,
+            TimeHelper::readableToMinutes("6:30"),
+            'TimeHelper could not convert readable 6:30 to 390 minutes.'
+        );
+    }
 }
