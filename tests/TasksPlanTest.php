@@ -21,8 +21,8 @@ final class TasksPlanTest extends TestCase
     {
         $tasks_plan = new TasksPlan();
 
-        //                         title, prio, project_id, type,     max_hours, remain, spent
-        $task_a = TestTask::create('a',   0,    1,          'studio', 2,         2,      0);
+        //                         title, project_id, type,     max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          'studio', 2,         2,      0);
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
         $this->assertSame(
             120,
@@ -40,8 +40,8 @@ final class TasksPlanTest extends TestCase
         // and planning should be a success accordingly
         $this->assertTrue($plan_success, 'planTask() did not return true ...');
 
-        //                         title, prio, project_id, type,     max_hours, remain, spent
-        $task_b = TestTask::create('b',   0,    1,          'studio', 2,         3,      0);
+        //                         title, project_id, type,     max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          'studio', 2,         3,      0);
 
         // first check the actual remaining, which should be still 180 minutes
         $this->assertSame(
@@ -83,10 +83,10 @@ final class TasksPlanTest extends TestCase
 
         // for Monday only task A should be planned
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
-        //                         title, prio, project_id, type,     max_hours, remain, spent
-        $task_a = TestTask::create('a',   0,    1,          'studio', 2,         2,      0);
-        //                         title, prio, project_id, type,     max_hours, remain, spent
-        $task_b = TestTask::create('b',   0,    1,          'studio', 2,         3,      0);
+        //                         title, project_id, type,     max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          'studio', 2,         2,      0);
+        //                         title, project_id, type,     max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          'studio', 2,         3,      0);
 
         // should be planned
         $tasks_plan->planTask(

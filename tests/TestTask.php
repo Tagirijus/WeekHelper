@@ -14,7 +14,6 @@ class TestTask
 
     public static function create(
         $title,
-        $priority,
         $project_id,
         $project_type,
         $project_max_hours_day,
@@ -26,7 +25,6 @@ class TestTask
         return [
             'id' => $id,
             'title' => $title,
-            'priority' => $priority,
             'project_id' => $project_id,
             'project_type' => $project_type,
             'project_max_hours_day' => $project_max_hours_day,
