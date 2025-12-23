@@ -63,7 +63,10 @@ class TimeSlotsDay
     {
         $this->slots = [];
         $lines = explode("\n", $config_string ?? '');
-        foreach ($lines as $line) {
+        foreach ($lines as &$line) {
+
+            $line = trim($line);
+
             // splitting initial config string into times and project_type
             $parts = preg_split('/\s+/', $line);
             $times = $parts[0];
@@ -86,7 +89,7 @@ class TimeSlotsDay
             // add a time slot finally
             $this->slots[] = [
                 'timespan' => new TimeSpan($start, $end),
-                'project_type' => trim($project_type)
+                'project_type' => $project_type
             ];
         }
 
