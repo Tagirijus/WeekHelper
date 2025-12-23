@@ -80,7 +80,7 @@ class ProjectInfoParser
                 $data['project_priority'] = (int) str_replace('project_priority=', '', $line);
 
             } elseif (str_starts_with($line, 'project_type=')) {
-                $data['project_type'] = str_replace('project_type=', '', $line);
+                $data['project_type'] = trim(str_replace('project_type=', '', $line));
 
             } elseif (str_starts_with($line, 'project_max_hours_day=')) {
                 $data['project_max_hours_day'] = (float) str_replace('project_max_hours_day=', '', $line);
@@ -93,7 +93,7 @@ class ProjectInfoParser
                 $data['project_wage'] = (float) str_replace('project_wage=', '', $line);
 
             } elseif (str_starts_with($line, 'project_alias=')) {
-                $data['project_alias'] = str_replace('project_alias=', '', $line);
+                $data['project_alias'] = trim(str_replace('project_alias=', '', $line));
 
             }
         }

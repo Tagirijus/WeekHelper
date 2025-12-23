@@ -86,7 +86,7 @@ class TimeSlotsDay
             // add a time slot finally
             $this->slots[] = [
                 'timespan' => new TimeSpan($start, $end),
-                'project_type' => $project_type
+                'project_type' => trim($project_type)
             ];
         }
 
