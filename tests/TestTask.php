@@ -10,7 +10,7 @@ namespace Kanboard\Plugin\WeekHelper\tests;
  */
 class TestTask
 {
-    private static int $nextId = 0;
+    private static int $nextId = 1;
 
     public static function create(
         $title,
