@@ -210,8 +210,8 @@ class TasksPlan
         }
 
         // check project day limit
-        $left_time_for_day = $this->project_conditions->getLeftDailyTime($task, $time_slots_day->getDay());
-        if ($left_time_for_day == 0) {
+        $left_daily_limit = $this->project_conditions->getLeftDailyTime($task, $time_slots_day->getDay());
+        if ($left_daily_limit == 0) {
             return 0;
         }
 
@@ -237,12 +237,12 @@ class TasksPlan
         // - otherwise only project max, if slot allows it
         // - otherwisw only the available slot length
         $out = (
-            ($tasks_actual_remaining > $left_time_for_day)
-            ? $left_time_for_day : $tasks_actual_remaining
+            ($tasks_actual_remaining > $left_daily_limit)
+            ? $left_daily_limit : $tasks_actual_remaining
         );
         $out = (
-            ($left_time_for_day > $slot_length)
-            ? $slot_length : $left_time_for_day
+            ($out > $slot_length)
+            ? $slot_length : $out
         );
         return $out;
     }

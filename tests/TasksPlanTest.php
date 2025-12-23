@@ -27,7 +27,7 @@ final class TasksPlanTest extends TestCase
         $this->assertSame(
             120,
             $tasks_plan->minutesCanBePlanned($task_a, $time_slots_day_mon),
-            'Task a could not be planned correctly on the given time slots day.'
+            'Task A could not be planned correctly on the given time slots day.'
         );
         // plan it
         $plan_success = $tasks_plan->planTask($task_a, $time_slots_day_mon);
@@ -35,10 +35,14 @@ final class TasksPlanTest extends TestCase
         $this->assertSame(
             0,
             $tasks_plan->getTasksActualRemaining($task_a),
-            'Task a actual remaining is wrong.'
+            'Task A actual remaining is wrong.'
         );
         // and planning should be a success accordingly
         $this->assertTrue($plan_success, 'planTask() did not return true ...');
+
+        //
+        // TASK B
+        //
 
         //                         title, project_id, type,     max_hours, remain, spent
         $task_b = TestTask::create('b',   1,          'studio', 2,         3,      0);
@@ -47,13 +51,13 @@ final class TasksPlanTest extends TestCase
         $this->assertSame(
             180,
             $tasks_plan->getTasksActualRemaining($task_b),
-            'Task b actual remaining is wrong.'
+            'Task B actual remaining is wrong.'
         );
         // for monday the day limit is full for this project
         $this->assertSame(
             0,
             $tasks_plan->project_conditions->getLeftDailyTime($task_b, $time_slots_day_mon->getDay()),
-            'Task b should not be able to be planned on Monday, since limit should be full for project.'
+            'Task B should not be able to be planned on Monday, since limit should be full for project.'
         );
 
         // now try to plan task b on some days
@@ -61,19 +65,41 @@ final class TasksPlanTest extends TestCase
         $this->assertSame(
             0,
             $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_tue),
-            'Task b could be planned on the given time slots day, but should not be able to.'
+            'Task B could be planned on the given time slots day, but should not be able to'
+            . ' due to project type restriction. Time slot has "office", but task is from'
+            . ' project with type "studio".'
         );
         $time_slots_day_wed = new TimeSlotsDay("6:00-7:00\n10:00-13:00 office", 'wed');
         $this->assertSame(
             60,
             $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_wed),
-            'Task b should be able to be planned for 60 min on Wednesday, but could not.'
+            'Task B should be able to be planned for 60 min on Wednesday, but could not.'
+            . ' On Wednesday there is a non-type-restricting slot of 60 min available.'
         );
         $time_slots_day_thu = new TimeSlotsDay("6:00-9:00", 'thu');
         $this->assertSame(
             120,
             $tasks_plan->minutesCanBePlanned($task_b, $time_slots_day_thu),
-            'Task b should be able to be planned for 120 min on Thursday, but could not.'
+            'Task B should be able to be planned for 120 min on Thursday, but could not.'
+            . ' On Thursday there is a non-type-restricting slot available for 180 min.'
+            . ' The project daily max is 120, though. So not the whole task should be'
+            . ' able to plan on that day.'
+        );
+
+
+        //
+        // TASK C
+        //
+
+        $task_c = TestTask::create('c', 3, '', 4, 0.5, 0.5);
+        $time_slots_day = new TimeSlotsDay("6:00-9:00", 'mon');
+
+        // initially the whole task, but nothing more should be
+        // plannable on the timeslots first slot
+        $this->assertSame(
+            30,
+            $tasks_plan->minutesCanBePlanned($task_c, $time_slots_day),
+            'Task A has more or less minutes to be planned on the given time slot day.'
         );
     }
 
@@ -153,7 +179,7 @@ final class TasksPlanTest extends TestCase
                 'overflow' => [],
             ],
             $tasks_plan->getPlan(),
-            'TasksPlan is incorrect.'
+            'TasksPlan plan A is incorrect.'
         );
     }
 }
