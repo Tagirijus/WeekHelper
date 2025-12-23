@@ -47,6 +47,7 @@ final class DistributionLogicTest extends TestCase
             'fri' => '',
             'sat' => '',
             'sun' => '',
+            'min_slot_length' => 0,
         ];
 
         // expected sorted plan

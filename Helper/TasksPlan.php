@@ -60,14 +60,24 @@ class TasksPlan
     var $project_conditions = null;
 
     /**
+     * The minimum amount of minutes a slot should have
+     * available for a task to be planned on. Otherwise
+     * the slot will get depleted automatically.
+     *
+     * @var integer
+     **/
+    var $min_slot_length = 0;
+
+    /**
      * Initialize the instance with the given ProjectConditions
      * instance, which will be used and updated later on.
      *
-     * @param ProjectConditions $project_conditions
+     * @param integer $min_slot_length
      */
-    public function __construct()
+    public function __construct($min_slot_length = 0)
     {
         $this->project_conditions = new ProjectConditions();
+        $this->min_slot_length = $min_slot_length;
     }
 
     /**

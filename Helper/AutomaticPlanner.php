@@ -137,7 +137,8 @@ class AutomaticPlanner extends Base
             'thu' => $this->configModel->get('weekhelper_thursday_slots', ''),
             'fri' => $this->configModel->get('weekhelper_friday_slots', ''),
             'sat' => $this->configModel->get('weekhelper_saturday_slots', ''),
-            'sun' => $this->configModel->get('weekhelper_sunday_slots', '')
+            'sun' => $this->configModel->get('weekhelper_sunday_slots', ''),
+            'min_slot_length' => $this->configModel->get('weekhelper_minimum_slot_length', 0),
         ];
     }
 

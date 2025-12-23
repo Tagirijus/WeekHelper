@@ -43,7 +43,7 @@ class DistributionLogic
     public function __construct($time_slots_config = '')
     {
         $this->parseTimeSlots($time_slots_config);
-        $this->tasks_plan = new TasksPlan();
+        $this->tasks_plan = new TasksPlan($time_slots_config['min_slot_length']);
     }
 
     /**
