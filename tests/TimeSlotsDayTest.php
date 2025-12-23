@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Helper/TimeHelper.php';
 require_once __DIR__ . '/../Helper/TimeSpan.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
 
 use PHPUnit\Framework\TestCase;
+use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
 
 
@@ -83,6 +86,150 @@ final class TimeSlotsDayTest extends TestCase
             2,
             self::$time_slots->nextSlot('other_type'),
             'Slot without type restriction could not be fetched.'
+        );
+    }
+
+    public function testTimeSlotsDayDepleteByTimeSpan()
+    {
+        //
+        // cut something away from START
+        //
+
+        $time_slots_day = new TimeSlotsDay("6:00-16:00");
+        $time_span = new TimeSpan(
+            TimeHelper::readableToMinutes("6:00"),
+            TimeHelper::readableToMinutes("10:00"),
+        );
+        $time_slots_day->depleteByTimeSpan($time_span);
+        // there now should still just be one slot, which length
+        // shrinked to 6 hours / 360 minutes, starts at 10:00 / 600
+        // and still ends at 16:00 / 960
+        $this->assertSame(
+            360,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot of instance is not 6 hours / 360 min in length.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getStartOfSlot(0),
+            'Time slot of instance should start at 10:00 / 600 minutes.'
+        );
+        $this->assertSame(
+            960,
+            $time_slots_day->getEndOfSlot(0),
+            'Time slot of instance should end at 16:00 / 960 minutes.'
+        );
+
+
+        //
+        // cut something away from END
+        //
+
+        $time_slots_day = new TimeSlotsDay("6:00-16:00");
+        $time_span = new TimeSpan(
+            TimeHelper::readableToMinutes("10:00"),
+            TimeHelper::readableToMinutes("16:00"),
+        );
+        $time_slots_day->depleteByTimeSpan($time_span);
+        // there now should still just be one slot, which length
+        // shrinked to 4 hours / 240 minutes, starts at 6:00 / 360
+        // and ends at 10:00 / 600
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot of instance is not 4 hours / 240 min in length.'
+        );
+        $this->assertSame(
+            360,
+            $time_slots_day->getStartOfSlot(0),
+            'Time slot of instance should start at 6:00 / 360 minutes.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getEndOfSlot(0),
+            'Time slot of instance should end at 10:00 / 600 minutes.'
+        );
+
+
+        //
+        // cut something away from MIDDLE
+        //
+
+        $time_slots_day = new TimeSlotsDay("6:00-16:00");
+        $time_span = new TimeSpan(
+            TimeHelper::readableToMinutes("7:00"),
+            TimeHelper::readableToMinutes("15:00"),
+        );
+        $time_slots_day->depleteByTimeSpan($time_span);
+        // there now should be two slots:
+        // 1: 6:00-7:00 / 360-420
+        // 2: 15:00-16:00 / 900-960
+        $this->assertSame(
+            60,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot 1 of instance is not 1 hours / 60 min in length.'
+        );
+        $this->assertSame(
+            360,
+            $time_slots_day->getStartOfSlot(0),
+            'Time slot 1 of instance should start at 6:00 / 360 minutes.'
+        );
+        $this->assertSame(
+            420,
+            $time_slots_day->getEndOfSlot(0),
+            'Time slot 1 of instance should end at 7:00 / 420 minutes.'
+        );
+        $this->assertSame(
+            60,
+            $time_slots_day->getLengthOfSlot(1),
+            'Time slot 2 of instance is not 1 hours / 60 min in length.'
+        );
+        $this->assertSame(
+            900,
+            $time_slots_day->getStartOfSlot(1),
+            'Time slot 2 of instance should start at 15:00 / 900 minutes.'
+        );
+        $this->assertSame(
+            960,
+            $time_slots_day->getEndOfSlot(1),
+            'Time slot 2 of instance should end at 16:00 / 960 minutes.'
+        );
+
+
+        //
+        // cut EVERYTHING away
+        //
+
+        $time_slots_day = new TimeSlotsDay("6:00-16:00");
+        $time_span = new TimeSpan(
+            TimeHelper::readableToMinutes("6:00"),
+            TimeHelper::readableToMinutes("16:00"),
+        );
+        $time_slots_day->depleteByTimeSpan($time_span);
+        // technically the only available slot should not be depleted
+        $this->assertSame(
+            0,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot of instance shoudl be depleted.'
+        );
+
+        // this shoudl also work, when there are mor slots; then
+        // all slots should get depleted
+        $time_slots_day = new TimeSlotsDay("6:00-10:00\n15:00-16:00");
+        $time_span = new TimeSpan(
+            TimeHelper::readableToMinutes("6:00"),
+            TimeHelper::readableToMinutes("16:00"),
+        );
+        $time_slots_day->depleteByTimeSpan($time_span);
+        $this->assertSame(
+            0,
+            $time_slots_day->getLengthOfSlot(0),
+            'Time slot 1 of instance shoudl be depleted.'
+        );
+        $this->assertSame(
+            0,
+            $time_slots_day->getLengthOfSlot(1),
+            'Time slot 2 of instance shoudl be depleted.'
         );
     }
 }

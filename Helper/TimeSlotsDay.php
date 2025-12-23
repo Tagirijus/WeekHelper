@@ -253,4 +253,104 @@ class TimeSlotsDay
             return false;
         }
     }
+
+    /**
+     * Deplete slots by time span. This ultimately can
+     * generate new time slots, in case the span would
+     * cut a slot in half, basically.
+     *
+     * @param  TimeSpan $time_span
+     * @return boolean
+     */
+    public function depleteByTimeSpan($time_span)
+    {
+        try {
+            $new_slots = [];
+            foreach ($this->slots as $slot) {
+                $slot_updated = $this->depleteSingleSlotByTimeSpan($slot, $time_span);
+                $new_slots = array_merge($new_slots, $slot_updated);
+            }
+            $this->slots = $new_slots;
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Basically helper method of the parent method with
+     * almost the same name. This one will simply modify
+     * only the given slot with the given slot key.
+     *
+     * It will return an array holding the modified slot,
+     * or even multiple, in case it got split into half.
+     *
+     * @param  array $slot
+     * @param  TimeSpan $time_span
+     * @return array
+     */
+    public function depleteSingleSlotByTimeSpan($slot, $time_span)
+    {
+        // time span is not in the slot at all and won't do anything
+        if (
+            $time_span->getEnd() < $slot['timespan']->getStart()
+            || $time_span->getStart() > $slot['timespan']->getEnd()
+        ) {
+            return [$slot];
+
+        // time span will only cut out something from the start
+        } elseif (
+            $time_span->getStart() <= $slot['timespan']->getStart()
+            && $time_span->getEnd() > $slot['timespan']->getStart()
+            && $time_span->getEnd() < $slot['timespan']->getEnd()
+        ) {
+            $slot['timespan']->setStart($time_span->getEnd());
+            return [$slot];
+
+        // time span will only cut out something from the end
+        } elseif (
+            $time_span->getStart() > $slot['timespan']->getStart()
+            && $time_span->getStart() < $slot['timespan']->getEnd()
+            && $time_span->getEnd() >= $slot['timespan']->getEnd()
+        ) {
+            $slot['timespan']->setEnd($time_span->getStart());
+            return [$slot];
+
+        // time span will cut the slot into half
+        } elseif (
+            $time_span->getStart() > $slot['timespan']->getStart()
+            && $time_span->getStart() < $slot['timespan']->getEnd()
+            && $time_span->getEnd() > $slot['timespan']->getStart()
+            && $time_span->getEnd() < $slot['timespan']->getEnd()
+        ) {
+            $project_type = $slot['project_type'];
+            $slot_a = [
+                'timespan' => new TimeSpan(
+                    $slot['timespan']->getStart(),
+                    $time_span->getStart()
+                ),
+                'project_type' => $project_type
+            ];
+            $slot_b = [
+                'timespan' => new TimeSpan(
+                    $time_span->getEnd(),
+                    $slot['timespan']->getEnd()
+                ),
+                'project_type' => $project_type
+            ];
+            return [$slot_a, $slot_b];
+
+        // time span is exactly the slot or around it; make it depleted
+        } elseif (
+            $time_span->getStart() <= $slot['timespan']->getStart()
+            && $time_span->getEnd() >= $slot['timespan']->getEnd()
+        ) {
+            $slot['timespan']->deplete();
+            return [$slot];
+
+        // fallback: do nothing ...
+        } else {
+            return [$slot];
+        }
+    }
 }
