@@ -85,23 +85,6 @@ class DistributionLogic
     public function distributeTasks($tasks)
     {
         foreach ($this->time_slots_days as $time_slots_day) {
-            // TODO:
-            // Deplete all slots before "NOW" and continue with next possible slot.
-            // So:
-            // - $day is before "today"? -> deplete all slots of this day, continued
-            // - $day is exactly "today"? -> deplete slots until "NOW" is reached
-            // - $day is after "now"? -> go on as usual
-            //
-            // I could need a method, whit which TimeSlotsDay can be depleted by
-            // TimeSpans. So I could have a time span and this would be planned
-            // or deplete the slots accordingly. This way I could on the one hand
-            // deplete whole days and time spans "till now". But on the other hand
-            // I could use this methods as well to "deplete" certain time spans
-            // in the week, which could stand for dates I already set in my
-            // calendar or so.
-            //
-            // CODE HERE LATER
-
             // I iter through the tasks times the tasks itself, since
             // sometimes the same project / task may not be planned
             // consecutively, thus has to be put back and the next
