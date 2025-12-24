@@ -4,6 +4,7 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
+use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
 
 
 class DistributionLogic
@@ -176,5 +177,14 @@ class DistributionLogic
                 $time_slots_day->depleteByTimePoint($time_point);
             }
         }
+    }
+
+    /**
+     * Will create a TimePoint automatically internally for "now"
+     * and deplete the week until this point.
+     */
+    public function depleteUntilNow()
+    {
+        $this->depleteUntilTimePoint(new TimePoint());
     }
 }
