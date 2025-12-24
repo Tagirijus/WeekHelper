@@ -19,7 +19,7 @@ class TimeHelper
     }
 
     /**
-     * COnvert the given readbale time string into full minutes.
+     * Convert the given readbale time string into full minutes.
      *
      * @param  string $readable
      * @return integer
