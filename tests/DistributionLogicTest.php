@@ -8,10 +8,12 @@ require_once __DIR__ . '/../Helper/TasksPlan.php';
 require_once __DIR__ . '/../Helper/ProjectConditions.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
 require_once __DIR__ . '/../Helper/TimeSpan.php';
+require_once __DIR__ . '/../Helper/TimePoint.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
+use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 
 
@@ -121,6 +123,61 @@ final class DistributionLogicTest extends TestCase
             $sorted_plan,
             $distributed_plan,
             'DistributionLogic did not distribute tasks as expected.'
+        );
+    }
+
+    public function testDepleteUntilTimePoint()
+    {
+        $time_slots_config = [
+            'mon' => "6:00-9:00 office\n11:00-15:00",
+            'tue' => '10:00-12:00',
+            'wed' => "10:30-15:00\n17:00-18:00",
+            'thu' => "10:00-12:00 office\n15:00-16:00 studio",
+            'fri' => '10:00-12:00',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 0,
+        ];
+        $distributor = new DistributionLogic($time_slots_config);
+        $distributor->depleteUntilTimePoint(new TimePoint('wed 11:00'));
+        $this->assertSame(
+            -1,
+            $distributor->time_slots_days['mon']->nextSlot(),
+            'There should not be any slot left on Monday now.'
+        );
+        $this->assertSame(
+            -1,
+            $distributor->time_slots_days['tue']->nextSlot(),
+            'There should not be any slot left on Tuesday now.'
+        );
+        $wed_slot = $distributor->time_slots_days['wed']->nextSlot();
+        $this->assertSame(
+            0,
+            $wed_slot,
+            'There should be slots left on Wednesday now.'
+        );
+        $this->assertSame(
+            240,
+            $distributor->time_slots_days['wed']->getLengthOfSlot($wed_slot),
+            'There should be 4 hours / 240 min left on Wednesday.'
+        );
+        // some further tests of remaining slots in the week
+        $thu_slot = $distributor->time_slots_days['thu']->nextSlot();
+        $this->assertSame(
+            0,
+            $thu_slot,
+            'There should be slots left on Thursday.'
+        );
+        $thu_slot = $distributor->time_slots_days['thu']->nextSlot('studio');
+        $this->assertSame(
+            1,
+            $thu_slot,
+            'There should be 1 slot left on Thursday for "studio".'
+        );
+        $this->assertSame(
+            60,
+            $distributor->time_slots_days['thu']->getLengthOfSlot($thu_slot),
+            'The Thursday studio slot should have 1 hour / 60 min left.'
         );
     }
 }

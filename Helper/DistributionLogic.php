@@ -145,4 +145,36 @@ class DistributionLogic
     {
         return $this->tasks_plan->getPlan();
     }
+
+    /**
+     * Deplete all time slots until the given TimePoint. This
+     * basically could, for example, deplete all the time slots
+     * on all days before "now". But for testing purposes this
+     * can also be any other TimePoint.
+     *
+     * @param  TimePoint $time_point
+     */
+    public function depleteUntilTimePoint($time_point)
+    {
+        // iter through all time_slots_days values,
+        // until the given TimePoint difference in days is positive
+        foreach ($this->time_slots_days as &$time_slots_day) {
+            $day_diff = $time_slots_day->dayDiffFromTimePoint($time_point);
+
+            // basically stop completely, if the given time point is
+            // any day after the TimeSlotsDay day itself.
+            if ($day_diff < 0) {
+                return;
+
+            // deplete whole days, if it is before the day
+            } elseif ($day_diff > 0) {
+                $time_slots_day->deplete();
+
+            // same day now; deplete the given day TO the given
+            // TimePoint start
+            } elseif ($day_diff == 0) {
+                $time_slots_day->depleteByTimePoint($time_point);
+            }
+        }
+    }
 }
