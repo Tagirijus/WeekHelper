@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 require_once __DIR__ . '/../Helper/TimeSpan.php';
+require_once __DIR__ . '/../Helper/TimePoint.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
 
 
@@ -230,6 +232,31 @@ final class TimeSlotsDayTest extends TestCase
             0,
             $time_slots_day->getLengthOfSlot(1),
             'Time slot 2 of instance shoudl be depleted.'
+        );
+    }
+
+    public function testTimePointChecks()
+    {
+        $time_slots_day = new TimeSlotsDay("6:00-10:00\n15:00-16:00", 'mon');
+        $this->assertSame(
+            0,
+            $time_slots_day->slotKeyFromTimePoint(new TimePoint('mon 6:00')),
+            'Given TimePoint should be in the TimeSlotsDay.'
+        );
+        $this->assertSame(
+            1,
+            $time_slots_day->slotKeyFromTimePoint(new TimePoint('mon 15:00')),
+            'Given TimePoint should be in the TimeSlotsDay.'
+        );
+        $this->assertSame(
+            -1,
+            $time_slots_day->slotKeyFromTimePoint(new TimePoint('tue 6:00')),
+            'Given TimePoint should not be in the TimeSlotsDay.'
+        );
+        $this->assertSame(
+            -1,
+            $time_slots_day->slotKeyFromTimePoint(new TimePoint('mon 10:01')),
+            'Given TimePoint should not be in the TimeSlotsDay.'
         );
     }
 }

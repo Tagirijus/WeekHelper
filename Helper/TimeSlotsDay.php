@@ -353,4 +353,24 @@ class TimeSlotsDay
             return [$slot];
         }
     }
+
+    /**
+     * Check if the given TimePoint instance is in any of the momentary
+     * slots and return the slot_key then. Returns -1 if given TimeSpan
+     * is not in any of these slots.
+     *
+     * @param  TimePoint $time_point
+     * @return integer
+     */
+    public function slotKeyFromTimePoint($time_point)
+    {
+        if ($this->day == $time_point->getDay()) {
+            foreach ($this->slots as $key => $slot) {
+                if ($slot['timespan']->timepointIsIn($time_point)) {
+                    return $key;
+                }
+            }
+        }
+        return -1;
+    }
 }
