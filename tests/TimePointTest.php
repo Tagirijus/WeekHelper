@@ -37,4 +37,24 @@ final class TimePointTest extends TestCase
             'Given TimePoint should be at 4:23 / 263 min.'
         );
     }
+
+    public function testTimePointAgainstTimePoint()
+    {
+        $timepoint = new TimePoint('wed 6:00');
+        $this->assertSame(
+            -1,
+            $timepoint->dayDiffFromTimePoint(new TimePoint('tue 6:00')),
+            'Checked TimePoint day should be one day before base TimePoint.'
+        );
+        $this->assertSame(
+            0,
+            $timepoint->dayDiffFromTimePoint(new TimePoint('wed 6:00')),
+            'Checked TimePoint day should be the day like the base TimePoint.'
+        );
+        $this->assertSame(
+            4,
+            $timepoint->dayDiffFromTimePoint(new TimePoint('sun 6:00')),
+            'Checked TimePoint day should be four days after base TimePoint.'
+        );
+    }
 }

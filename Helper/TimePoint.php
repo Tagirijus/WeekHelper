@@ -103,4 +103,23 @@ class TimePoint
         $time_same = $this->getTime() == $time_point->getTime();
         return $day_same && $time_same;
     }
+
+    /**
+     * Return the number of days the given TimePoint
+     * day is away form this instances day. Positive
+     * number means it's after this day, negative means
+     * it is before. 0 means it is also today.
+     *
+     * @param  TimePoint $time_point
+     * @return integer
+     */
+    public function dayDiffFromTimePoint($time_point)
+    {
+        $map = [
+            'mon' => 0, 'tue' => 1, 'wed' => 2, 'thu' => 3,
+            'fri' => 4, 'sat' => 5, 'sun' => 6
+        ];
+
+        return $map[$time_point->getDay()] - $map[$this->day];
+    }
 }
