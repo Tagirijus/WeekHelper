@@ -85,17 +85,6 @@ class DistributionLogic
     public function distributeTasks($tasks)
     {
         foreach ($this->time_slots_days as $time_slots_day) {
-            // I iter through the tasks times the tasks itself, since
-            // sometimes the same project / task may not be planned
-            // consecutively, thus has to be put back and the next
-            // task has to be checked. but the other task might
-            // still have remaining time to be planned. so I should
-            // re-check this this task again.
-            // I am doing probably the most noobish thing here by
-            // itering through the tasks and inside through the tasks
-            // again, making it count(tasks) x the tasks.
-            // I tried with a while loop, but this one got stuck in an
-            // endless loop, unfortunately.
             foreach ($tasks as $task) {
                 $this->tasks_plan->planTask($task, $time_slots_day);
             }
