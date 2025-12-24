@@ -277,4 +277,20 @@ final class TimeSlotsDayTest extends TestCase
             'Given TimePoint should be on the same day as the TimeSlotsDay.'
         );
     }
+
+    public function testDepletion()
+    {
+        $time_slots_day = new TimeSlotsDay("6:00-10:00 office\n15:00-16:00 office\n19:00-20:00 studio", 'mon');
+        $this->assertSame(
+            2,
+            $time_slots_day->nextSlot('studio'),
+            'Initially there should be a slot available for this TimeSlotsDay.'
+        );
+        $time_slots_day->deplete();
+        $this->assertSame(
+            -1,
+            $time_slots_day->nextSlot(),
+            'After depletion there should not be any slot available for this TimeSlotsDay.'
+        );
+    }
 }

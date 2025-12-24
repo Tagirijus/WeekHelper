@@ -240,6 +240,16 @@ class TimeSlotsDay
     }
 
     /**
+     * Simply deplete all the slots completely for this day.
+     */
+    public function deplete()
+    {
+        foreach ($this->slots as &$slot) {
+            $slot['timespan']->deplete();
+        }
+    }
+
+    /**
      * Deplete the given slot. Return if succeeded.
      *
      * @param  integer $slot_key
