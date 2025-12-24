@@ -34,7 +34,7 @@ class ProjectInfoParser
 
             // the max hours the projects tasks can be
             // planned for one day.
-            'project_max_hours_day' => 8.0,
+            'project_max_hours_day' => 24.0,
 
             // the max hours the projects tasks can be
             // planned for one consecutive work block.
@@ -49,7 +49,7 @@ class ProjectInfoParser
             // It was an idea of mine, but it was to hard to
             // implement for now. Maybe later ...
             // !!!!!!!!!   ATTENTION   !!!!!!!!!
-            'project_max_hours_block' => 8.0,
+            'project_max_hours_block' => 24.0,
 
             // the hourly wage for the project
             'project_wage' => 0.0,
