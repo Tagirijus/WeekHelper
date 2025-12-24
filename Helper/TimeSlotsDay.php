@@ -461,4 +461,21 @@ class TimeSlotsDay
         $tmp_timepoint = new TimePoint($this->day . ' 0:00');
         return $tmp_timepoint->dayDiffFromTimePoint($time_point);
     }
+
+    /**
+     * Return the overall length of the day. With init_value
+     * ste to "true" it will use the original TimeSpans of
+     * the slots.
+     *
+     * @param  boolean $init_value
+     * @return integer
+     */
+    public function getLength($init_value = false)
+    {
+        $out = 0;
+        foreach ($this->slots as $key => $slot) {
+            $out += $this->getLengthOfSlot($key, $init_value);
+        }
+        return $out;
+    }
 }

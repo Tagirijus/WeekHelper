@@ -369,4 +369,26 @@ final class TimeSlotsDayTest extends TestCase
             . ' also for init_value - this should not have changed.'
         );
     }
+
+    public function testGetOverallLength()
+    {
+        $time_slots_day = new TimeSlotsDay("10:00-11:00\n20:00-22:00", 'mon');
+        $this->assertSame(
+            180,
+            $time_slots_day->getLength(),
+            'Initially the TimeSlotsDay should have 3 hours / 180 min in total.'
+        );
+        $time_slots_day->depleteSlot(0);
+        $this->assertSame(
+            120,
+            $time_slots_day->getLength(),
+            'After depleting the first slot, there should only be 2 hours / 120 min left.'
+        );
+        $this->assertSame(
+            180,
+            $time_slots_day->getLength(true),
+            'After depleting the first slot, there should only be 2 hours / 120 min left,'
+            . ' but with init_value==true it should look at the init TimeSpan.'
+        );
+    }
 }
