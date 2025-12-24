@@ -258,5 +258,23 @@ final class TimeSlotsDayTest extends TestCase
             $time_slots_day->slotKeyFromTimePoint(new TimePoint('mon 10:01')),
             'Given TimePoint should not be in the TimeSlotsDay.'
         );
+
+        // also check the difference in days
+        $time_slots_day = new TimeSlotsDay("6:00-10:00\n15:00-16:00", 'wed');
+        $this->assertSame(
+            -1,
+            $time_slots_day->dayDiffFromTimePoint(new TimePoint('tue 6:00')),
+            'Given TimePoint should be -1 days be away from TimeSlotsDay.'
+        );
+        $this->assertSame(
+            2,
+            $time_slots_day->dayDiffFromTimePoint(new TimePoint('fri 6:00')),
+            'Given TimePoint should be +2 days be away from TimeSlotsDay.'
+        );
+        $this->assertSame(
+            0,
+            $time_slots_day->dayDiffFromTimePoint(new TimePoint('wed 19:00')),
+            'Given TimePoint should be on the same day as the TimeSlotsDay.'
+        );
     }
 }

@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 
 
@@ -372,5 +373,23 @@ class TimeSlotsDay
             }
         }
         return -1;
+    }
+
+    /**
+     * Return the difference of days for the given TimePoint
+     * from the internal days. This method will create another
+     * pseudo TimePoint temporarily for this check.
+     *
+     * Positive numbers mean that the given TimePoint is after
+     * the internal day, negative means is is before, 0 means
+     * it is the same day.
+     *
+     * @param  TimePoint $time_point
+     * @return integer
+     */
+    public function dayDiffFromTimePoint($time_point)
+    {
+        $tmp_timepoint = new TimePoint($this->day . ' 0:00');
+        return $tmp_timepoint->dayDiffFromTimePoint($time_point);
     }
 }
