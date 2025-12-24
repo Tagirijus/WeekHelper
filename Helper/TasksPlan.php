@@ -52,12 +52,19 @@ class TasksPlan
     var $planned_tasks_times = [];
 
     /**
-     * The ProjectConditions instance from outside
-     * here as a reference.
+     * Per project storage of how much for which day a
+     * project was planned already. Structure:
+     *     [
+     *         project_id => [
+     *             'mon' => time,
+     *             'tue' => time,
+     *             ...
+     *         ]
+     *     ]
      *
-     * @var ProjectConditions
+     * @var array
      **/
-    var $project_conditions = null;
+    var $planned_project_times = [];
 
     /**
      * The minimum amount of minutes a slot should have
@@ -69,14 +76,12 @@ class TasksPlan
     var $min_slot_length = 0;
 
     /**
-     * Initialize the instance with the given ProjectConditions
-     * instance, which will be used and updated later on.
+     * Initialize the instance.
      *
      * @param integer $min_slot_length
      */
     public function __construct($min_slot_length = 0)
     {
-        $this->project_conditions = new ProjectConditions();
         $this->min_slot_length = $min_slot_length;
     }
 
@@ -128,6 +133,63 @@ class TasksPlan
     }
 
     /**
+     * Add planned time to the project.
+     *
+     * @param integer $project_id
+     * @param string $day
+     * @param integer $time
+     */
+    public function addPlannedTimeForProject($project_id, $day, $time)
+    {
+        if (!array_key_exists($project_id, $this->planned_project_times)) {
+            $this->planned_project_times[$project_id] = [
+                'mon' => 0,
+                'tue' => 0,
+                'wed' => 0,
+                'thu' => 0,
+                'fri' => 0,
+                'sat' => 0,
+                'sun' => 0,
+                'overflow' => 0,
+            ];
+        }
+        $this->planned_project_times[$project_id][$day] += $time;
+    }
+
+    /**
+     * Return the planned time for the whole day for the project.
+     *
+     * @param  integer $project_id
+     * @param  string $day
+     */
+    public function getPlannedTimeForProject($project_id, $day)
+    {
+        if (!array_key_exists($project_id, $this->planned_project_times)) {
+            // basically initialize some kind of empty day-time counter
+            // here, if the given id did not exist.
+            $this->addPlannedTimeForProject($project_id, $day, 0);
+        }
+        return $this->planned_project_times[$project_id][$day];
+    }
+
+    /**
+     * Check if the daily limit for the given task is full. A task
+     * array will also hold the "project_max_hours_day" value so
+     * that I can check on this key. This method will return the
+     * remaining contingent available for the project.
+     *
+     * @param  array $task
+     * @param  string $day
+     * @return integer
+     */
+    public function getLeftDailyTime($task, $day)
+    {
+        $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
+        $project_id = $task['project_id'];
+        return $project_daily_limit - $this->getPlannedTimeForProject($project_id, $day);
+    }
+
+    /**
      * Plan the given task into the time slot, which will automatically get
      * the correct next time slot key. Only the length is needed from
      * outside this method.
@@ -170,7 +232,7 @@ class TasksPlan
             $success = $plan_success == '';
 
             // update the limits in ProjectConditions
-            $this->project_conditions->addTimeToDay($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
+            $this->addPlannedTimeForProject($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
 
             // add task to the internal planning array and update other
             // needed internal attributes
@@ -220,7 +282,7 @@ class TasksPlan
         }
 
         // check project day limit
-        $left_daily_limit = $this->project_conditions->getLeftDailyTime($task, $time_slots_day->getDay());
+        $left_daily_limit = $this->getLeftDailyTime($task, $time_slots_day->getDay());
         if ($left_daily_limit == 0) {
             return 0;
         }

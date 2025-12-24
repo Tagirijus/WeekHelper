@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Helper/TasksPlan.php';
 require_once __DIR__ . '/../tests/TestTask.php';
-require_once __DIR__ . '/../Helper/ProjectConditions.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
 require_once __DIR__ . '/../Helper/TimeSpan.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
@@ -62,7 +61,7 @@ final class TasksPlanTest extends TestCase
         // for monday the day limit is full for this project, though
         $this->assertSame(
             0,
-            $tasks_plan->project_conditions->getLeftDailyTime($task, $time_slots_day_mon->getDay()),
+            $tasks_plan->getLeftDailyTime($task, $time_slots_day_mon->getDay()),
             'Task B should not be able to be planned on Monday, since limit should be full for project.'
         );
 
