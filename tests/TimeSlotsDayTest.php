@@ -325,4 +325,48 @@ final class TimeSlotsDayTest extends TestCase
             'Last slot should now only have 0.5 hours / 30 minutes left.'
         );
     }
+
+    public function testTimespanInitValues()
+    {
+        $time_slots_day = new TimeSlotsDay("6:00-10:00 office\n15:00-16:00 office\n19:00-20:00 studio", 'mon');
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot(0),
+            'Initially the first time slot should have 4 hours / 240 min.'
+        );
+        $time_slots_day->depleteSlot(0);
+        $this->assertSame(
+            0,
+            $time_slots_day->getLengthOfSlot(0),
+            'After depletion the first time slot should have nothing left.'
+        );
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot(0, true),
+            'After depletion the first time slot should have nothing left, but with the'
+            . ' init_value==true parameter the original value should be returned.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getStartOfSlot(0),
+            'After depletion the first time slot should have end as start.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getEndOfSlot(0),
+            'After depletion the first time slot should have the same end.'
+        );
+        $this->assertSame(
+            360,
+            $time_slots_day->getStartOfSlot(0, true),
+            'After depletion the first time slot should have the same start as before,'
+            . ' when init_value==true.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getEndOfSlot(0, true),
+            'After depletion the first time slot should have the same end,'
+            . ' also for init_value - this should not have changed.'
+        );
+    }
 }

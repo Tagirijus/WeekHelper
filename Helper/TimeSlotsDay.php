@@ -91,6 +91,7 @@ class TimeSlotsDay
             // add a time slot finally
             $this->slots[] = [
                 'timespan' => new TimeSpan($start, $end),
+                'timespan_init' => new TimeSpan($start, $end),
                 'project_type' => $project_type
             ];
         }
@@ -197,13 +198,24 @@ class TimeSlotsDay
     /**
      * Return the start for the wanted slot.
      *
+     * With $init_value set to "true", the initial values
+     * for the internal TimeSpan of this slot should be used.
+     * That way it does not matter how much there is left or
+     * if the slot is depleted - it will just return the original
+     * start of the slot.
+     *
      * @param  integer $slot_key
+     * @param  boolean $init_value
      * @return integer
      */
-    public function getStartOfSlot($slot_key)
+    public function getStartOfSlot($slot_key, $init_value = false)
     {
         if (array_key_exists($slot_key, $this->slots)) {
-            return $this->slots[$slot_key]['timespan']->getStart();
+            if ($init_value) {
+                return $this->slots[$slot_key]['timespan_init']->getStart();
+            } else {
+                return $this->slots[$slot_key]['timespan']->getStart();
+            }
         } else {
             return -1;
         }
@@ -212,13 +224,24 @@ class TimeSlotsDay
     /**
      * Return the length for the wanted slot.
      *
+     * With $init_value set to "true", the initial values
+     * for the internal TimeSpan of this slot should be used.
+     * That way it does not matter how much there is left or
+     * if the slot is depleted - it will just return the original
+     * length of the slot.
+     *
      * @param  integer $slot_key
+     * @param  boolean $init_value
      * @return integer
      */
-    public function getLengthOfSlot($slot_key)
+    public function getLengthOfSlot($slot_key, $init_value = false)
     {
         if (array_key_exists($slot_key, $this->slots)) {
-            return $this->slots[$slot_key]['timespan']->length();
+            if ($init_value) {
+                return $this->slots[$slot_key]['timespan_init']->length();
+            } else {
+                return $this->slots[$slot_key]['timespan']->length();
+            }
         } else {
             return -1;
         }
@@ -227,13 +250,24 @@ class TimeSlotsDay
     /**
      * Return the end for the wanted slot.
      *
+     * With $init_value set to "true", the initial values
+     * for the internal TimeSpan of this slot should be used.
+     * That way it does not matter how much there is left or
+     * if the slot is depleted - it will just return the original
+     * end of the slot.
+     *
      * @param  integer $slot_key
+     * @param  boolean $init_value
      * @return integer
      */
-    public function getEndOfSlot($slot_key)
+    public function getEndOfSlot($slot_key, $init_value = false)
     {
         if (array_key_exists($slot_key, $this->slots)) {
-            return $this->slots[$slot_key]['timespan']->getEnd();
+            if ($init_value) {
+                return $this->slots[$slot_key]['timespan_init']->getEnd();
+            } else {
+                return $this->slots[$slot_key]['timespan']->getEnd();
+            }
         } else {
             return -1;
         }
