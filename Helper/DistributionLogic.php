@@ -17,6 +17,16 @@ class DistributionLogic
     var $tasks_plan;
 
     /**
+     * The virtual plan, which will basically
+     * hold the processed tasks / spent time.
+     * It will be used to update the actual
+     * TasksPlan instance project daily limits.
+     *
+     * @var TasksPlan
+     **/
+    var $worked_plan;
+
+    /**
      * An array with all the TimeSlotsDay instances, which
      * are capable of holding slot capacities.
      * The last ("overflow") instance is basically a day
@@ -45,6 +55,10 @@ class DistributionLogic
     {
         $this->parseTimeSlots($time_slots_config);
         $this->tasks_plan = new TasksPlan($time_slots_config['min_slot_length']);
+        $this->worked_plan = new TasksPlan(
+            $time_slots_config['min_slot_length'],
+            true
+        );
     }
 
     /**
@@ -131,5 +145,26 @@ class DistributionLogic
     public function depleteUntilNow()
     {
         $this->depleteUntilTimePoint(new TimePoint());
+    }
+
+    /**
+     * With the given tasks create some kind of virtual plan internally
+     * with the help of all "time_spent" values, instead of "time_remaining".
+     * With this a "planned_project_times" will be created, which then
+     * will be transfered ot the actual internal TasksPlan instance.
+     *
+     * If a week plan will now be generated, it menas that updated project
+     * daily limits will be used.
+     *
+     * @param  array $tasks
+     */
+    public function updateWorkedTimesForTasksPlan($tasks)
+    {
+        foreach ($this->time_slots_days as $time_slots_day) {
+            foreach ($tasks as $task) {
+                $this->worked_plan->planTask($task, $time_slots_day);
+            }
+        }
+        $this->tasks_plan->copyPlannedProjectTimesFromTasksPlan($this->worked_plan);
     }
 }

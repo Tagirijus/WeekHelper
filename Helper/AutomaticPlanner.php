@@ -316,6 +316,7 @@ class AutomaticPlanner extends Base
         );
 
         $distributor = new DistributionLogic($this->getDistributionConfig());
+        $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
         $distributor->depleteUntilNow();
         $distributor->distributeTasks($sorted_tasks);
         $distribution = $distributor->getTasksPlan();
