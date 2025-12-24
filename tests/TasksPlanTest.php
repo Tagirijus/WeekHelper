@@ -278,4 +278,165 @@ final class TasksPlanTest extends TestCase
             'TasksPlan plan B is incorrect.'
         );
     }
+
+    public function testWorkedMode()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
+
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          '',   4,         4,      0);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_tue
+        );
+
+        // without looking at spent time, the plan should be this basically
+        $expected_without_worked_mode = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 600,
+                    'end' => 840,
+                    'length' => 240,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => $task_b,
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                ],
+                [
+                    'task' => $task_c,
+                    'start' => 720,
+                    'end' => 840,
+                    'length' => 120,
+                ]
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+        $this->assertSame(
+            $expected_without_worked_mode,
+            $tasks_plan->getPlan(),
+            'Expected plan is not correct without work mode enabled.'
+        );
+
+        //
+        // now the same with work mode enabled and timeslots depleted
+        // for Monday (as if the new day is Tuesday now after working
+        // Monday already - but task a was not finished).
+        //
+
+        $tasks_plan = new TasksPlan();
+        $tasks_plan_worked = new TasksPlan(0, true);
+
+        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
+        $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
+
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          '',   4,         2,      2);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+
+        // create a plan for worked tasks and thus create a correct project
+        // daily limits array internally ...
+        // only do this for task A, since I just know that the other tasks
+        // do not have spent time ... at least here in the test. later in the
+        // distribution logic method, the method will iter through all
+        // time slot day intsnaces anyway.
+        $tasks_plan_worked->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+
+        // pass the project daily limits to the actual tasks plan
+        $tasks_plan->copyPlannedProjectTimesFromTasksPlan($tasks_plan_worked);
+
+        // also deplete Monday as if it is Tuesday now already
+        $time_slots_day_mon->deplete();
+
+        // now plan the tasks again for the actual tasksplan instance
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_ovr
+        );
+
+        // without looking at spent time, the plan should be this basically
+        $expected_without_worked_mode = [
+            'mon' => [],
+            'tue' => [
+                [
+                    'task' => $task_a,
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 720,
+                    'end' => 840,
+                    'length' => 120,
+                ]
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [
+                [
+                    'task' => $task_c,
+                    'start' => 0,
+                    'end' => 120,
+                    'length' => 120,
+                ]
+            ],
+        ];
+        $this->assertSame(
+            $expected_without_worked_mode,
+            $tasks_plan->getPlan(),
+            'Expected plan is not correct with work mode enabled.'
+        );
+    }
 }

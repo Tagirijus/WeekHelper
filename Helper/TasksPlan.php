@@ -76,13 +76,35 @@ class TasksPlan
     var $min_slot_length = 0;
 
     /**
+     * If set to true, the instance will use the tasks
+     * "time_spent" instead of the "time_remaining" key.
+     * This is used for "planning" a week, or better,
+     * basically getting what work was done already, probably.
+     * This way I get a planned_project_times array I cen then
+     * pass onto the actual week planning TasksPlan instance,
+     * which will be able to understand for which projects
+     * tasks were processed already and use the updated
+     * project limits.
+     *
+     * For example: in a week I might have worked for a project
+     * for 5 hours already and it is Wednesday. Maybe the
+     * project daily limit is 2h. This would mean that on Wednesday
+     * only 1 hour is left to plan for this project.
+     *
+     * @var boolean
+     **/
+    var $worked_mode = false;
+
+    /**
      * Initialize the instance.
      *
      * @param integer $min_slot_length
+     * @param boolean $worked_mode
      */
-    public function __construct($min_slot_length = 0)
+    public function __construct($min_slot_length = 0, $worked_mode = false)
     {
         $this->min_slot_length = $min_slot_length;
+        $this->worked_mode = $worked_mode;
     }
 
     /**
@@ -127,7 +149,13 @@ class TasksPlan
      */
     public function getTasksActualRemaining($task)
     {
-        $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
+        if ($this->worked_mode) {
+            // see doc comment at start of class to understand what
+            // this is basically for!
+            $remain = TimeHelper::hoursToMinutes($task['time_spent']);
+        } else {
+            $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
+        }
         $planned = $this->getPlannedTimeForTask($task['id']);
         return $remain - $planned;
     }
@@ -184,6 +212,16 @@ class TasksPlan
      */
     public function getLeftDailyTime($task, $day)
     {
+        // "overflow", for example, should not have a project daily limit.
+        // it should be able to ignore it, since this special "day" is supposed
+        // to hold all overflowed tasks I could not plan into the week
+        if (!in_array($day, ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])) {
+            // basically return minutes of a whole single day, which should be
+            // a phyiscal max value
+            return 1440;
+        }
+
+        // otherwise go on as usual for the weekdays
         $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
         $project_id = $task['project_id'];
         return $project_daily_limit - $this->getPlannedTimeForProject($project_id, $day);
@@ -361,5 +399,16 @@ class TasksPlan
     public function setMinSlotLength($min_slot_length = 0)
     {
         $this->min_slot_length = $min_slot_length;
+    }
+
+    /**
+     * Copy the internal planned_project_times from another given
+     * TasksPlan instance to this internal attribut accordingly.
+     *
+     * @param  TasksPlan $tasks_plan
+     */
+    public function copyPlannedProjectTimesFromTasksPlan($tasks_plan)
+    {
+        $this->planned_project_times = $tasks_plan->planned_project_times;
     }
 }
