@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Helper/TimeSpan.php';
+require_once __DIR__ . '/../Helper/TimePoint.php';
+require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
 
 
 final class TimeSpanTest extends TestCase
@@ -68,6 +71,23 @@ final class TimeSpanTest extends TestCase
             0,
             $time_span->length(),
             'TimeSpan->deplete() did not set start to end, probably.'
+        );
+    }
+
+    public function testWithTimePoint()
+    {
+        $time_span = new TimeSpan(360, 900);
+        $this->assertTrue(
+            $time_span->timepointIsIn(new TimePoint('mon 7:45')),
+            'Given TimePoint should be in TimeSpan.'
+        );
+        $this->assertFalse(
+            $time_span->timepointIsIn(new TimePoint('mon 5:59')),
+            'Given TimePoint should not be in TimeSpan.'
+        );
+        $this->assertFalse(
+            $time_span->timepointIsIn(new TimePoint('mon 15:01')),
+            'Given TimePoint should not be in TimeSpan.'
         );
     }
 }

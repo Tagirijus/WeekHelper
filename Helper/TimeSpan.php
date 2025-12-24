@@ -144,4 +144,18 @@ class TimeSpan
     {
         $this->setStart($this->getEnd());
     }
+
+    /**
+     * Check if a given TimePoint instance is in this TimeSpan.
+     *
+     * @param  TimePoint $time_point
+     * @return boolean
+     */
+    public function timepointIsIn($time_point)
+    {
+        return (
+            $time_point->getTime() >= $this->start
+            && $time_point->getTime() <= $this->end
+        );
+    }
 }
