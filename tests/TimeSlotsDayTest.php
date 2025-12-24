@@ -292,5 +292,37 @@ final class TimeSlotsDayTest extends TestCase
             $time_slots_day->nextSlot(),
             'After depletion there should not be any slot available for this TimeSlotsDay.'
         );
+
+        // another depletion test; test depletion by TimePoint
+        $time_slots_day = new TimeSlotsDay("6:00-10:00 office\n15:00-16:00 office\n19:00-20:00 studio", 'mon');
+        // should not be able to deplete, since the day is incorrect
+        $time_slots_day->depleteByTimePoint(new TimePoint('tue 7:00'));
+        $next_slot = $time_slots_day->nextSlot();
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot($next_slot),
+            'First slot should still have 4 hours / 240 minutes left.'
+        );
+        // this now should deplet the first slot
+        $time_slots_day->depleteByTimePoint(new TimePoint('tue 7:00'), true);
+        $next_slot = $time_slots_day->nextSlot();
+        $this->assertSame(
+            180,
+            $time_slots_day->getLengthOfSlot($next_slot),
+            'First slot should now only have 3 hours / 180 minutes left.'
+        );
+        // this should deplete even further
+        $time_slots_day->depleteByTimePoint(new TimePoint('mon 19:30'));
+        $next_slot = $time_slots_day->nextSlot();
+        $this->assertSame(
+            2,
+            $next_slot,
+            'Only the last slot should have available time now.'
+        );
+        $this->assertSame(
+            30,
+            $time_slots_day->getLengthOfSlot($next_slot),
+            'Last slot should now only have 0.5 hours / 30 minutes left.'
+        );
     }
 }

@@ -366,6 +366,31 @@ class TimeSlotsDay
     }
 
     /**
+     * It is possible to deplete a TimeSlotsDay by a given
+     * TimePoint, which will internally be converted to a
+     * TimeSpan like start of the day till the TimePoint time.
+     * So if the TimePoint should represent 13:00 o'clock, it
+     * would deplete the TimeSpan of 0:00-13:00.
+     *
+     * ignore_day cna be set to true so that a TimePoint with
+     * a different day than the internal TimeSlotsDay can
+     * also be used.
+     *
+     * @param  TimePoint $time_point
+     * @param  boolean   $ignore_day
+     * @return boolean
+     */
+    public function depleteByTimePoint($time_point, $ignore_day = false)
+    {
+        $time_span = new TimeSpan(0, $time_point->getTime());
+        if ($this->day == $time_point->getDay() || $ignore_day) {
+            return $this->depleteByTimeSpan($time_span);
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Check if the given TimePoint instance is in any of the momentary
      * slots and return the slot_key then. Returns -1 if given TimeSpan
      * is not in any of these slots.
