@@ -200,12 +200,28 @@ class AutomaticPlanner extends Base
         }
 
         // also extend the project array to each task
+        $this->extendArrayWithProject($this->tasks_active_week);
+    }
+
+    /**
+     * Extend the given array with the fetched projects array.
+     *
+     * @param  array  &$tasks
+     */
+    public function extendArrayWithProject(&$tasks = [])
+    {
         $projects = $this->getProjects();
-        foreach ($this->tasks_active_week as $key => $task) {
+        foreach ($tasks as $key => $task) {
             // if I need other (native Kanboard) project values to sort on,
             // I should add them here. Otherwise with just the key "info"
             // there are the ones added / parsed by my plugin.
-            $this->tasks_active_week[$key] = array_merge($task, $projects[$task['project_id']]['info']);
+            $tasks[$key] = array_merge($task, $projects[$task['project_id']]['info']);
+
+            // add some more infos to the task array, fetching from the project array.
+            // I could add the whole project array to the task under e.g. the "project"
+            // key, but somehow I think this might be bad practice. So I am going the
+            // cleaner way and just pick the ones I really need for my plugin here.
+            // $tasks[$key]['project_title'] = $projects[$task['project_id']]['name'];
         }
     }
 
@@ -244,13 +260,7 @@ class AutomaticPlanner extends Base
         }
 
         // also extend the project info to each task
-        $projects = $this->getProjects();
-        foreach ($this->tasks_planned_week as $key => $task) {
-            // if I need other (native Kanboard) project values to sort on,
-            // I should add them here. Otherwise with just the key "info"
-            // there are the ones added / parsed by my plugin.
-            $this->tasks_planned_week[$key] = array_merge($task, $projects[$task['project_id']]['info']);
-        }
+        $this->extendArrayWithProject($this->tasks_planned_week);
     }
 
     /**
@@ -331,47 +341,49 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsText()
     {
+        $title_select = $this->request->getStringParam('title_select', 0);
+
         $final_plan = $this->getAutomaticPlanAsArray();
         $out = "active week\n";
         $out .= "\n";
         $out .= "monday tasks:\n";
         foreach ($final_plan['active']['mon'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "tuesday tasks:\n";
         foreach ($final_plan['active']['tue'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "wednesday tasks:\n";
         foreach ($final_plan['active']['wed'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "thursday tasks:\n";
         foreach ($final_plan['active']['thu'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "friday tasks:\n";
         foreach ($final_plan['active']['fri'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "saturday tasks:\n";
         foreach ($final_plan['active']['sat'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "sunday tasks:\n";
         foreach ($final_plan['active']['sun'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
         $out .= "\n";
         $out .= "overflow tasks:\n";
         foreach ($final_plan['active']['overflow'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task);
+            $out .= $this->formatSinglePlaintextTask($task, $title_select);
         }
 
         return $out;
@@ -383,10 +395,16 @@ class AutomaticPlanner extends Base
      *
      * Maybe one day it might even be configurable via the settings.
      *
+     * $title_select options:
+     *   0: The task title (default)
+     *   1: The project name
+     *   2: The project alias (project name as fallback if empty)
+     *
      * @param  array $task
+     * @param  integer $title_select
      * @return string
      */
-    public function formatSinglePlaintextTask($task)
+    public function formatSinglePlaintextTask($task, $title_select = 0)
     {
         $out = '';
         $start_daytime = (
@@ -404,9 +422,20 @@ class AutomaticPlanner extends Base
             . ':'
             . (string) sprintf('%02d', round($task['length'] % 60))
         );
+        if ($title_select == 1) {
+            $title = $task['task']['project_name'];
+        } elseif ($title_select == 2) {
+            if ($task['task']['project_alias'] != '') {
+                $title = $task['task']['project_alias'];
+            } else {
+                $title = $task['task']['project_name'];
+            }
+        } else {
+            $title = $task['task']['title'];
+        }
 
         $out .= $start_daytime . ' - ' . $end_daytime;
-        $out .=  '  >  ' . $task['task']['title'];
+        $out .=  '  >  ' . $title;
         $out .= " (" . $length . " h)" . "\n";
         return $out;
     }
