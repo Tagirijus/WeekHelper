@@ -286,7 +286,7 @@ class AutomaticPlanner extends Base
     public function getAutomaticPlanAsArray()
     {
         $active_week = $this->prepareWeek($this->getTasksActiveWeek());
-        $planned_week = $this->prepareWeek($this->getTasksPlannedWeek());
+        $planned_week = $this->prepareWeek($this->getTasksPlannedWeek(), true);
 
         return [
             'active' => $active_week,
@@ -310,9 +310,10 @@ class AutomaticPlanner extends Base
      *     ]
      *
      * @param  array $tasks
+     * @param  boolean $ignore_now
      * @return array
      */
-    public function prepareWeek($tasks)
+    public function prepareWeek($tasks, $ignore_now = false)
     {
         $sorted_tasks = SortingLogic::sortTasks(
             $tasks,
@@ -320,8 +321,10 @@ class AutomaticPlanner extends Base
         );
 
         $distributor = new DistributionLogic($this->getDistributionConfig());
-        $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
-        $distributor->depleteUntilNow();
+        if (!$ignore_now) {
+            $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
+            $distributor->depleteUntilNow();
+        }
         $distributor->distributeTasks($sorted_tasks);
         $distribution = $distributor->getTasksPlan();
 
