@@ -400,8 +400,6 @@ class AutomaticPlanner extends Base
      */
     public function formatSinglePlaintextTask($task)
     {
-        $title_select = $this->request->getStringParam('title_select', 0);
-
         $out = '';
         $start_daytime = (
             (string) floor($task['start'] / 60)
@@ -418,21 +416,64 @@ class AutomaticPlanner extends Base
             . ':'
             . (string) sprintf('%02d', round($task['length'] % 60))
         );
-        if ($title_select == 1) {
-            $title = $task['task']['project_name'];
-        } elseif ($title_select == 2) {
-            if ($task['task']['project_alias'] != '') {
-                $title = $task['task']['project_alias'];
-            } else {
-                $title = $task['task']['project_name'];
-            }
-        } else {
-            $title = $task['task']['title'];
+
+        // time of day
+        $hide_times = $this->request->getStringParam('hide_times', 0);
+        if ($hide_times != 1) {
+            $out .= $start_daytime . ' - ' . $end_daytime;
+            $out .= '  >  ';
         }
 
-        $out .= $start_daytime . ' - ' . $end_daytime;
-        $out .=  '  >  ' . $title;
-        $out .= " (" . $length . " h)" . "\n";
+        // task title
+        $out .= $this->formatSinglePlaintextTitle($task);
+
+        // length of task
+        $hide_length = $this->request->getStringParam('hide_length', 0);
+        if ($hide_length != 1) {
+            $out .= " (" . $length . " h)";
+        }
+        $out .= "\n";
+
         return $out;
+    }
+
+    /**
+     * Format a single plaintext title.
+     *
+     * TODO:
+     * Later I might consider making this whole formatting
+     * logic to set via the config by the user. Maybe with
+     * some tiny templater language.
+     * On the other site this way it is choosable what to
+     * show from the URI ... this is also good and flexible.
+     * I will see!
+     *
+     * @param  array $task
+     * @return string
+     */
+    public function formatSinglePlaintextTitle($task)
+    {
+        $hide_task_title = $this->request->getStringParam('hide_task_title', 0);
+        $title = $hide_task_title ? '' : $task['task']['title'];
+
+        $prepend_project_name = $this->request->getStringParam('prepend_project_name', 0);
+        $title = (
+            $prepend_project_name ?
+            $task['task']['project_name'] . ': ' . $title
+            : $title
+        );
+
+        $prepend_project_alias = $this->request->getStringParam('prepend_project_alias', 0);
+        $title = (
+            $prepend_project_alias ?
+            (
+                $task['task']['project_alias'] != '' ?
+                '[' . $task['task']['project_alias'] . '] ' . $title
+                : $title
+            )
+            : $title
+        );
+
+        return $title;
     }
 }
