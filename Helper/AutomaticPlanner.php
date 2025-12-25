@@ -363,8 +363,6 @@ class AutomaticPlanner extends Base
      */
     public function formatSinglePlaintextDay(&$out, $plan_week)
     {
-        $title_select = $this->request->getStringParam('title_select', 0);
-
         // with this variable I can have better visual breakpoints so that it
         // is more clear where whole work blocks are being separated
         $last_time = 0;
@@ -380,7 +378,7 @@ class AutomaticPlanner extends Base
                     }
                     $last_time = $task['end'];
                 }
-                $out .= $this->formatSinglePlaintextTask($task, $title_select);
+                $out .= $this->formatSinglePlaintextTask($task);
             }
             $out .= "\n";
         }
@@ -398,11 +396,12 @@ class AutomaticPlanner extends Base
      *   2: The project alias (project name as fallback if empty)
      *
      * @param  array $task
-     * @param  integer $title_select
      * @return string
      */
-    public function formatSinglePlaintextTask($task, $title_select = 0)
+    public function formatSinglePlaintextTask($task)
     {
+        $title_select = $this->request->getStringParam('title_select', 0);
+
         $out = '';
         $start_daytime = (
             (string) floor($task['start'] / 60)
