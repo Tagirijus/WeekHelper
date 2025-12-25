@@ -349,7 +349,7 @@ class AutomaticPlanner extends Base
 
         if ($week_only == 'planned' || $week_only == '') {
             if ($week_only == '') {
-                $out .= "\n";
+                $out .= "\n\n";
                 $out .= "PLANNED WEEK\n";
                 $out .= "\n";
             }
@@ -390,13 +390,13 @@ class AutomaticPlanner extends Base
                         $last_time = $task['end'];
                     } else {
                         if ($task['start'] - $last_time > 1) {
-                            $out .= "-\n";
+                            $out .= "\n";
                         }
                         $last_time = $task['end'];
                     }
                     $out .= $this->formatSinglePlaintextTask($task);
                 }
-                $out .= "\n";
+                $out .= "\n\n";
             }
         }
     }
@@ -437,7 +437,11 @@ class AutomaticPlanner extends Base
         // time of day
         $hide_times = $this->request->getStringParam('hide_times', 0);
         if ($hide_times != 1) {
-            $out .= $start_daytime . ' - ' . $end_daytime;
+            $out .= (
+                str_pad($start_daytime, 5, " ", STR_PAD_LEFT)
+                . ' - '
+                . str_pad($end_daytime, 5, " ", STR_PAD_LEFT)
+            );
             $out .= '  >  ';
         }
 
