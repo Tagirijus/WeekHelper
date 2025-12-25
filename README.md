@@ -44,13 +44,15 @@ With this feature I want to have such thing automatically. I do plan my week loo
 
 ### TL;DR - Automatic Planner
 
-This feature lets the user assign certain info to a project:
+This feature lets the user assign certain info to a project (description):
 
-	priority
+	project_priority
 	project_type
-	max_hours
+	project_max_hours_day
+	project_wage
+	project_alias
 
-And then it is needed to tell the system which "levels" (are defined on the hours view config page) stand for the planned vs the active week. Also it is needed to assign "time slots" to days in combination with time spans and an optional "project type" (a project can have; only the substring should occur, while the string to search for is this stirng in the time slot config of the feature). With these information + priority and "max_hours" the system will use theese infos and also the tasks priorities and their column + position in the column to sort the tasks and assign them to the weekdays.
+And then it is needed to tell the system which "levels" (are defined on the hours view config page) stand for the planned vs the active week. Also it is needed to assign "time slots" to days in combination with time spans and an optional "project type" (a project can have; only the substring should occur, while the string to search for is this stirng in the time slot config of the feature). With these information + "project_priority" and "project_max_hours_day" the system will use theese infos and also the tasks priorities and their column + position in the column to sort the tasks and assign them to the weekdays.
 
 I am still in the concept phase. Maybe I will even forget to remove this line here or update the above text. But I still wanted to mention it already, in case I will forget it.
 
