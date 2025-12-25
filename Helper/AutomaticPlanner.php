@@ -216,12 +216,6 @@ class AutomaticPlanner extends Base
             // I should add them here. Otherwise with just the key "info"
             // there are the ones added / parsed by my plugin.
             $tasks[$key] = array_merge($task, $projects[$task['project_id']]['info']);
-
-            // add some more infos to the task array, fetching from the project array.
-            // I could add the whole project array to the task under e.g. the "project"
-            // key, but somehow I think this might be bad practice. So I am going the
-            // cleaner way and just pick the ones I really need for my plugin here.
-            // $tasks[$key]['project_title'] = $projects[$task['project_id']]['name'];
         }
     }
 
@@ -341,15 +335,26 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsText()
     {
-        $final_plan = $this->getAutomaticPlanAsArray();
-        $out = "ACTIVE WEEK\n";
-        $out .= "\n";
-        $this->formatSinglePlaintextDay($out, $final_plan['active']);
+        $week_only = $this->request->getStringParam('week_only', '');
 
-        $out .= "\n";
-        $out .= "PLANNED WEEK\n";
-        $out .= "\n";
-        $this->formatSinglePlaintextDay($out, $final_plan['planned']);
+        $final_plan = $this->getAutomaticPlanAsArray();
+
+        if ($week_only == 'active' || $week_only == '') {
+            if ($week_only == '') {
+                $out = "ACTIVE WEEK\n";
+                $out .= "\n";
+            }
+            $this->formatSinglePlaintextDay($out, $final_plan['active']);
+        }
+
+        if ($week_only == 'planned' || $week_only == '') {
+            if ($week_only == '') {
+                $out .= "\n";
+                $out .= "PLANNED WEEK\n";
+                $out .= "\n";
+            }
+            $this->formatSinglePlaintextDay($out, $final_plan['planned']);
+        }
 
         return $out;
     }
@@ -367,20 +372,32 @@ class AutomaticPlanner extends Base
         // is more clear where whole work blocks are being separated
         $last_time = 0;
 
+        $days = $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr');
+
         foreach ($plan_week as $day => $tasks) {
-            $out .= "$day:\n";
-            foreach ($tasks as $task) {
-                if ($last_time == 0) {
-                    $last_time = $task['end'];
-                } else {
-                    if ($task['start'] - $last_time > 1) {
-                        $out .= "-\n";
-                    }
-                    $last_time = $task['end'];
+            if (
+                str_contains($days, $day)
+                || (
+                    str_contains($days, 'ovr')
+                    && $day == 'overflow'
+                )
+            ) {
+                if (str_contains($days, ',')) {
+                    $out .= strtoupper($day) . ":\n";
                 }
-                $out .= $this->formatSinglePlaintextTask($task);
+                foreach ($tasks as $task) {
+                    if ($last_time == 0) {
+                        $last_time = $task['end'];
+                    } else {
+                        if ($task['start'] - $last_time > 1) {
+                            $out .= "-\n";
+                        }
+                        $last_time = $task['end'];
+                    }
+                    $out .= $this->formatSinglePlaintextTask($task);
+                }
+                $out .= "\n";
             }
-            $out .= "\n";
         }
     }
 
