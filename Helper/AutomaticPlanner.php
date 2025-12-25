@@ -341,52 +341,49 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsText()
     {
-        $title_select = $this->request->getStringParam('title_select', 0);
-
         $final_plan = $this->getAutomaticPlanAsArray();
-        $out = "active week\n";
+        $out = "ACTIVE WEEK\n";
         $out .= "\n";
-        $out .= "monday tasks:\n";
-        foreach ($final_plan['active']['mon'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
+        $this->formatSinglePlaintextDay($out, $final_plan['active']);
+
         $out .= "\n";
-        $out .= "tuesday tasks:\n";
-        foreach ($final_plan['active']['tue'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
+        $out .= "PLANNED WEEK\n";
         $out .= "\n";
-        $out .= "wednesday tasks:\n";
-        foreach ($final_plan['active']['wed'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
-        $out .= "\n";
-        $out .= "thursday tasks:\n";
-        foreach ($final_plan['active']['thu'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
-        $out .= "\n";
-        $out .= "friday tasks:\n";
-        foreach ($final_plan['active']['fri'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
-        $out .= "\n";
-        $out .= "saturday tasks:\n";
-        foreach ($final_plan['active']['sat'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
-        $out .= "\n";
-        $out .= "sunday tasks:\n";
-        foreach ($final_plan['active']['sun'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
-        $out .= "\n";
-        $out .= "overflow tasks:\n";
-        foreach ($final_plan['active']['overflow'] as $task) {
-            $out .= $this->formatSinglePlaintextTask($task, $title_select);
-        }
+        $this->formatSinglePlaintextDay($out, $final_plan['planned']);
 
         return $out;
+    }
+
+    /**
+     * Extend the $out string with the given planned week,
+     * which is either the active one or the planned one.
+     *
+     * @param  string &$out
+     * @param  array $plan_week
+     */
+    public function formatSinglePlaintextDay(&$out, $plan_week)
+    {
+        $title_select = $this->request->getStringParam('title_select', 0);
+
+        // with this variable I can have better visual breakpoints so that it
+        // is more clear where whole work blocks are being separated
+        $last_time = 0;
+
+        foreach ($plan_week as $day => $tasks) {
+            $out .= "$day:\n";
+            foreach ($tasks as $task) {
+                if ($last_time == 0) {
+                    $last_time = $task['end'];
+                } else {
+                    if ($task['start'] - $last_time > 1) {
+                        $out .= "-\n";
+                    }
+                    $last_time = $task['end'];
+                }
+                $out .= $this->formatSinglePlaintextTask($task, $title_select);
+            }
+            $out .= "\n";
+        }
     }
 
     /**
