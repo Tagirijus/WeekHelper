@@ -340,7 +340,10 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
                 $this->request->getStringParam('week_only', ''),
                 $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr'),
                 $this->request->getStringParam('hide_times', 0) == 1,
-                $this->request->getStringParam('hide_length', 0) == 1
+                $this->request->getStringParam('hide_length', 0) == 1,
+                $this->request->getStringParam('hide_task_title', 0) == 1,
+                $this->request->getStringParam('prepend_project_name', 0) == 1,
+                $this->request->getStringParam('prepend_project_alias', 0) == 1
             );
         }
         return $this->response->text($automatic_plan);

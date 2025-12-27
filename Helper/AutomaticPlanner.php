@@ -350,14 +350,35 @@ class AutomaticPlanner extends Base
      *     hide_times:
      *         If true the day times will be hidden.
      *
+     *     hide_length:
+     *         If true the task length will be hidden.
+     *
+     *     hide_task_title:
+     *         If true, it hides the original task title.
+     *
+     *     prepend_project_name:
+     *         If true, it prepends the project name.
+     *
+     *     prepend_project_alias:
+     *         If true, it prepend the project alias.
+     *
      * @param boolean  $week_only
+     * @param  string $days
+     * @param  boolean $hide_times
+     * @param  boolean $hide_length
+     * @param  boolean $hide_task_title
+     * @param  boolean $prepend_project_name
+     * @param  boolean $prepend_project_alias
      * @return string
      */
     public function getAutomaticPlanAsText(
         $week_only = '',
         $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
         $hide_times = false,
-        $hide_length = false
+        $hide_length = false,
+        $hide_task_title = false,
+        $prepend_project_name = false,
+        $prepend_project_alias = false
     )
     {
         $final_plan = $this->getAutomaticPlanAsArray();
@@ -372,7 +393,10 @@ class AutomaticPlanner extends Base
                 $final_plan['active'],
                 $days,
                 $hide_times,
-                $hide_length
+                $hide_length,
+                $hide_task_title,
+                $prepend_project_name,
+                $prepend_project_alias
             );
         }
 
@@ -387,7 +411,10 @@ class AutomaticPlanner extends Base
                 $final_plan['planned'],
                 $days,
                 $hide_times,
-                $hide_length
+                $hide_length,
+                $hide_task_title,
+                $prepend_project_name,
+                $prepend_project_alias
             );
         }
 
@@ -406,18 +433,30 @@ class AutomaticPlanner extends Base
      *
      * hide_length: If true the task length will be hidden.
      *
+     * hide_task_title: If true, it hides the original task title.
+     *
+     * prepend_project_name: If true, it prepends the project name.
+     *
+     * prepend_project_alias: If true, it prepend the project alias.
+     *
      * @param  string &$out
      * @param  array $plan_week
      * @param  string $days
      * @param  boolean $hide_times
      * @param  boolean $hide_length
+     * @param  boolean $hide_task_title
+     * @param  boolean $prepend_project_name
+     * @param  boolean $prepend_project_alias
      */
     public function formatSinglePlaintextDay(
         &$out,
         $plan_week,
         $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
         $hide_times = false,
-        $hide_length = false
+        $hide_length = false,
+        $hide_task_title = false,
+        $prepend_project_name = false,
+        $prepend_project_alias = false
     )
     {
         // with this variable I can have better visual breakpoints so that it
@@ -444,7 +483,14 @@ class AutomaticPlanner extends Base
                         }
                         $last_time = $task['end'];
                     }
-                    $out .= $this->formatSinglePlaintextTask($task, $hide_times, $hide_length);
+                    $out .= $this->formatSinglePlaintextTask(
+                        $task,
+                        $hide_times,
+                        $hide_length,
+                        $hide_task_title,
+                        $prepend_project_name,
+                        $prepend_project_alias
+                    );
                 }
                 $out .= "\n\n";
             }
@@ -460,9 +506,19 @@ class AutomaticPlanner extends Base
      * @param  array $task
      * @param  boolean $hide_times Hide daytimes
      * @param  boolean $hide_length Hide length of task
+     * @param  boolean $hide_task_title Hide original task title
+     * @param  boolean $prepend_project_name Prepend project name
+     * @param  boolean $prepend_project_alias Prepend project alias
      * @return string
      */
-    public function formatSinglePlaintextTask($task, $hide_times = false, $hide_length = false)
+    public function formatSinglePlaintextTask(
+        $task,
+        $hide_times = false,
+        $hide_length = false,
+        $hide_task_title = false,
+        $prepend_project_name = false,
+        $prepend_project_alias = false
+    )
     {
         $out = '';
         $start_daytime = (
@@ -492,7 +548,12 @@ class AutomaticPlanner extends Base
         }
 
         // task title
-        $out .= $this->formatSinglePlaintextTitle($task);
+        $out .= $this->formatSinglePlaintextTitle(
+            $task,
+            $hide_task_title,
+            $prepend_project_name,
+            $prepend_project_alias
+        );
 
         // length of task
         if (!$hide_length) {
@@ -515,21 +576,26 @@ class AutomaticPlanner extends Base
      * I will see!
      *
      * @param  array $task
+     * @param  boolean $hide_task_title Hide original task title
+     * @param  boolean $prepend_project_name Prepend project name
+     * @param  boolean $prepend_project_alias Prepend project alias
      * @return string
      */
-    public function formatSinglePlaintextTitle($task)
+    public function formatSinglePlaintextTitle(
+        $task,
+        $hide_task_title = false,
+        $prepend_project_name = false,
+        $prepend_project_alias = false
+    )
     {
-        $hide_task_title = $this->request->getStringParam('hide_task_title', 0);
         $title = $hide_task_title ? '' : $task['task']['title'];
 
-        $prepend_project_name = $this->request->getStringParam('prepend_project_name', 0);
         $title = (
             $prepend_project_name ?
             $task['task']['project_name'] . ': ' . $title
             : $title
         );
 
-        $prepend_project_alias = $this->request->getStringParam('prepend_project_alias', 0);
         $title = (
             $prepend_project_alias ?
             (
