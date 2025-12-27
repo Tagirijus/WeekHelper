@@ -7,6 +7,7 @@ use Kanboard\Core\Translator;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeekOnCreate;
 use Kanboard\Plugin\WeekHelper\Model;
+use Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner;
 
 
 class Plugin extends Base
@@ -167,6 +168,31 @@ class Plugin extends Base
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
         $this->route->addRoute('/weekhelper/dashboard_level/:level', 'WeekHelperController', 'showLevelHoverAsPage', 'WeekHelper');
         $this->route->addRoute('/weekhelper/automaticplan', 'WeekHelperController', 'getAutomaticPlan', 'WeekHelper');
+
+        // JSONRPC - Methods
+        $this->container['automaticPlanner'] = function ($c) {
+            return new AutomaticPlanner($c);
+        };
+        $container = $this->container;
+        $this->api->getProcedureHandler()->withCallback(
+            'automaticPlanner.getAutomaticPlanAsText',
+            function(
+                $week_only = '',
+                $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
+                $hide_times = false,
+                $hide_length = false
+            ) use ($container) {
+                return [
+                    'ok' => true,
+                    'received' => $container['automaticPlanner']->getAutomaticPlanAsText(
+                        $week_only,
+                        $days,
+                        $hide_times,
+                        $hide_length
+                    ),
+                ];
+            }
+        );
     }
 
     public function onStartup()
