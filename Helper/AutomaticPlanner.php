@@ -334,12 +334,32 @@ class AutomaticPlanner extends Base
     /**
      * Get the automatic plan as plaintext.
      *
+     * Available parameter:
+     *
+     *     week_only:
+     *         - '': both weeks
+     *         - 'active': only active week
+     *         - 'planned': only planned / next week
+     *
+     *     days:
+     *         A string containing the abbreviation
+     *         weekdays which should be shown. Can
+     *         be comma separated. String will just
+     *         be checked with "str_contains()" later.
+     *
+     *     hide_times:
+     *         If true the day times will be hidden.
+     *
+     * @param boolean  $week_only
      * @return string
      */
-    public function getAutomaticPlanAsText()
+    public function getAutomaticPlanAsText(
+        $week_only = '',
+        $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
+        $hide_times = false,
+        $hide_length = false
+    )
     {
-        $week_only = $this->request->getStringParam('week_only', '');
-
         $final_plan = $this->getAutomaticPlanAsArray();
 
         if ($week_only == 'active' || $week_only == '') {
@@ -347,7 +367,13 @@ class AutomaticPlanner extends Base
                 $out = "ACTIVE WEEK\n";
                 $out .= "\n";
             }
-            $this->formatSinglePlaintextDay($out, $final_plan['active']);
+            $this->formatSinglePlaintextDay(
+                $out,
+                $final_plan['active'],
+                $days,
+                $hide_times,
+                $hide_length
+            );
         }
 
         if ($week_only == 'planned' || $week_only == '') {
@@ -356,7 +382,13 @@ class AutomaticPlanner extends Base
                 $out .= "PLANNED WEEK\n";
                 $out .= "\n";
             }
-            $this->formatSinglePlaintextDay($out, $final_plan['planned']);
+            $this->formatSinglePlaintextDay(
+                $out,
+                $final_plan['planned'],
+                $days,
+                $hide_times,
+                $hide_length
+            );
         }
 
         return $out;
@@ -366,16 +398,31 @@ class AutomaticPlanner extends Base
      * Extend the $out string with the given planned week,
      * which is either the active one or the planned one.
      *
+     * days: The days to show. Should contain weekdays in
+     * lowercase with abbreviation and maybe comma separated
+     * or so. It will be checked with "str_contains()".
+     *
+     * hide_times: If true the day times will be hidden.
+     *
+     * hide_length: If true the task length will be hidden.
+     *
      * @param  string &$out
      * @param  array $plan_week
+     * @param  string $days
+     * @param  boolean $hide_times
+     * @param  boolean $hide_length
      */
-    public function formatSinglePlaintextDay(&$out, $plan_week)
+    public function formatSinglePlaintextDay(
+        &$out,
+        $plan_week,
+        $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
+        $hide_times = false,
+        $hide_length = false
+    )
     {
         // with this variable I can have better visual breakpoints so that it
         // is more clear where whole work blocks are being separated
         $last_time = 0;
-
-        $days = $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr');
 
         foreach ($plan_week as $day => $tasks) {
             if (
@@ -397,7 +444,7 @@ class AutomaticPlanner extends Base
                         }
                         $last_time = $task['end'];
                     }
-                    $out .= $this->formatSinglePlaintextTask($task);
+                    $out .= $this->formatSinglePlaintextTask($task, $hide_times, $hide_length);
                 }
                 $out .= "\n\n";
             }
@@ -410,15 +457,12 @@ class AutomaticPlanner extends Base
      *
      * Maybe one day it might even be configurable via the settings.
      *
-     * $title_select options:
-     *   0: The task title (default)
-     *   1: The project name
-     *   2: The project alias (project name as fallback if empty)
-     *
      * @param  array $task
+     * @param  boolean $hide_times Hide daytimes
+     * @param  boolean $hide_length Hide length of task
      * @return string
      */
-    public function formatSinglePlaintextTask($task)
+    public function formatSinglePlaintextTask($task, $hide_times = false, $hide_length = false)
     {
         $out = '';
         $start_daytime = (
@@ -438,8 +482,7 @@ class AutomaticPlanner extends Base
         );
 
         // time of day
-        $hide_times = $this->request->getStringParam('hide_times', 0);
-        if ($hide_times != 1) {
+        if (!$hide_times) {
             $out .= (
                 str_pad($start_daytime, 5, " ", STR_PAD_LEFT)
                 . ' - '
@@ -452,8 +495,7 @@ class AutomaticPlanner extends Base
         $out .= $this->formatSinglePlaintextTitle($task);
 
         // length of task
-        $hide_length = $this->request->getStringParam('hide_length', 0);
-        if ($hide_length != 1) {
+        if (!$hide_length) {
             $out .= " (" . $length . " h)";
         }
         $out .= "\n";

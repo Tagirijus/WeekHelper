@@ -336,7 +336,12 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             // $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsJSON();
             $automatic_plan = 'TODO JSON';
         } else {
-            $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText();
+            $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText(
+                $this->request->getStringParam('week_only', ''),
+                $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr'),
+                $this->request->getStringParam('hide_times', 0) == 1,
+                $this->request->getStringParam('hide_length', 0) == 1
+            );
         }
         return $this->response->text($automatic_plan);
     }
