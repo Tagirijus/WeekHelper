@@ -48,7 +48,7 @@ final class TimeHelperTest extends TestCase
         );
     }
 
-    public function testDayChecker()
+    public function testDiffOfWeekDays()
     {
         $this->assertSame(
             1,
@@ -68,6 +68,13 @@ final class TimeHelperTest extends TestCase
         $this->assertSame(
             -6,
             TimeHelper::diffOfWeekDays('Overflow', 'tUesDAY'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
+
+        // today testing
+        $this->assertSame(
+            TimeHelper::diffOfWeekDays('tue', date('D')),
+            TimeHelper::diffOfWeekDays('tue', ''),
             'TimeHelper could not test weekday string against weekday string.'
         );
     }

@@ -42,8 +42,13 @@ class TimeHelper
      * Base is day 1. So if day 2 lies in the past compared
      * to day 1, it will return a negative  number.
      *
+     * Day 2 can be empty which would mean "today".
+     *
      * Example:
      * day1 = 'wed' and day2 = 'mon' will return -2.
+     *
+     * Example for today is "Thursday":
+     * day1 = 'fri' and day2 = '' will return 1.
      *
      * Also there is the special virtual day "overflow" or
      * "ovr" available, which technically lies after sunday.
@@ -64,6 +69,10 @@ class TimeHelper
             'thu' => 3, 'fri' => 4, 'sat' => 5,
             'sun' => 6, 'ovr' => 7,
         ];
+
+        if ($day2 == '') {
+            $day2 = date('D');
+        }
 
         $a = $normalize($day1);
         $b = $normalize($day2);
