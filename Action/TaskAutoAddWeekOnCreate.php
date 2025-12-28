@@ -112,7 +112,6 @@ class TaskAutoAddWeekOnCreate extends Base
     public function hasRequiredCondition(array $data)
     {
         // return true;
-        $this->logger->info(json_encode($data));
         return $data['task']['column_id'] == $this->getParam('column_id');
     }
 }

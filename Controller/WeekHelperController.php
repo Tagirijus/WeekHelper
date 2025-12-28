@@ -249,7 +249,6 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     public function getTooltipDashboardTimes()
     {
         $level = $this->request->getStringParam('level', 'all');
-        $this->logger->info(json_encode($level));
         if ($level == 'level_1') {
             $label = $this->configModel->get('hoursview_level_1_caption', 'level_1');
         } elseif ($level == 'level_2') {
