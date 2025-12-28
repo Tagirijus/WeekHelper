@@ -395,7 +395,7 @@ class AutomaticPlanner extends Base
                 $out = "ACTIVE WEEK\n";
                 $out .= "\n";
             }
-            $this->formatSinglePlaintextDay(
+            $this->formatSinglePlaintextDays(
                 $out,
                 $final_plan['active'],
                 $days,
@@ -413,7 +413,7 @@ class AutomaticPlanner extends Base
                 $out .= "PLANNED WEEK\n";
                 $out .= "\n";
             }
-            $this->formatSinglePlaintextDay(
+            $this->formatSinglePlaintextDays(
                 $out,
                 $final_plan['planned'],
                 $days,
@@ -455,7 +455,7 @@ class AutomaticPlanner extends Base
      * @param  boolean $prepend_project_name
      * @param  boolean $prepend_project_alias
      */
-    public function formatSinglePlaintextDay(
+    public function formatSinglePlaintextDays(
         &$out,
         $plan_week,
         $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
@@ -532,21 +532,9 @@ class AutomaticPlanner extends Base
     )
     {
         $out = '';
-        $start_daytime = (
-            (string) floor($task['start'] / 60)
-            . ':'
-            . (string) sprintf('%02d', round($task['start'] % 60))
-        );
-        $end_daytime = (
-            (string) floor($task['end'] / 60)
-            . ':'
-            . (string) sprintf('%02d', round($task['end'] % 60))
-        );
-        $length = (
-            (string) floor($task['length'] / 60)
-            . ':'
-            . (string) sprintf('%02d', round($task['length'] % 60))
-        );
+        $start_daytime = TimeHelper::minutesToReadable($task['start']);
+        $end_daytime = TimeHelper::minutesToReadable($task['end']);
+        $length = TimeHelper::minutesToReadable($task['length'], ' h');
 
         // time of day
         if (!$hide_times) {
@@ -568,7 +556,7 @@ class AutomaticPlanner extends Base
 
         // length of task
         if (!$hide_length) {
-            $out .= " (" . $length . " h)";
+            $out .= " (" . $length . ")";
         }
         $out .= "\n";
 
