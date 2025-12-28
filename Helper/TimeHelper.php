@@ -35,6 +35,28 @@ class TimeHelper
     }
 
     /**
+     * Convert the given minutes integer to readblae hours.
+     *
+     * @param  integer $minutes
+     * @param  string $suffix
+     * @return string
+     */
+    public static function minutesToReadable($minutes = 0, $suffix = '')
+    {
+        if (!is_numeric($minutes)) {
+            return '0:00' . $suffix;
+        }
+        if ($minutes < 0) {
+            $minutes = abs($minutes);
+        }
+        return (
+            (string) floor($minutes / 60)
+            . ':'
+            . (string) sprintf('%02d', round($minutes % 60))
+        ) . $suffix;
+    }
+
+    /**
      * Calculate the day difference from day 1 to day 2 with
      * only the abbreviation of the day given in lower case
      * or upper case. Normal day names are also possible.
