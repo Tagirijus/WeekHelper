@@ -47,4 +47,28 @@ final class TimeHelperTest extends TestCase
             'TimeHelper could not convert readable 6:30 to 390 minutes.'
         );
     }
+
+    public function testDayChecker()
+    {
+        $this->assertSame(
+            1,
+            TimeHelper::diffOfWeekDays('mon', 'tue'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
+        $this->assertSame(
+            -2,
+            TimeHelper::diffOfWeekDays('Wednesday', 'MON'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
+        $this->assertSame(
+            7,
+            TimeHelper::diffOfWeekDays('mon', 'ovr'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
+        $this->assertSame(
+            -6,
+            TimeHelper::diffOfWeekDays('Overflow', 'tUesDAY'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
+    }
 }
