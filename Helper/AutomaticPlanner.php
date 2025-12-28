@@ -346,6 +346,12 @@ class AutomaticPlanner extends Base
      *         weekdays which should be shown. Can
      *         be comma separated. String will just
      *         be checked with "str_contains()" later.
+     *         BUT: it can also contain numbers, which
+     *         stand for the relation to "today". So it
+     *         can contain "0" and stand for "today". Or
+     *         "-1" which stand for "yesterday". This way
+     *         it should be possible to define days
+     *         dynamically.
      *
      *     hide_times:
      *         If true the day times will be hidden.
