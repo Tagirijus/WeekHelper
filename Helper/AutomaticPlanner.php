@@ -555,7 +555,7 @@ class AutomaticPlanner extends Base
                 . ' - '
                 . str_pad($end_daytime, 5, " ", STR_PAD_LEFT)
             );
-            $out .= '  >  ';
+            $out .= '  ';
         }
 
         // task title
