@@ -56,5 +56,11 @@ final class TimePointTest extends TestCase
             $timepoint->dayDiffFromTimePoint(new TimePoint('sun 6:00')),
             'Checked TimePoint day should be four days after base TimePoint.'
         );
+        $this->assertSame(
+            5,
+            // "overflow" is a virtual day after sunday
+            $timepoint->dayDiffFromTimePoint(new TimePoint('overflow 6:00')),
+            'Checked TimePoint day should be four days after base TimePoint.'
+        );
     }
 }
