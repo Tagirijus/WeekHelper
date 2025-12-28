@@ -7,6 +7,7 @@ use Kanboard\Model\ProjectModel;
 use Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser;
 use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
+use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 
 
 class AutomaticPlanner extends Base
@@ -476,6 +477,8 @@ class AutomaticPlanner extends Base
                     str_contains($days, 'ovr')
                     && $day == 'overflow'
                 )
+                ||
+                str_contains($days, TimeHelper::diffOfWeekDays('', $day))
             ) {
                 if (str_contains($days, ',')) {
                     $out .= strtoupper($day) . ":\n";

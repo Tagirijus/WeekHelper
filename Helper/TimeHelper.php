@@ -42,7 +42,7 @@ class TimeHelper
      * Base is day 1. So if day 2 lies in the past compared
      * to day 1, it will return a negative  number.
      *
-     * Day 2 can be empty which would mean "today".
+     * Day 1/2 can be empty which would mean "today".
      *
      * Example:
      * day1 = 'wed' and day2 = 'mon' will return -2.
@@ -70,6 +70,9 @@ class TimeHelper
             'sun' => 6, 'ovr' => 7,
         ];
 
+        if ($day1 == '') {
+            $day1 = date('D');
+        }
         if ($day2 == '') {
             $day2 = date('D');
         }

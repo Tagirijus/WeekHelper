@@ -77,5 +77,10 @@ final class TimeHelperTest extends TestCase
             TimeHelper::diffOfWeekDays('tue', ''),
             'TimeHelper could not test weekday string against weekday string.'
         );
+        $this->assertSame(
+            TimeHelper::diffOfWeekDays(date('D'), 'wed'),
+            TimeHelper::diffOfWeekDays('', 'wed'),
+            'TimeHelper could not test weekday string against weekday string.'
+        );
     }
 }
