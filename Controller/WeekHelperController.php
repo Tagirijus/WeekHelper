@@ -319,22 +319,15 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
-     * Get the automatic planned week as plaintext, HTML or JSON.
-     * TODO: HTML + JSON; with "?type=html" or "?type=json"
+     * Get the automatic planned week as plaintext or JSON string.
      *
      * @return Response
      */
     public function getAutomaticPlan()
     {
         $type = $this->request->getStringParam('type', 'text');
-        if ($type == 'html') {
-            // TODO
-            // $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsHTML();
-            $automatic_plan = 'TODO HTML';
-        } elseif ($type == 'json') {
-            // TODO
-            // $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsJSON();
-            $automatic_plan = 'TODO JSON';
+        if ($type == 'json') {
+            $automatic_plan = json_encode($this->helper->automaticPlanner->getAutomaticPlanAsArray());
         } else {
             $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText(
                 $this->request->getStringParam('week_only', ''),
