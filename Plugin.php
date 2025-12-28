@@ -199,6 +199,15 @@ class Plugin extends Base
                 ];
             }
         );
+        $this->api->getProcedureHandler()->withCallback(
+            'automaticPlanner.getAutomaticPlanAsJSON',
+            function() use ($container) {
+                return [
+                    'ok' => true,
+                    'received' => $container['automaticPlanner']->getAutomaticPlanAsArray(),
+                ];
+            }
+        );
     }
 
     public function onStartup()
