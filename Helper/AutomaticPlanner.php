@@ -480,6 +480,8 @@ class AutomaticPlanner extends Base
                 ||
                 str_contains($days, TimeHelper::diffOfWeekDays('', $day))
             ) {
+                // print out day name, if there are probably more
+                // than one day wanted
                 if (str_contains($days, ',')) {
                     $out .= strtoupper($day) . ":\n";
                 }
