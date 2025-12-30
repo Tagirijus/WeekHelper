@@ -372,6 +372,9 @@ class AutomaticPlanner extends Base
      *     prepend_project_alias:
      *         If true, it prepend the project alias.
      *
+     *     show_day_planned:
+     *         If true, show the times for a whole day.
+     *
      * @param  array $params See docstring for info
      * @return string
      */
@@ -455,11 +458,24 @@ class AutomaticPlanner extends Base
                 ||
                 str_contains($days, TimeHelper::diffOfWeekDays('', $day))
             ) {
+                // prepare the day times replacer, which wil be replaced with
+                // day times statistics later
+                $day_times = $params['show_day_planned'] ?? false ? '{DAY_PLANNED}' : '';
+
                 // print out day name, if there are probably more
                 // than one day wanted
                 if (str_contains($days, ',')) {
-                    $out .= strtoupper($day) . ":\n";
+                    $out .= strtoupper($day) . ($day_times ? " ($day_times)" : '') . ":\n";
+
+                // probably just one day; then maybe at least
+                // print out the day time stats if wanted
+                } else {
+                    $out .= ($day_times ? "$day_times:\n" : '');
                 }
+
+                // calculations for the "show_day_planned" option
+                $day_planned = 0;
+
                 foreach ($tasks as $task) {
                     if ($last_time == 0) {
                         $last_time = $task['end'];
@@ -473,8 +489,16 @@ class AutomaticPlanner extends Base
                         $task,
                         $params
                     );
+                    $day_planned += $task['length'];
                 }
                 $out .= "\n\n";
+
+                if ($params['show_day_planned'] ?? false) {
+                    $day_times_str = (
+                        TimeHelper::minutesToReadable($day_planned, 'h')
+                    );
+                    $out = str_replace('{DAY_PLANNED}', $day_times_str, $out);
+                }
             }
         }
     }
