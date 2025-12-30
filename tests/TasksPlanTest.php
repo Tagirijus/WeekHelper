@@ -463,4 +463,62 @@ final class TasksPlanTest extends TestCase
             'Expected plan is not correct with work mode enabled.'
         );
     }
+
+    public function testGlobalTimes()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("10:00-13:00", 'tue');
+        $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
+
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          '',   4,         2,      1.5);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          '',   4,         4,      1);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_c = TestTask::create('c',   2,          '',   2,         2,      0.5);
+
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_ovr
+        );
+
+        $this->assertSame(
+            480,
+            $tasks_plan->getGlobalTimesForWeek()['remaining'],
+            'Global times from TaskPlan are not the same.'
+        );
+        $this->assertSame(
+            180,
+            $tasks_plan->getGlobalTimesForWeek()['spent'],
+            'Global times from TaskPlan are not the same.'
+        );
+        $this->assertSame(
+            420,
+            $tasks_plan->getGlobalTimesForWeek()['planned'],
+            'Global times from TaskPlan are not the same.'
+        );
+        $this->assertSame(
+            60,
+            $tasks_plan->getGlobalTimesForOverflow()['planned'],
+            'Global times from TaskPlan are not the same.'
+        );
+    }
 }

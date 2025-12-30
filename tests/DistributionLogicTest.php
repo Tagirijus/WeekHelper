@@ -132,7 +132,7 @@ final class DistributionLogicTest extends TestCase
         // now the final distribution instance
         $distributor = new DistributionLogic($time_slots_config);
         $distributor->distributeTasks($init_tasks);
-        $distributed_plan = $distributor->getTasksPlan();
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
 
         $this->assertSame(
             $sorted_plan,

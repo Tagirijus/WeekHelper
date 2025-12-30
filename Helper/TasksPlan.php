@@ -76,6 +76,44 @@ class TasksPlan
     var $min_slot_length = 0;
 
     /**
+     * This variable holds the overall planned, spent and
+     * remaining times per week and per day. Structure:
+     *
+     *      [
+     *          'task_ids' => [0, 1, 2, 3, ...],
+     *          'week' => [
+     *              'remaining' => 0,
+     *              'spent' => 0,
+     *              'planned' => 0
+     *          ],
+     *          'mon' => [
+     *              'remaining' => 0,
+     *              'spent' => 0,
+     *              'planned' => 0
+     *          ],
+     *          'tue' => ...
+     *      ]
+     * The "task_ids" key is for storing info about which
+     * tasks where added to the internal "remaining" and
+     * "spent" times already. Tasks should only add once
+     * to these values, after all.
+     *
+     * @var array
+     **/
+    var $global_times = [
+        'task_ids' => [],
+        'week' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'mon' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'tue' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'wed' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'thu' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'fri' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'sat' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'sun' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+        'overflow' => ['remaining' => 0, 'spent' => 0, 'planned' => 0],
+    ];
+
+    /**
      * If set to true, the instance will use the tasks
      * "time_spent" instead of the "time_remaining" key.
      * This is used for "planning" a week, or better,
@@ -276,6 +314,7 @@ class TasksPlan
             // needed internal attributes
             $this->addPlannedTimeForTask($task['id'], $time_to_plan);
             $this->addTaskToPlan($task, $time_slots_day->getDay(), $start, $end);
+            $this->addTimesToGlobal($time_slots_day->getDay(), $time_to_plan, $task);
         }
 
         return $success;
@@ -299,6 +338,39 @@ class TasksPlan
             'spent' => TimeHelper::hoursToMinutes($task['time_spent']),
             'remaining' => TimeHelper::hoursToMinutes($task['time_remaining'])
         ];
+    }
+
+    /**
+     * Add times to the internal global array, which holds information
+     * about on which day or for the whole week how the times are; like
+     * remainin, spent and planned times.
+     *
+     * @param string $day
+     * @param integer $minutes_planned
+     * @param array $task
+     */
+    public function addTimesToGlobal($day, $minutes_planned, $task)
+    {
+        $task_id = $task['id'];
+        if (!in_array($task_id, $this->global_times['task_ids'])) {
+            $remaining = TimeHelper::hoursToMinutes($task['time_remaining']);
+            $spent = TimeHelper::hoursToMinutes($task['time_spent']);
+            $this->global_times['task_ids'][] = $task_id;
+        } else {
+            $remaining = 0;
+            $spent = 0;
+        }
+        $this->global_times['week']['remaining'] += $remaining;
+        $this->global_times['week']['spent'] += $spent;
+        // only add planned time for the real week days;
+        // not for the overflow. the later one is stored
+        // in the "global_times['overflow']" array anyway!
+        if (in_array($day, ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])) {
+            $this->global_times['week']['planned'] += $minutes_planned;
+        }
+        $this->global_times[$day]['remaining'] += $remaining;
+        $this->global_times[$day]['spent'] += $spent;
+        $this->global_times[$day]['planned'] += $minutes_planned;
     }
 
     /**
@@ -412,5 +484,38 @@ class TasksPlan
     public function copyPlannedProjectTimesFromTasksPlan($tasks_plan)
     {
         $this->planned_project_times = $tasks_plan->planned_project_times;
+    }
+
+    /**
+     * Return the internal array part for the week times.
+     *
+     * @return array
+     */
+    public function getGlobalTimesForWeek()
+    {
+        return $this->global_times['week'];
+    }
+
+    /**
+     * Return the internal array part for the times for
+     * the specified weekday.
+     *
+     * @param  string $day
+     * @return array
+     */
+    public function getGlobalTimesForDay($day = 'mon')
+    {
+        return $this->global_times[$day];
+    }
+
+    /**
+     * Basically a wrapper for getting the "overflow" key
+     * value from getGlobalTimesForDay().
+     *
+     * @return array
+     */
+    public function getGlobalTimesForOverflow()
+    {
+        return $this->global_times['overflow'];
     }
 }

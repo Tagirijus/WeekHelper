@@ -103,7 +103,7 @@ class DistributionLogic
      */
     public function getTasksPlan()
     {
-        return $this->tasks_plan->getPlan();
+        return $this->tasks_plan;
     }
 
     /**

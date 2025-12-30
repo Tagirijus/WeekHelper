@@ -60,6 +60,20 @@ class AutomaticPlanner extends Base
     var $tasks_planned_week = null;
 
     /**
+     * The TasksPlan instance for the active week.
+     *
+     * @var TasksPlan
+     **/
+    var $tasks_plan_active_week = null;
+
+    /**
+     * The TasksPlan instance for the planned week.
+     *
+     * @var TasksPlan
+     **/
+    var $tasks_plan_planned_week = null;
+
+    /**
      * Get (and if needed first initialize it) the internal projects
      * array with the active projects and their additional meta data.
      *
@@ -286,33 +300,54 @@ class AutomaticPlanner extends Base
      */
     public function getAutomaticPlanAsArray()
     {
-        $active_week = $this->prepareWeek($this->getTasksActiveWeek());
-        $planned_week = $this->prepareWeek($this->getTasksPlannedWeek(), true);
-
         return [
-            'active' => $active_week,
-            'planned' => $planned_week,
+            'active' => $this->getTasksPlanActiveWeek()->getPlan(),
+            'planned' => $this->getTasksPlanPlannedWeek()->getPlan(),
         ];
     }
 
     /**
-     * Prepare an active week with the given tasks.
-     * This method gets an array of tasks, sorts them
-     * with the sorter class, splits these task
-     * over the time slots, defined in the config and
-     * finally returns an array with the following
-     * structure:
-     *     [
-     *         'mon' => [array with sorted tasks],
-     *         'tue' => [array with sorted tasks],
-     *         ...
-     *         'sun' => [array with sorted tasks],
-     *         'overflow' => [array with sorted tasks]
-     *     ]
+     * Instantiate the internal TasksPlan instances.
+     */
+    public function initTasksPlans()
+    {
+        $this->tasks_plan_active_week = $this->prepareWeek($this->getTasksActiveWeek());
+        $this->tasks_plan_planned_week = $this->prepareWeek($this->getTasksPlannedWeek(), true);
+    }
+
+    /**
+     * Return the internal tasks plan fpr the active week.
+     *
+     * @return TasksPlan
+     */
+    public function getTasksPlanActiveWeek()
+    {
+        if (is_null($this->tasks_plan_active_week)) {
+            $this->initTasksPlans();
+        }
+        return $this->tasks_plan_active_week;
+    }
+
+    /**
+     * Return the internal tasks plan fpr the planned week.
+     *
+     * @return TasksPlan
+     */
+    public function getTasksPlanPlannedWeek()
+    {
+        if (is_null($this->tasks_plan_planned_week)) {
+            $this->initTasksPlans();
+        }
+        return $this->tasks_plan_planned_week;
+    }
+
+    /**
+     * Prepare an active week with the given tasks
+     * and return its TasksPlan instance.
      *
      * @param  array $tasks
      * @param  boolean $ignore_now
-     * @return array
+     * @return TasksPlan
      */
     public function prepareWeek($tasks, $ignore_now = false)
     {
@@ -327,9 +362,9 @@ class AutomaticPlanner extends Base
             $distributor->depleteUntilNow();
         }
         $distributor->distributeTasks($sorted_tasks);
-        $distribution = $distributor->getTasksPlan();
+        $tasks_plan = $distributor->getTasksPlan();
 
-        return $distribution;
+        return $tasks_plan;
     }
 
     /**
@@ -387,8 +422,6 @@ class AutomaticPlanner extends Base
         $week_only = $params['week_only'] ?? '';
         $show_week_times = $params['show_week_times'] ?? false;
 
-        $final_plan = $this->getAutomaticPlanAsArray();
-
         if ($week_only == 'active' || $week_only == '') {
             // both weeks are needed, thus also a title for
             // each week to distinguish both
@@ -403,7 +436,7 @@ class AutomaticPlanner extends Base
             }
             $this->formatSinglePlaintextDays(
                 $out,
-                $final_plan['active'],
+                'active',
                 $params
             );
         }
@@ -423,7 +456,7 @@ class AutomaticPlanner extends Base
             }
             $this->formatSinglePlaintextDays(
                 $out,
-                $final_plan['planned'],
+                'planned',
                 $params
             );
         }
@@ -435,27 +468,13 @@ class AutomaticPlanner extends Base
      * Extend the $out string with the given planned week,
      * which is either the active one or the planned one.
      *
-     * days: The days to show. Should contain weekdays in
-     * lowercase with abbreviation and maybe comma separated
-     * or so. It will be checked with "str_contains()".
-     *
-     * hide_times: If true the day times will be hidden.
-     *
-     * hide_length: If true the task length will be hidden.
-     *
-     * hide_task_title: If true, it hides the original task title.
-     *
-     * prepend_project_name: If true, it prepends the project name.
-     *
-     * prepend_project_alias: If true, it prepend the project alias.
-     *
      * @param  string &$out
-     * @param  array $plan_week
+     * @param  string $week
      * @param  array $params See getAutomaticPlanAsText() for info
      */
     public function formatSinglePlaintextDays(
         &$out,
-        $plan_week,
+        $week,
         $params = []
     )
     {
@@ -465,6 +484,14 @@ class AutomaticPlanner extends Base
 
         // params preparation
         $days = $params['days'] ?? 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr';
+
+        // which week should be processed?
+        if ($week == 'active') {
+            $tasks_plan = $this->getTasksPlanActiveWeek();
+        } elseif ($week == 'planned') {
+            $tasks_plan = $this->getTasksPlanPlannedWeek();
+        }
+        $plan_week = $tasks_plan->getPlan();
 
         foreach ($plan_week as $day => $tasks) {
             if (
@@ -491,9 +518,6 @@ class AutomaticPlanner extends Base
                     $out .= ($day_times ? "$day_times:\n" : '');
                 }
 
-                // calculations for the "show_day_planned" option
-                $day_planned = 0;
-
                 foreach ($tasks as $task) {
                     if ($last_time == 0) {
                         $last_time = $task['end'];
@@ -507,13 +531,15 @@ class AutomaticPlanner extends Base
                         $task,
                         $params
                     );
-                    $day_planned += $task['length'];
                 }
                 $out .= "\n\n";
 
                 if ($params['show_day_planned'] ?? false) {
                     $day_times_str = (
-                        TimeHelper::minutesToReadable($day_planned, 'h')
+                        TimeHelper::minutesToReadable(
+                            $tasks_plan->getGlobalTimesForDay($day)['planned'],
+                            'h'
+                        )
                     );
                     $out = str_replace('{DAY_PLANNED}', $day_times_str, $out);
                 }
