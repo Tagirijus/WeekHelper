@@ -490,9 +490,18 @@ class AutomaticPlanner extends Base
                 ||
                 str_contains($days, TimeHelper::diffOfWeekDays('', $day))
             ) {
-                // prepare the day times replacer, which wil be replaced with
-                // day times statistics later
-                $day_times = $params['show_day_planned'] ?? false ? '{DAY_PLANNED}' : '';
+                // prepare the day times string
+                $day_times = $params['show_day_planned'] ?? false;
+                if ($day_times) {
+                    $day_times = (
+                        TimeHelper::minutesToReadable(
+                            $this->getTasksPlan($week)->getGlobalTimesForDay($day)['planned'],
+                            'h'
+                        )
+                    );
+                } else {
+                    $day_times = '';
+                }
 
                 // print out day name, if there are probably more
                 // than one day wanted
@@ -520,16 +529,6 @@ class AutomaticPlanner extends Base
                     );
                 }
                 $out .= "\n\n";
-
-                if ($params['show_day_planned'] ?? false) {
-                    $day_times_str = (
-                        TimeHelper::minutesToReadable(
-                            $this->getTasksPlan($week)->getGlobalTimesForDay($day)['planned'],
-                            'h'
-                        )
-                    );
-                    $out = str_replace('{DAY_PLANNED}', $day_times_str, $out);
-                }
             }
         }
     }
