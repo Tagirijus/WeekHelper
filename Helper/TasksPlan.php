@@ -296,6 +296,8 @@ class TasksPlan
             'start' => $start,
             'end' => $end,
             'length' => $end - $start,
+            'spent' => TimeHelper::hoursToMinutes($task['time_spent']),
+            'remaining' => TimeHelper::hoursToMinutes($task['time_remaining'])
         ];
     }
 
