@@ -177,24 +177,12 @@ class Plugin extends Base
         $this->api->getProcedureHandler()->withCallback(
             'automaticPlanner.getAutomaticPlanAsText',
             function(
-                $week_only = '',
-                $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
-                $hide_times = false,
-                $hide_length = false,
-                $hide_task_title = false,
-                $prepend_project_name = false,
-                $prepend_project_alias = false
+                $params
             ) use ($container) {
                 return [
                     'ok' => true,
                     'received' => $container['automaticPlanner']->getAutomaticPlanAsText(
-                        $week_only,
-                        $days,
-                        $hide_times,
-                        $hide_length,
-                        $hide_task_title,
-                        $prepend_project_name,
-                        $prepend_project_alias
+                        $params
                     ),
                 ];
             }

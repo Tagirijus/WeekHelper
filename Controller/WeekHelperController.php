@@ -329,13 +329,15 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             $automatic_plan = json_encode($this->helper->automaticPlanner->getAutomaticPlanAsArray());
         } else {
             $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText(
-                $this->request->getStringParam('week_only', ''),
-                $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr'),
-                $this->request->getStringParam('hide_times', 0) == 1,
-                $this->request->getStringParam('hide_length', 0) == 1,
-                $this->request->getStringParam('hide_task_title', 0) == 1,
-                $this->request->getStringParam('prepend_project_name', 0) == 1,
-                $this->request->getStringParam('prepend_project_alias', 0) == 1
+                [
+                    'week_only' => $this->request->getStringParam('week_only', ''),
+                    'days' => $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr'),
+                    'hide_times' => $this->request->getStringParam('hide_times', 0) == 1,
+                    'hide_length' => $this->request->getStringParam('hide_length', 0) == 1,
+                    'hide_task_title' => $this->request->getStringParam('hide_task_title', 0) == 1,
+                    'prepend_project_name' => $this->request->getStringParam('prepend_project_name', 0) == 1,
+                    'prepend_project_alias' => $this->request->getStringParam('prepend_project_alias', 0) == 1
+                ]
             );
         }
         return $this->response->text($automatic_plan);

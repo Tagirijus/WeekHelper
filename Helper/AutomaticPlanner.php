@@ -335,7 +335,10 @@ class AutomaticPlanner extends Base
     /**
      * Get the automatic plan as plaintext.
      *
-     * Available parameter:
+     * The $params parameter can hold the following
+     * options, which would be basically parameters
+     * themself. But for better extending I made this
+     * one an array:
      *
      *     week_only:
      *         - '': both weeks
@@ -369,25 +372,14 @@ class AutomaticPlanner extends Base
      *     prepend_project_alias:
      *         If true, it prepend the project alias.
      *
-     * @param boolean  $week_only
-     * @param  string $days
-     * @param  boolean $hide_times
-     * @param  boolean $hide_length
-     * @param  boolean $hide_task_title
-     * @param  boolean $prepend_project_name
-     * @param  boolean $prepend_project_alias
+     * @param  array $params See docstring for info
      * @return string
      */
-    public function getAutomaticPlanAsText(
-        $week_only = '',
-        $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
-        $hide_times = false,
-        $hide_length = false,
-        $hide_task_title = false,
-        $prepend_project_name = false,
-        $prepend_project_alias = false
-    )
+    public function getAutomaticPlanAsText($params = [])
     {
+        // params preparation
+        $week_only = $params['week_only'] ?? '';
+
         $final_plan = $this->getAutomaticPlanAsArray();
 
         if ($week_only == 'active' || $week_only == '') {
@@ -398,12 +390,7 @@ class AutomaticPlanner extends Base
             $this->formatSinglePlaintextDays(
                 $out,
                 $final_plan['active'],
-                $days,
-                $hide_times,
-                $hide_length,
-                $hide_task_title,
-                $prepend_project_name,
-                $prepend_project_alias
+                $params
             );
         }
 
@@ -416,12 +403,7 @@ class AutomaticPlanner extends Base
             $this->formatSinglePlaintextDays(
                 $out,
                 $final_plan['planned'],
-                $days,
-                $hide_times,
-                $hide_length,
-                $hide_task_title,
-                $prepend_project_name,
-                $prepend_project_alias
+                $params
             );
         }
 
@@ -448,27 +430,20 @@ class AutomaticPlanner extends Base
      *
      * @param  string &$out
      * @param  array $plan_week
-     * @param  string $days
-     * @param  boolean $hide_times
-     * @param  boolean $hide_length
-     * @param  boolean $hide_task_title
-     * @param  boolean $prepend_project_name
-     * @param  boolean $prepend_project_alias
+     * @param  array $params See getAutomaticPlanAsText() for info
      */
     public function formatSinglePlaintextDays(
         &$out,
         $plan_week,
-        $days = 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr',
-        $hide_times = false,
-        $hide_length = false,
-        $hide_task_title = false,
-        $prepend_project_name = false,
-        $prepend_project_alias = false
+        $params = []
     )
     {
         // with this variable I can have better visual breakpoints so that it
         // is more clear where whole work blocks are being separated
         $last_time = 0;
+
+        // params preparation
+        $days = $params['days'] ?? 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr';
 
         foreach ($plan_week as $day => $tasks) {
             if (
@@ -496,11 +471,7 @@ class AutomaticPlanner extends Base
                     }
                     $out .= $this->formatSinglePlaintextTask(
                         $task,
-                        $hide_times,
-                        $hide_length,
-                        $hide_task_title,
-                        $prepend_project_name,
-                        $prepend_project_alias
+                        $params
                     );
                 }
                 $out .= "\n\n";
@@ -515,21 +486,10 @@ class AutomaticPlanner extends Base
      * Maybe one day it might even be configurable via the settings.
      *
      * @param  array $task
-     * @param  boolean $hide_times Hide daytimes
-     * @param  boolean $hide_length Hide length of task
-     * @param  boolean $hide_task_title Hide original task title
-     * @param  boolean $prepend_project_name Prepend project name
-     * @param  boolean $prepend_project_alias Prepend project alias
+     * @param  array $params See getAutomaticPlanAsText() for info
      * @return string
      */
-    public function formatSinglePlaintextTask(
-        $task,
-        $hide_times = false,
-        $hide_length = false,
-        $hide_task_title = false,
-        $prepend_project_name = false,
-        $prepend_project_alias = false
-    )
+    public function formatSinglePlaintextTask($task, $params = [])
     {
         $out = '';
         $start_daytime = TimeHelper::minutesToReadable($task['start']);
@@ -537,7 +497,7 @@ class AutomaticPlanner extends Base
         $length = TimeHelper::minutesToReadable($task['length'], ' h');
 
         // time of day
-        if (!$hide_times) {
+        if (!($params['hide_times'] ?? false)) {
             $out .= (
                 str_pad($start_daytime, 5, " ", STR_PAD_LEFT)
                 . ' - '
@@ -547,15 +507,10 @@ class AutomaticPlanner extends Base
         }
 
         // task title
-        $out .= $this->formatSinglePlaintextTitle(
-            $task,
-            $hide_task_title,
-            $prepend_project_name,
-            $prepend_project_alias
-        );
+        $out .= $this->formatSinglePlaintextTitle($task, $params);
 
         // length of task
-        if (!$hide_length) {
+        if (!($params['hide_length'] ?? false)) {
             $out .= " (" . $length . ")";
         }
         $out .= "\n";
@@ -575,28 +530,21 @@ class AutomaticPlanner extends Base
      * I will see!
      *
      * @param  array $task
-     * @param  boolean $hide_task_title Hide original task title
-     * @param  boolean $prepend_project_name Prepend project name
-     * @param  boolean $prepend_project_alias Prepend project alias
+     * @param  array $params See getAutomaticPlanAsText() for info
      * @return string
      */
-    public function formatSinglePlaintextTitle(
-        $task,
-        $hide_task_title = false,
-        $prepend_project_name = false,
-        $prepend_project_alias = false
-    )
+    public function formatSinglePlaintextTitle($task, $params = [])
     {
-        $title = $hide_task_title ? '' : $task['task']['title'];
+        $title = $params['hide_task_title'] ?? false ? '' : $task['task']['title'];
 
         $title = (
-            $prepend_project_name ?
+            $params['prepend_project_name'] ?? false ?
             $task['task']['project_name'] . ': ' . $title
             : $title
         );
 
         $title = (
-            $prepend_project_alias ?
+            $params['prepend_project_alias'] ?? false ?
             (
                 $task['task']['project_alias'] != '' ?
                 '[' . $task['task']['project_alias'] . '] ' . $title
