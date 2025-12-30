@@ -423,11 +423,11 @@ class AutomaticPlanner extends Base
             if ($week_only == '') {
                 $out = "ACTIVE WEEK\n";
                 if ($show_week_times) {
-                    $out .= "{WEEK_TIMES}\n";
+                    $out .= $this->prepareWeekTimesString('active') . "\n";
                 }
                 $out .= "\n";
             } elseif ($show_week_times) {
-                $out = "{WEEK_TIMES}\n\n";
+                $out = $this->prepareWeekTimesString('active') . "\n\n";
             }
             $this->formatSinglePlaintextDays(
                 $out,
@@ -443,11 +443,11 @@ class AutomaticPlanner extends Base
                 $out .= "\n\n";
                 $out .= "PLANNED WEEK\n";
                 if ($show_week_times) {
-                    $out .= "{WEEK_TIMES}\n";
+                    $out .= $this->prepareWeekTimesString('planned') . "\n";
                 }
                 $out .= "\n";
             } elseif ($show_week_times) {
-                $out = "{WEEK_TIMES}\n\n";
+                $out = $this->prepareWeekTimesString('planned') . "\n\n";
             }
             $this->formatSinglePlaintextDays(
                 $out,
@@ -456,6 +456,26 @@ class AutomaticPlanner extends Base
             );
         }
 
+        return $out;
+    }
+
+    /**
+     * Prepare the week times string for the given week,
+     * which is "active" or "planned".
+     *
+     * @param  string $week
+     * @return string
+     */
+    public function prepareWeekTimesString($week = 'active')
+    {
+        $remaining = $this->getTasksPlan($week)->getGlobalTimesForWeek()['remaining'];
+        $spent = $this->getTasksPlan($week)->getGlobalTimesForWeek()['spent'];
+        $planned = $this->getTasksPlan($week)->getGlobalTimesForWeek()['planned'];
+
+        $out = 'Planned: ' . TimeHelper::minutesToReadable($planned, ' h');
+        $out .= ' (Remaining: ' . TimeHelper::minutesToReadable($remaining, ' h');
+        $out .= ', Spent: ' . TimeHelper::minutesToReadable($spent, ' h');
+        $out .= ')';
         return $out;
     }
 

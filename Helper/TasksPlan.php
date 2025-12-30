@@ -291,6 +291,11 @@ class TasksPlan
             // first it has to be checked, if there even is enough time
             // for the task to be planned available
             $time_to_plan = $this->minutesCanBePlanned($task, $time_slots_day);
+            // also this tasks times has to be added already, even if no time
+            // for it is to plan. I want the remaining and especially the spent
+            // time anyway added into the global array!
+            $this->addTimesToGlobal($time_slots_day->getDay(), $time_to_plan, $task);
+            // and now check; no time to plan? return false as success already
             if ($time_to_plan == 0) {
                 break;
             }
@@ -314,7 +319,6 @@ class TasksPlan
             // needed internal attributes
             $this->addPlannedTimeForTask($task['id'], $time_to_plan);
             $this->addTaskToPlan($task, $time_slots_day->getDay(), $start, $end);
-            $this->addTimesToGlobal($time_slots_day->getDay(), $time_to_plan, $task);
         }
 
         return $success;
