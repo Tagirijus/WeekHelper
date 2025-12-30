@@ -375,6 +375,9 @@ class AutomaticPlanner extends Base
      *     show_day_planned:
      *         If true, show the times for a whole day.
      *
+     *     show_week_times:
+     *         If true, shows time stats for the week.
+     *
      * @param  array $params See docstring for info
      * @return string
      */
@@ -382,13 +385,21 @@ class AutomaticPlanner extends Base
     {
         // params preparation
         $week_only = $params['week_only'] ?? '';
+        $show_week_times = $params['show_week_times'] ?? false;
 
         $final_plan = $this->getAutomaticPlanAsArray();
 
         if ($week_only == 'active' || $week_only == '') {
+            // both weeks are needed, thus also a title for
+            // each week to distinguish both
             if ($week_only == '') {
                 $out = "ACTIVE WEEK\n";
+                if ($show_week_times) {
+                    $out .= "{WEEK_TIMES}\n";
+                }
                 $out .= "\n";
+            } elseif ($show_week_times) {
+                $out = "{WEEK_TIMES}\n\n";
             }
             $this->formatSinglePlaintextDays(
                 $out,
@@ -398,10 +409,17 @@ class AutomaticPlanner extends Base
         }
 
         if ($week_only == 'planned' || $week_only == '') {
+            // both weeks are needed, thus also a title for
+            // each week to distinguish both
             if ($week_only == '') {
                 $out .= "\n\n";
                 $out .= "PLANNED WEEK\n";
+                if ($show_week_times) {
+                    $out .= "{WEEK_TIMES}\n";
+                }
                 $out .= "\n";
+            } elseif ($show_week_times) {
+                $out = "{WEEK_TIMES}\n\n";
             }
             $this->formatSinglePlaintextDays(
                 $out,

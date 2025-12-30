@@ -337,7 +337,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
                     'hide_task_title' => $this->request->getStringParam('hide_task_title', 0) == 1,
                     'prepend_project_name' => $this->request->getStringParam('prepend_project_name', 0) == 1,
                     'prepend_project_alias' => $this->request->getStringParam('prepend_project_alias', 0) == 1,
-                    'show_day_planned' => $this->request->getStringParam('show_day_planned', 0) == 1
+                    'show_day_planned' => $this->request->getStringParam('show_day_planned', 0) == 1,
+                    'show_week_times' => $this->request->getStringParam('show_week_times', 0) == 1
                 ]
             );
         }
