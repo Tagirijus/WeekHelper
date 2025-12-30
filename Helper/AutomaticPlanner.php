@@ -316,29 +316,24 @@ class AutomaticPlanner extends Base
     }
 
     /**
-     * Return the internal tasks plan fpr the active week.
+     * Return the internal tasks plan for the week:
+     * "active" or "planned". It will also first
+     * initialize the internal variables, if needed.
      *
+     * @param string  $week
      * @return TasksPlan
      */
-    public function getTasksPlanActiveWeek()
+    public function getTasksPlan($week = 'active')
     {
+        // check if null; both will be initialized then
         if (is_null($this->tasks_plan_active_week)) {
             $this->initTasksPlans();
         }
-        return $this->tasks_plan_active_week;
-    }
-
-    /**
-     * Return the internal tasks plan fpr the planned week.
-     *
-     * @return TasksPlan
-     */
-    public function getTasksPlanPlannedWeek()
-    {
-        if (is_null($this->tasks_plan_planned_week)) {
-            $this->initTasksPlans();
+        if ($week == 'active') {
+            return $this->tasks_plan_active_week;
+        } else {
+            return $this->tasks_plan_planned_week;
         }
-        return $this->tasks_plan_planned_week;
     }
 
     /**
@@ -485,15 +480,7 @@ class AutomaticPlanner extends Base
         // params preparation
         $days = $params['days'] ?? 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr';
 
-        // which week should be processed?
-        if ($week == 'active') {
-            $tasks_plan = $this->getTasksPlanActiveWeek();
-        } elseif ($week == 'planned') {
-            $tasks_plan = $this->getTasksPlanPlannedWeek();
-        }
-        $plan_week = $tasks_plan->getPlan();
-
-        foreach ($plan_week as $day => $tasks) {
+        foreach ($this->getTasksPlan($week)->getPlan() as $day => $tasks) {
             if (
                 str_contains($days, $day)
                 || (
@@ -537,7 +524,7 @@ class AutomaticPlanner extends Base
                 if ($params['show_day_planned'] ?? false) {
                     $day_times_str = (
                         TimeHelper::minutesToReadable(
-                            $tasks_plan->getGlobalTimesForDay($day)['planned'],
+                            $this->getTasksPlan($week)->getGlobalTimesForDay($day)['planned'],
                             'h'
                         )
                     );
