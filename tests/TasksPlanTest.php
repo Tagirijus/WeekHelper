@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../Helper/TasksPlan.php';
 require_once __DIR__ . '/../tests/TestTask.php';
 require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
+require_once __DIR__ . '/../Helper/TimePoint.php';
 require_once __DIR__ . '/../Helper/TimeSpan.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 
