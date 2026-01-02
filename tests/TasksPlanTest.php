@@ -629,41 +629,4 @@ final class TasksPlanTest extends TestCase
             'Expected plan is not correct with task_earliest_start set for task A.'
         );
     }
-
-    public function toDotestEarliestStartMinutesRemaining()
-    {
-        $tasks_plan = new TasksPlan();
-
-        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
-        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
-
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         2,      0);
-        // also task A should have a "task_earliest_start" value set; which will be
-        // parsed normally later in the whole automatic planning process; only for
-        // the tets I will set this value by hand
-        $task_a['task_earliest_start'] = 'tue 13:00';
-
-        // this basically is a part of the other test; yet during development I need
-        // this test before managing to do the other one properly. this bascially
-        // tests how the TasksPlan->minutesCanBePlanned() method will handle the
-        // task with the "task_earliest_start" value.
-
-        // first the Monday is to check; task A may only be planned on Tueday, though;
-        // so 0 minutes should be able to be planned
-        $this->assertSame(
-            0,
-            $tasks_plan->minutesCanBePlanned($task_a, $time_slots_day_mon),
-            'minutesCanBePlanned() do not return correct minutes for task with'
-            . ' set "task_earliest_start" value.'
-        );
-        // now it's Tuesday - available would be 4 hours, but the task may only
-        // start at 13:00 ... so only 1 hour would be left then
-        $this->assertSame(
-            60,
-            $tasks_plan->minutesCanBePlanned($task_a, $time_slots_day_tue),
-            'minutesCanBePlanned() do not return correct minutes for task with'
-            . ' set "task_earliest_start" value.'
-        );
-    }
 }
