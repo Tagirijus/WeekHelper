@@ -546,8 +546,11 @@ class TimeSlotsDay
      * @param  string $time_point_str
      * @return boolean
      */
-    public function splitSlotByTimepointString($time_point_str)
+    public function splitSlotByTimepointString($time_point_str = '')
     {
+        if ($time_point_str == '') {
+            return false;
+        }
         $time_point = new TimePoint($time_point_str);
         return $this->splitSlotByTimepoint($time_point);
     }
