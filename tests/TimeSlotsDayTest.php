@@ -411,6 +411,11 @@ final class TimeSlotsDayTest extends TestCase
             $time_slots_day->nextSlot('', 'tue 20:30'),
             'Tasks earliest start should give NO next slot key.'
         );
+        $this->assertSame(
+            -1,
+            $time_slots_day->nextSlot('', 'mon 22:00'),
+            'Tasks earliest start should give NO next slot key.'
+        );
     }
 
     public function testSplitByTimepoint()
