@@ -133,9 +133,10 @@ class TimeSlotsDay
      * for the slot, which still has remaining time to plan left.
      *
      * @param  string $project_type
+     * @param  string $time_point_str
      * @return int
      */
-    public function nextSlot($project_type = '')
+    public function nextSlot($project_type = '', $time_point_str = '')
     {
         foreach ($this->slots as $key => $slot) {
             // if a slot type is empty, it means that every project_type
@@ -146,7 +147,15 @@ class TimeSlotsDay
                 || $slot['project_type'] == $project_type
             );
             $has_remaining_time = $slot['timespan']->length() > 0;
-            if ($type_is_valid && $has_remaining_time) {
+            $time_point = new TimePoint($time_point_str);
+            $time_point_str_is_in = (
+                $time_point_str == ''
+                || (
+                    $slot['timespan']->timepointIsIn($time_point)
+                    && $time_point->getDay() == $this->getDay()
+                )
+            );
+            if ($type_is_valid && $has_remaining_time && $time_point_str_is_in) {
                 return $key;
             }
         }

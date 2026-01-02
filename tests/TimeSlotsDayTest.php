@@ -391,4 +391,25 @@ final class TimeSlotsDayTest extends TestCase
             . ' but with init_value==true it should look at the init TimeSpan.'
         );
     }
+
+    public function testNextSlotWithEarliestStart()
+    {
+        // the test for the new nextSlot() method, which now can also
+        // get an optional string, representing a "Tasks earliest start"
+        // timepoint string. it should be internal an additional check,
+        // whether the given timepoint string is ALSO in the one of the
+        // next available time slots for this TimeSlotsDay instance. It
+        // will return the key of the next slot on success, -1 on fail.
+        $time_slots_day = new TimeSlotsDay("10:00-11:00\n20:00-22:00", 'mon');
+        $this->assertSame(
+            1,
+            $time_slots_day->nextSlot('', 'mon 20:30'),
+            'Tasks earliest start should give a next slot key.'
+        );
+        $this->assertSame(
+            -1,
+            $time_slots_day->nextSlot('', 'tue 20:30'),
+            'Tasks earliest start should give NO next slot key.'
+        );
+    }
 }
