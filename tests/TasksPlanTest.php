@@ -521,4 +521,111 @@ final class TasksPlanTest extends TestCase
             'Global times from TaskPlan are not the same.'
         );
     }
+
+    public function testEarliestStart()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
+
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_a = TestTask::create('a',   1,          '',   4,         2,      0);
+        // also task A should have a "task_earliest_start" value set; which will be
+        // parsed normally later in the whole automatic planning process; only for
+        // the tets I will set this value by hand
+        $task_a['task_earliest_start'] = 'tue 11:00';
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_b = TestTask::create('b',   1,          '',   4,         4,      0);
+        //                         title, project_id, type, max_hours, remain, spent
+        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+
+        // now I plan manually like the sorting was set already and how I know how
+        // the tasks should be planned across the days; at least how it is supposed
+        // to happen
+
+        // for task A, for example, it should not be planned on Monday, since its
+        // earliest start is set to Tuesday 11:00!
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        // go on with the next tasks then ...
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_mon
+        );
+        // now its Tuesday, only task A and C should be remaining
+        // task A should be planned on 11:00-13:00
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_tue
+        );
+        // task B should be depleted by now already
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+        // task C should be planned before that on 10:00-11:00
+        // and also after that on 13:00-14:00
+        $tasks_plan->planTask(
+            $task_c,
+            $time_slots_day_tue
+        );
+
+        // now let's see if everythig worked correctly
+        $expected = [
+            'mon' => [
+                [
+                    'task' => $task_b,
+                    'start' => 600,
+                    'end' => 840,
+                    'length' => 240,
+                    'spent' => 0,
+                    'remaining' => 240,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => $task_c,
+                    'start' => 600,
+                    'end' => 660,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => $task_a,
+                    'start' => 660,
+                    'end' => 780,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => $task_c,
+                    'start' => 780,
+                    'end' => 840,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ]
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+        $this->assertSame(
+            $expected,
+            $tasks_plan->getPlan(),
+            'Expected plan is not correct with task_earliest_start set for task A.'
+        );
+    }
 }
