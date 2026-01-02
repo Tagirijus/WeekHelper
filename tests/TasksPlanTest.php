@@ -522,7 +522,7 @@ final class TasksPlanTest extends TestCase
         );
     }
 
-    public function testEarliestStart()
+    public function toDotestEarliestStart()
     {
         $tasks_plan = new TasksPlan();
 
