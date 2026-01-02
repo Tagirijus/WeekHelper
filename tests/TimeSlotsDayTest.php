@@ -412,4 +412,59 @@ final class TimeSlotsDayTest extends TestCase
             'Tasks earliest start should give NO next slot key.'
         );
     }
+
+    public function testSplitByTimepoint()
+    {
+        $time_slots_day = new TimeSlotsDay("10:00-20:00", 'mon');
+        $time_point = new TimePoint('mon 16:00');
+
+        // first some initial test
+        $this->assertSame(
+            1,
+            count($time_slots_day->getSlots()),
+            'There should initially only be 1 slot for the TimeSlotsDay.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getLengthOfSlot(0),
+            'The original slot should be 10 hours / 600 minutes in length.'
+        );
+        $this->assertSame(
+            600,
+            $time_slots_day->getLengthOfSlot(0, true),
+            'The original slot should be 10 hours / 600 minutes in length for initial as well.'
+        );
+
+        // now the splitting and ongoing tests
+        $split_success = $time_slots_day->splitSlotByTimepoint($time_point);
+        $this->assertTrue(
+            $split_success,
+            'Splitting TimeSlotsDay by TimePoint was not successful.'
+        );
+        $this->assertSame(
+            2,
+            count($time_slots_day->getSlots()),
+            'There should now be 2 slots after splitting TimeSlotsDay by TimePoint.'
+        );
+        $this->assertSame(
+            360,
+            $time_slots_day->getLengthOfSlot(0),
+            'The new first slot should only be 6 hours / 360 minutes in length.'
+        );
+        $this->assertSame(
+            360,
+            $time_slots_day->getLengthOfSlot(0, true),
+            'The new first slot should only be 6 hours / 360 minutes in length for initial as well.'
+        );
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot(1),
+            'The new second slot should only be 4 hours / 240 minutes in length.'
+        );
+        $this->assertSame(
+            240,
+            $time_slots_day->getLengthOfSlot(1, true),
+            'The new second slot should only be 4 hours / 240 minutes in length for initial as well.'
+        );
+    }
 }

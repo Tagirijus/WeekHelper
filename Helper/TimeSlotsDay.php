@@ -435,7 +435,7 @@ class TimeSlotsDay
 
     /**
      * Check if the given TimePoint instance is in any of the momentary
-     * slots and return the slot_key then. Returns -1 if given TimeSpan
+     * slots and return the slot_key then. Returns -1 if given TimePoint
      * is not in any of these slots.
      *
      * @param  TimePoint $time_point
@@ -486,5 +486,55 @@ class TimeSlotsDay
             $out += $this->getLengthOfSlot($key, $init_value);
         }
         return $out;
+    }
+
+    /**
+     * Split an internal slot into two slots, if the given
+     * TimePoint is inside this slot. True, if splitting
+     * was successful, otherwise false.
+     *
+     * @param  TimePoint $time_point
+     * @return boolean
+     */
+    public function splitSlotByTimepoint($time_point)
+    {
+        $success = false;
+        $slot_key = $this->slotKeyFromTimePoint($time_point);
+        if ($slot_key != -1) {
+            $new_slots = [];
+            foreach ($this->getSlots() as $key => $slot) {
+                if ($slot_key == $key) {
+                    $first_half = [
+                        'timespan' => new TimeSpan(
+                            $slot['timespan']->getStart(),
+                            $time_point->getTime()
+                        ),
+                        'timespan_init' => new TimeSpan(
+                            $slot['timespan_init']->getStart(),
+                            $time_point->getTime()
+                        ),
+                        'project_type' => $slot['project_type']
+                    ];
+                    $second_half = [
+                        'timespan' => new TimeSpan(
+                            $time_point->getTime(),
+                            $slot['timespan']->getEnd()
+                        ),
+                        'timespan_init' => new TimeSpan(
+                            $time_point->getTime(),
+                            $slot['timespan_init']->getEnd()
+                        ),
+                        'project_type' => $slot['project_type']
+                    ];
+                    $new_slots[] = $first_half;
+                    $new_slots[] = $second_half;
+                } else {
+                    $new_slots[] = $slot;
+                }
+            }
+            $this->slots = $new_slots;
+            $success = true;
+        }
+        return $success;
     }
 }
