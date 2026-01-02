@@ -148,14 +148,23 @@ class TimeSlotsDay
             );
             $has_remaining_time = $slot['timespan']->length() > 0;
             $time_point = new TimePoint($time_point_str);
-            $time_point_str_is_in = (
+            $time_point_str_is_in_or_before = (
+                // either there is no timepoint string given
                 $time_point_str == ''
+                // or the timepoint is exactly in the slot
                 || (
                     $slot['timespan']->timepointIsIn($time_point)
                     && $time_point->getDay() == $this->getDay()
                 )
+                // or the timepoint is before the next available slots
+                || (
+                    $slot['timespan']->getStart() >= $time_point->getTime()
+                    && TimeHelper::diffOfWeekDays(
+                        $this->getDay(), $time_point->getDay()
+                    ) < 1
+                )
             );
-            if ($type_is_valid && $has_remaining_time && $time_point_str_is_in) {
+            if ($type_is_valid && $has_remaining_time && $time_point_str_is_in_or_before) {
                 return $key;
             }
         }
