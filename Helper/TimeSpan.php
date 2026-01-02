@@ -155,7 +155,7 @@ class TimeSpan
     {
         return (
             $time_point->getTime() >= $this->start
-            && $time_point->getTime() <= $this->end
+            && $time_point->getTime() < $this->end
         );
     }
 }

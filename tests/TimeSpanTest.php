@@ -86,7 +86,7 @@ final class TimeSpanTest extends TestCase
             'Given TimePoint should not be in TimeSpan.'
         );
         $this->assertFalse(
-            $time_span->timepointIsIn(new TimePoint('mon 15:01')),
+            $time_span->timepointIsIn(new TimePoint('mon 15:00')),
             'Given TimePoint should not be in TimeSpan.'
         );
     }
