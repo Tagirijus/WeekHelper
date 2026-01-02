@@ -532,10 +532,10 @@ final class TasksPlanTest extends TestCase
 
         //                         title, project_id, type, max_hours, remain, spent
         $task_a = TestTask::create('a',   1,          '',   4,         2,      0);
-        // also task A should have a "task_earliest_start" value set; which will be
+        // also task A should have a "plan_from" value set; which will be
         // parsed normally later in the whole automatic planning process; only for
         // the tets I will set this value by hand
-        $task_a['task_earliest_start'] = 'tue 11:00';
+        $task_a['plan_from'] = 'tue 11:00';
         //                         title, project_id, type, max_hours, remain, spent
         $task_b = TestTask::create('b',   1,          '',   4,         4,      0);
         //                         title, project_id, type, max_hours, remain, spent
@@ -629,7 +629,7 @@ final class TasksPlanTest extends TestCase
         $this->assertSame(
             $expected,
             $tasks_plan->getPlan(),
-            'Expected plan is not correct with task_earliest_start set for task A.'
+            'Expected plan is not correct with plan_from set for task A.'
         );
     }
 }

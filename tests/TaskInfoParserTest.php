@@ -74,18 +74,18 @@ final class TaskInfoParserTest extends TestCase
         $task = [
             'description' => (
                 "any other descriptions text\nis here\nin multiline\n"
-                . "task_earliest_start=wed 10:00\n"
+                . "plan_from=wed 10:00\n"
             )
         ];
 
         $this->assertFalse(
-            array_key_exists('task_earliest_start', $task),
-            '$task should not have the task_earliest_start key yet.'
+            array_key_exists('plan_from', $task),
+            '$task should not have the plan_from key yet.'
         );
         TaskInfoParser::extendTask($task);
         $this->assertSame(
             'wed 10:00',
-            $task['task_earliest_start'],
+            $task['plan_from'],
             'Task info was not parsed correctly.'
         );
     }

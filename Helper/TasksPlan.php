@@ -281,16 +281,16 @@ class TasksPlan
     {
         $success = false;
 
-        // a task can have a "task_earliest_start" timepoint string.
+        // a task can have a "plan_from" timepoint string.
         // this should be able to split an available time slot into
         // two slots. This way it is easier to assign a task into the
         // slot and deplete it, etc. So basically before doing the
         // main loop for planning the task into any slot, the task
         // is capable to split the slots first.
-        $time_point_str = $task['task_earliest_start'] ?? '';
+        $time_point_str = $task['plan_from'] ?? '';
         $time_slots_day->splitSlotByTimepointString($time_point_str);
         // also directly return false, if for the given task
-        // with (maybe) a task_earliest_start there is no next
+        // with (maybe) a plan_from there is no next
         // slot at all.
         $next_slot_key = $time_slots_day->nextSlot(
             $task['project_type'],
@@ -427,7 +427,7 @@ class TasksPlan
         }
 
         // get next possible slot
-        $time_point_str = $task['task_earliest_start'] ?? '';
+        $time_point_str = $task['plan_from'] ?? '';
         $next_slot_key = $time_slots_day->nextSlot($task['project_type'], $time_point_str);
         if ($next_slot_key == -1) {
             return 0;

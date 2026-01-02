@@ -42,7 +42,7 @@ class TaskInfoParser
             // "you may plan this task earliest on this day + time only". so
             // maybe there are tasks, which should only be planned after
             // Tuesday or so.
-            'task_earliest_start' => '',
+            'plan_from' => '',
         ];
 
         self::parseData($data, $task['description']);
@@ -67,8 +67,8 @@ class TaskInfoParser
             if (str_starts_with($line, 'project_type=')) {
                 $data['project_type'] = str_replace('project_type=', '', $line);
 
-            } elseif (str_starts_with($line, 'task_earliest_start=')) {
-                $data['task_earliest_start'] = str_replace('task_earliest_start=', '', $line);
+            } elseif (str_starts_with($line, 'plan_from=')) {
+                $data['plan_from'] = str_replace('plan_from=', '', $line);
 
             }
         }
