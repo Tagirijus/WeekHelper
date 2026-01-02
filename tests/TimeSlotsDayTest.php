@@ -416,7 +416,6 @@ final class TimeSlotsDayTest extends TestCase
     public function testSplitByTimepoint()
     {
         $time_slots_day = new TimeSlotsDay("10:00-20:00", 'mon');
-        $time_point = new TimePoint('mon 16:00');
 
         // first some initial test
         $this->assertSame(
@@ -436,7 +435,7 @@ final class TimeSlotsDayTest extends TestCase
         );
 
         // now the splitting and ongoing tests
-        $split_success = $time_slots_day->splitSlotByTimepoint($time_point);
+        $split_success = $time_slots_day->splitSlotByTimepointString('mon 16:00');
         $this->assertTrue(
             $split_success,
             'Splitting TimeSlotsDay by TimePoint was not successful.'

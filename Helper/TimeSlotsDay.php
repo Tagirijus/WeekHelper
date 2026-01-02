@@ -537,4 +537,18 @@ class TimeSlotsDay
         }
         return $success;
     }
+
+    /**
+     * Basically a wrapper for the splitSlotByTimepoint() method,
+     * but this one can get a string, which will be converted
+     * to a TimePoint internally.
+     *
+     * @param  string $time_point_str
+     * @return boolean
+     */
+    public function splitSlotByTimepointString($time_point_str)
+    {
+        $time_point = new TimePoint($time_point_str);
+        return $this->splitSlotByTimepoint($time_point);
+    }
 }
