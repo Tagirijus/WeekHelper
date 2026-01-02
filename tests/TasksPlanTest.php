@@ -523,7 +523,7 @@ final class TasksPlanTest extends TestCase
         );
     }
 
-    public function toDotestEarliestStart()
+    public function testEarliestStart()
     {
         $tasks_plan = new TasksPlan();
 
@@ -552,10 +552,12 @@ final class TasksPlanTest extends TestCase
             $time_slots_day_mon
         );
         // go on with the next tasks then ...
+        // task B should be planned
         $tasks_plan->planTask(
             $task_b,
             $time_slots_day_mon
         );
+        // task C shoudl not be planned
         $tasks_plan->planTask(
             $task_c,
             $time_slots_day_mon
@@ -566,7 +568,7 @@ final class TasksPlanTest extends TestCase
             $task_a,
             $time_slots_day_tue
         );
-        // task B should be depleted by now already
+        // task B should be depleted by now already, thus not planned
         $tasks_plan->planTask(
             $task_b,
             $time_slots_day_tue
@@ -623,6 +625,7 @@ final class TasksPlanTest extends TestCase
             'sun' => [],
             'overflow' => [],
         ];
+
         $this->assertSame(
             $expected,
             $tasks_plan->getPlan(),

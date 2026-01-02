@@ -281,6 +281,25 @@ class TasksPlan
     {
         $success = false;
 
+        // a task can have a "task_earliest_start" timepoint string.
+        // this should be able to split an available time slot into
+        // two slots. This way it is easier to assign a task into the
+        // slot and deplete it, etc. So basically before doing the
+        // main loop for planning the task into any slot, the task
+        // is capable to split the slots first.
+        $time_point_str = $task['task_earliest_start'] ?? '';
+        $time_slots_day->splitSlotByTimepointString($time_point_str);
+        // also directly return false, if for the given task
+        // with (maybe) a task_earliest_start there is no next
+        // slot at all.
+        $next_slot_key = $time_slots_day->nextSlot(
+            $task['project_type'],
+            $time_point_str
+        );
+        if ($next_slot_key == -1) {
+            return $success;
+        }
+
         // try to plan the given task over all available time slots
         // of the TimeSlotsDay instance. e.g. it can happen that
         // there might be more than one slot for this task to be used,
@@ -291,6 +310,7 @@ class TasksPlan
             // first it has to be checked, if there even is enough time
             // for the task to be planned available
             $time_to_plan = $this->minutesCanBePlanned($task, $time_slots_day);
+
             // also this tasks times has to be added already, even if no time
             // for it is to plan. I want the remaining and especially the spent
             // time anyway added into the global array!
@@ -301,7 +321,10 @@ class TasksPlan
             }
 
             // then there should be an available slot left on the day
-            $next_slot_key = $time_slots_day->nextSlot($task['project_type']);
+            $next_slot_key = $time_slots_day->nextSlot(
+                $task['project_type'],
+                $time_point_str
+            );
             if ($next_slot_key == -1) {
                 break;
             }
@@ -404,7 +427,8 @@ class TasksPlan
         }
 
         // get next possible slot
-        $next_slot_key = $time_slots_day->nextSlot($task['project_type']);
+        $time_point_str = $task['task_earliest_start'] ?? '';
+        $next_slot_key = $time_slots_day->nextSlot($task['project_type'], $time_point_str);
         if ($next_slot_key == -1) {
             return 0;
         }
