@@ -31,6 +31,18 @@ class TaskInfoParser
             // project type won't overwrite the project type, which exists
             // on the outside.
             'project_type' => null,
+
+            // this is an info for the automatic planner so that it knows
+            // when this task can be planned earliest in the week. this can
+            // become handy, if a task should be rather planned on a specific
+            // time directly. e.g. the user could add a sorting for all tasks
+            // on this key, so that tasks with such key would be processed
+            // first. maybe this value becomes handy in other situations as
+            // well. it's no direct timeslot planning, but rather some kind of
+            // "you may plan this task earliest on this day + time only". so
+            // maybe there are tasks, which should only be planned after
+            // Tuesday or so.
+            'task_earliest_start' => '',
         ];
 
         self::parseData($data, $task['description']);
@@ -54,6 +66,9 @@ class TaskInfoParser
 
             if (str_starts_with($line, 'project_type=')) {
                 $data['project_type'] = str_replace('project_type=', '', $line);
+
+            } elseif (str_starts_with($line, 'task_earliest_start=')) {
+                $data['task_earliest_start'] = str_replace('task_earliest_start=', '', $line);
 
             }
         }

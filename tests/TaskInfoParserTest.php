@@ -68,4 +68,25 @@ final class TaskInfoParserTest extends TestCase
             'Task info was not parsed correctly.'
         );
     }
+
+    public function testTaskEarliestStart()
+    {
+        $task = [
+            'description' => (
+                "any other descriptions text\nis here\nin multiline\n"
+                . "task_earliest_start=wed 10:00\n"
+            )
+        ];
+
+        $this->assertFalse(
+            array_key_exists('task_earliest_start', $task),
+            '$task should not have the task_earliest_start key yet.'
+        );
+        TaskInfoParser::extendTask($task);
+        $this->assertSame(
+            'wed 10:00',
+            $task['task_earliest_start'],
+            'Task info was not parsed correctly.'
+        );
+    }
 }
