@@ -321,8 +321,16 @@ class AutomaticPlanner extends Base
      */
     public function initTasksPlans()
     {
-        $this->tasks_plan_active_week = $this->prepareWeek($this->getTasksActiveWeek());
-        $this->tasks_plan_planned_week = $this->prepareWeek($this->getTasksPlannedWeek(), true);
+        $this->tasks_plan_active_week = $this->prepareWeek(
+            $this->getTasksActiveWeek(),
+            false,
+            $this->configModel->get('weekhelper_block_active_week', '')
+        );
+        $this->tasks_plan_planned_week = $this->prepareWeek(
+            $this->getTasksPlannedWeek(),
+            true,
+            $this->configModel->get('weekhelper_block_planned_week', '')
+        );
     }
 
     /**
@@ -352,9 +360,14 @@ class AutomaticPlanner extends Base
      *
      * @param  array $tasks
      * @param  boolean $ignore_now
+     * @param  string $blocking_config
      * @return TasksPlan
      */
-    public function prepareWeek($tasks, $ignore_now = false)
+    public function prepareWeek(
+        $tasks,
+        $ignore_now = false,
+        $blocking_config = ''
+    )
     {
         $sorted_tasks = SortingLogic::sortTasks(
             $tasks,
@@ -366,6 +379,7 @@ class AutomaticPlanner extends Base
             $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
             $distributor->depleteUntilNow();
         }
+        $distributor->depleteByTimeSpansConfig($blocking_config);
         $distributor->distributeTasks($sorted_tasks);
         $tasks_plan = $distributor->getTasksPlan();
 
