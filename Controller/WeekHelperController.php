@@ -217,6 +217,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_saturday_slots' => $form['saturday_slots'],
             'weekhelper_sunday_slots' => $form['sunday_slots'],
             'weekhelper_minimum_slot_length' => $form['minimum_slot_length'],
+            'weekhelper_block_active_week' => $form['block_active_week'],
+            'weekhelper_block_planned_week' => $form['block_planned_week'],
         ];
 
         $this->languageModel->loadCurrentLanguage();

@@ -6,21 +6,46 @@
 
     <br>
 
+    <!-- Blocking slots -->
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <b>Blocking</b>
+            <p class="weekhelper-config-weak-text">
+                <?= t('Here you can assign slots with "day + whitespace + timespan + whitespace + title", which will be used to "deplete" time slots. This way you can have a normal week plan with slots (below on this page), but still have e.g. private dates for the active or next (planned) week without the need to modify the week plan every week. The idea is that these two text areas can be modified automatically from a private CalDAV calendar later or so.') ?>
+            </p>
+            <?= $this->form->label(t('Blocking for active week'), 'block_active_week') ?>
+            <?= $this->form->textarea('block_active_week', ['block_active_week' => $block_active_week], [], [
+                "placeholder='mon 9:00-10:00 dentist\nwed 0:00-24:00 vacation\nthu 13:00-24:00 closing time'"
+            ], 'weekhelper-textarea-config') ?>
+            <?= $this->form->label(t('Blocking for next/planned week'), 'block_planned_week') ?>
+            <?= $this->form->textarea('block_planned_week', ['block_planned_week' => $block_planned_week], [], [
+                "placeholder='mon 9:00-10:00 dentist\nwed 0:00-24:00 vacation\nthu 13:00-24:00 closing time'"
+            ], 'weekhelper-textarea-config') ?>
+        </div>
+
+    </div>
+
+    <br>
+    <br>
+
+
     <!-- Sorting logic -->
 
     <div class="task-form-container">
 
         <div class="task-form-main-column">
             <?= $this->form->label(t('Sorting logic'), 'sorting_logic') ?>
+            <p class="weekhelper-config-weak-text">
+                <?= t('This is the core sorting logic for the automatic planner feature. Here you can define a sorting "column" (of a task) with asc/desc per line (column + whitespace + direction). Some important available columns are: project_priority, project_wage, project_max_hours, project_type, priority, column_position, position, score. All "project_" keys are from my plugin. Further columns are the one from a native Kanbaord task array (see source code if in doubt).') ?>
+            </p>
             <?= $this->form->textarea('sorting_logic', ['sorting_logic' => $sorting_logic], [], [
                 "placeholder='priority desc\ncolumn_pos desc\nposition asc'"
             ], 'weekhelper-textarea-config') ?>
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
-        <?= t('This is the core sorting logic for the automatic planner feature. Here you can define a sorting "column" (of a task) with asc/desc per line (column + whitespace + direction). Some important available columns are: project_priority, project_wage, project_max_hours, project_type, priority, column_position, position, score. All "project_" keys are from my plugin. Further columns are the one from a native Kanbaord task array (see source code if in doubt).') ?>
-    </p>
 
     <br>
     <br>
@@ -56,8 +81,6 @@
         <div class="task-form-main-column">
             <?= $this->form->label(t('Level to use for the active week.'), 'level_active_week') ?>
             <?= $this->form->text('level_active_week', ['level_active_week' => $level_active_week], [], [
-                'autofocus',
-                'tabindex="9"',
                 'placeholder="e.g. \'level_1\' or \'all\'"'
             ]) ?>
         </div>
@@ -67,8 +90,6 @@
         <div class="task-form-main-column">
             <?= $this->form->label(t('Level to use for the planned week.'), 'level_planned_week') ?>
             <?= $this->form->text('level_planned_week', ['level_planned_week' => $level_planned_week], [], [
-                'autofocus',
-                'tabindex="9"',
                 'placeholder="e.g. \'level_1\' or \'all\'"'
             ]) ?>
         </div>

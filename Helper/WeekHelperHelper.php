@@ -99,6 +99,8 @@ class WeekHelperHelper extends Base
             'saturday_slots' =>  $this->configModel->get('weekhelper_saturday_slots', ''),
             'sunday_slots' =>  $this->configModel->get('weekhelper_sunday_slots', ''),
             'minimum_slot_length' =>  $this->configModel->get('weekhelper_minimum_slot_length', 0),
+            'block_active_week' =>  $this->configModel->get('weekhelper_block_active_week', ''),
+            'block_planned_week' =>  $this->configModel->get('weekhelper_block_planned_week', ''),
         ];
     }
 
