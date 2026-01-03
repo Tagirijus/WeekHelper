@@ -49,9 +49,18 @@ class DistributionLogic
     /**
      * Initialize the class with its attributes.
      *
-     * @param string  $time_slots_config
+     * @param array  $time_slots_config
      */
-    public function __construct($time_slots_config = '')
+    public function __construct($time_slots_config = [
+        'mon' => '',
+        'tue' => '',
+        'wed' => '',
+        'thu' => '',
+        'fri' => '',
+        'sat' => '',
+        'sun' => '',
+        'min_slot_length' => 0
+    ])
     {
         $this->parseTimeSlots($time_slots_config);
         $this->tasks_plan = new TasksPlan($time_slots_config['min_slot_length']);
@@ -151,8 +160,11 @@ class DistributionLogic
      * Deplete the time slots by a given array of TimeSpan instances,
      * where the keys of the array are the day:
      *     [
-     *         'mon' => [TimeSpan, TimeSpan, ...],
-     *         'tue' => [TimeSpan, TimeSpan, ...],
+     *         'mon' => [
+     *             ['timespan' => TimeSpan, 'title' => 'abc'],
+     *             ...
+     *         ],
+     *         'tue' => ...,
      *         ...
      *     ]
      *
@@ -167,11 +179,82 @@ class DistributionLogic
         foreach ($time_spans_by_day as $day => $time_spans) {
             if (array_key_exists($day, $this->time_slots_days)) {
                 foreach ($time_spans as $time_span) {
-                    $success[] = $this->time_slots_days[$day]->depleteByTimeSpan($time_span);
+                    $success[] = $this->time_slots_days[$day]->depleteByTimeSpan($time_span['timespan']);
                 }
             }
         }
         return !in_array(false, $success);
+    }
+
+    /**
+     * Wrapper for depleteByTimeSpans, except that the parameter
+     * can be the config string, which will be parsed internally.
+     *
+     * @param  string $blocking_config
+     * @return boolean
+     */
+    public function depleteByTimeSpansConfig($blocking_config)
+    {
+        return $this->depleteByTimeSpans(
+            self::blockingConfigToTimeSpansByDay($blocking_config)
+        );
+    }
+
+    /**
+     * Convert the config blocking string into an array
+     * with days as keys and an array of TimeSpan instances
+     * as values.
+     *
+     * @param  string $blocking_config
+     * @return array
+     */
+    public static function blockingConfigToTimeSpansByDay($blocking_config)
+    {
+        $out = [
+            'mon' => [],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+        ];
+        $lines = explode("\n", $blocking_config ?? '');
+        foreach ($lines as &$line) {
+
+            $line = trim($line);
+
+            // splitting initial config string into times and project_type
+            $parts = preg_split('/\s+/', $line, 3);
+            $day = $parts[0];
+            if (count($parts) > 1) {
+                $times = $parts[1];
+            } else {
+                return $out;
+            }
+            if (count($parts) > 2) {
+                $title = $parts[2];
+            } else {
+                $title = '';
+            }
+
+            // now splitting times into start and end
+            $times_parts = preg_split('/\-/', $times);
+            if (count($times_parts) == 2) {
+                $start = TimeHelper::readableToMinutes($times_parts[0]);
+                $end = TimeHelper::readableToMinutes($times_parts[1]);
+            } else {
+                $start = 0;
+                $end = 0;
+            }
+
+            // add a time span to array
+            $out[$day][] = [
+                'timespan' => new TimeSpan($start,$end),
+                'title' => $title
+            ];
+        }
+        return $out;
     }
 
     /**
