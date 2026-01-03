@@ -13,6 +13,7 @@ require_once __DIR__ . '/../Helper/TimeHelper.php';
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
+use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 
 
@@ -193,6 +194,42 @@ final class DistributionLogicTest extends TestCase
             60,
             $distributor->time_slots_days['thu']->getLengthOfSlot($thu_slot),
             'The Thursday studio slot should have 1 hour / 60 min left.'
+        );
+    }
+
+    public function testDepleteByTimeSpans()
+    {
+        $time_slots_config = [
+            'mon' => "6:00-9:00 office\n11:00-15:00",
+            'tue' => '10:00-12:00',
+            'wed' => "10:30-15:00\n17:00-18:00",
+            'thu' => "10:00-12:00 office\n15:00-16:00 studio",
+            'fri' => '10:00-12:00',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 0,
+        ];
+        $distributor = new DistributionLogic($time_slots_config);
+
+        $time_spans = [
+            'mon' => [
+                new TimeSpan(300, 360),
+                new TimeSpan(360, 600)
+            ],
+            'tue' => [
+                new TimeSpan(540, 660)
+            ]
+        ];
+        $distributor->depleteByTimeSpans($time_spans);
+        $this->assertSame(
+            1,
+            $distributor->time_slots_days['mon']->nextSlot(),
+            'There should only be the second slot left on Monday now.'
+        );
+        $this->assertSame(
+            60,
+            $distributor->time_slots_days['tue']->getLength(),
+            'Tuesday should only have 1 hour / 60 min left.'
         );
     }
 }

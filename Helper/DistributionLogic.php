@@ -99,7 +99,7 @@ class DistributionLogic
     /**
      * Return the spicey task plan finally!
      *
-     * @return array
+     * @return TasksPlan
      */
     public function getTasksPlan()
     {
@@ -145,6 +145,33 @@ class DistributionLogic
     public function depleteUntilNow()
     {
         $this->depleteUntilTimePoint(new TimePoint());
+    }
+
+    /**
+     * Deplete the time slots by a given array of TimeSpan instances,
+     * where the keys of the array are the day:
+     *     [
+     *         'mon' => [TimeSpan, TimeSpan, ...],
+     *         'tue' => [TimeSpan, TimeSpan, ...],
+     *         ...
+     *     ]
+     *
+     * Returns true or false depending on the success.
+     *
+     * @param  array $time_spans_by_day
+     * @return boolean
+     */
+    public function depleteByTimeSpans($time_spans_by_day)
+    {
+        $success = [];
+        foreach ($time_spans_by_day as $day => $time_spans) {
+            if (array_key_exists($day, $this->time_slots_days)) {
+                foreach ($time_spans as $time_span) {
+                    $success[] = $this->time_slots_days[$day]->depleteByTimeSpan($time_span);
+                }
+            }
+        }
+        return !in_array(false, $success);
     }
 
     /**
