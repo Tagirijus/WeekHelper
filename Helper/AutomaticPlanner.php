@@ -311,8 +311,8 @@ class AutomaticPlanner extends Base
     public function getAutomaticPlanAsArray()
     {
         return [
-            'active' => $this->getTasksPlanActiveWeek()->getPlan(),
-            'planned' => $this->getTasksPlanPlannedWeek()->getPlan(),
+            'active' => $this->getTasksPlan('active')->getPlan(),
+            'planned' => $this->getTasksPlan('planned')->getPlan(),
         ];
     }
 
