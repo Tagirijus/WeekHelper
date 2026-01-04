@@ -556,4 +556,31 @@ class TasksPlan
     {
         return $this->global_times['overflow'];
     }
+
+    /**
+     * Combine two given plans and sort them accordingly.
+     * This can combine two TasksPlan task arrays. It also
+     * can (that's why I am coding it) combine a TasksPlan
+     * task array with a blocking_pseudo_tasks array from
+     * the DistributionLogic, which is needed for the
+     * feature to also print out the blocking tasks.
+     *
+     * @param  array $plan_a
+     * @param  array $plan_b
+     * @return array
+     */
+    public static function combinePlans($plan_a, $plan_b)
+    {
+        $out = [
+            'mon' => array_merge($plan_a['mon'], $plan_b['mon']),
+            'tue' => array_merge($plan_a['tue'], $plan_b['tue']),
+            'wed' => array_merge($plan_a['wed'], $plan_b['wed']),
+            'thu' => array_merge($plan_a['thu'], $plan_b['thu']),
+            'fri' => array_merge($plan_a['fri'], $plan_b['fri']),
+            'sat' => array_merge($plan_a['sat'], $plan_b['sat']),
+            'sun' => array_merge($plan_a['sun'], $plan_b['sun']),
+            'overflow' => array_merge($plan_a['overflow'], $plan_b['overflow']),
+        ];
+        return self::sortPlan($out);
+    }
 }

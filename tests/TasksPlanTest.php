@@ -632,4 +632,164 @@ final class TasksPlanTest extends TestCase
             'Expected plan is not correct with plan_from set for task A.'
         );
     }
+
+    public function testCombinePlan()
+    {
+        $plan_a = [
+            'mon' => [
+                [
+                    'task' => ['title' => 'plan a mon 1'],
+                    'start' => 300,
+                    'end' => 360,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => ['title' => 'plan a mon 2'],
+                    'start' => 1200,
+                    'end' => 1300,
+                    'length' => 100,
+                    'spent' => 0,
+                    'remaining' => 100,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [
+                [
+                    'task' => ['title' => 'plan a wed 1'],
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ]
+            ],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+        $plan_b = [
+            'mon' => [
+                [
+                    'task' => ['title' => 'plan b mon 1'],
+                    'start' => 360,
+                    'end' => 420,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => ['title' => 'plan b tue 1'],
+                    'start' => 300,
+                    'end' => 420,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => ['title' => 'plan b tue 2'],
+                    'start' => 420,
+                    'end' => 480,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'wed' => [
+                [
+                    'task' => ['title' => 'plan b wed 1'],
+                    'start' => 900,
+                    'end' => 930,
+                    'length' => 30,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+        $expected_combine = [
+            'mon' => [
+                [
+                    'task' => ['title' => 'plan a mon 1'],
+                    'start' => 300,
+                    'end' => 360,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => ['title' => 'plan b mon 1'],
+                    'start' => 360,
+                    'end' => 420,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ],
+                [
+                    'task' => ['title' => 'plan a mon 2'],
+                    'start' => 1200,
+                    'end' => 1300,
+                    'length' => 100,
+                    'spent' => 0,
+                    'remaining' => 100,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => ['title' => 'plan b tue 1'],
+                    'start' => 300,
+                    'end' => 420,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => ['title' => 'plan b tue 2'],
+                    'start' => 420,
+                    'end' => 480,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'wed' => [
+                [
+                    'task' => ['title' => 'plan a wed 1'],
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+                [
+                    'task' => ['title' => 'plan b wed 1'],
+                    'start' => 900,
+                    'end' => 930,
+                    'length' => 30,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        $this->assertSame(
+            $expected_combine,
+            TasksPlan::combinePlans($plan_a, $plan_b),
+            'TasksPlan combiner returned something incorrect.'
+        );
+    }
 }
