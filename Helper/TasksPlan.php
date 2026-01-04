@@ -20,8 +20,14 @@ class TasksPlan
      * of this array is this:
      *     [
      *         'mon' => [
-     *             ['task' => kanboard task array,
-     *              'start' => starting time, 'end' => ...]
+     *             [
+     *                 'task' => kanboard task array,
+     *                 'start' => starting time,
+     *                 'end' => ending time,
+     *                 'length' => length in minutes,
+     *                 'spent' => spent in minutes,
+     *                 'remaining' => remaining in minutes
+     *             ], ...
      *         ],
      *         'tue' => ...
      *     ]

@@ -233,39 +233,45 @@ final class DistributionLogicTest extends TestCase
         );
     }
 
-    public function testBlockingConfigConverter()
+    public function testBlockingConfigParser()
     {
         $distributor = new DistributionLogic();
 
         $blocking_config = "mon 5:00-6:00\nmon 6:00-10:00 monday 2\ntue 9:00-11:00 tuesday";
 
-        $time_spans_expected = [
-            'mon' => [
-                ['timespan' => new TimeSpan(300, 360), 'title' => ''],
-                ['timespan' => new TimeSpan(360, 600), 'title' => 'monday 2']
-            ],
-            'tue' => [
-                ['timespan' => new TimeSpan(540, 660), 'title' => 'tuesday']
-            ]
-        ];
-
         // unfortunately I cannot compare the array, since the TimeSpan instances
         // are different. So I have to compare their components.
-        $parsed = $distributor::blockingConfigToTimeSpansByDay($blocking_config);
+        [$blocking_timespans, $pseudo_tasks] = $distributor::blockingConfigParser($blocking_config);
 
         $this->assertSame(
             300,
-            $parsed['mon'][0]['timespan']->getStart(),
+            $blocking_timespans['mon'][0]['timespan']->getStart(),
             'Parsed blocking config failed.'
         );
         $this->assertSame(
             'monday 2',
-            $parsed['mon'][1]['title'],
+            $blocking_timespans['mon'][1]['title'],
             'Parsed blocking config failed.'
         );
         $this->assertSame(
             120,
-            $parsed['tue'][0]['timespan']->length(),
+            $blocking_timespans['tue'][0]['timespan']->length(),
+            'Parsed blocking config failed.'
+        );
+
+        $this->assertSame(
+            300,
+            $pseudo_tasks['mon'][0]['start'],
+            'Parsed blocking config failed.'
+        );
+        $this->assertSame(
+            'monday 2',
+            $pseudo_tasks['mon'][1]['task']['title'],
+            'Parsed blocking config failed.'
+        );
+        $this->assertSame(
+            120,
+            $pseudo_tasks['tue'][0]['length'],
             'Parsed blocking config failed.'
         );
     }

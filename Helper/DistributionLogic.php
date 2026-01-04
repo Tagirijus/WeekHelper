@@ -17,6 +17,26 @@ class DistributionLogic
     var $tasks_plan;
 
     /**
+     * The internal array holding the generated pseudo
+     * tasks from the blocking config, which stand for
+     * pseudo tasks, so that it is possible to show
+     * the blocking timespans with their title in the
+     * plan as well.
+     *
+     * @var array
+     **/
+    var $blocking_pseudo_tasks = [
+        'mon' => [],
+        'tue' => [],
+        'wed' => [],
+        'thu' => [],
+        'fri' => [],
+        'sat' => [],
+        'sun' => [],
+        'overflow' => [],
+    ];
+
+    /**
      * The virtual plan, which will basically
      * hold the processed tasks / spent time.
      * It will be used to update the actual
@@ -195,8 +215,12 @@ class DistributionLogic
      */
     public function depleteByTimeSpansConfig($blocking_config)
     {
+        [
+            $blocking_timespans,
+            $this->blocking_pseudo_tasks
+        ] = self::blockingConfigParser($blocking_config);
         return $this->depleteByTimeSpans(
-            self::blockingConfigToTimeSpansByDay($blocking_config)
+            $blocking_timespans
         );
     }
 
@@ -205,12 +229,19 @@ class DistributionLogic
      * with days as keys and an array of TimeSpan instances
      * as values.
      *
+     * Will return two arrays in an array:
+     *     [
+     *         blocking_timespans: array,
+     *         pseudo_tasks: array
+     *     ]
+     *
      * @param  string $blocking_config
      * @return array
      */
-    public static function blockingConfigToTimeSpansByDay($blocking_config)
+    public static function blockingConfigParser($blocking_config)
     {
-        $out = [
+        // this one is needed for depleting
+        $blocking_timespans = [
             'mon' => [],
             'tue' => [],
             'wed' => [],
@@ -218,6 +249,16 @@ class DistributionLogic
             'fri' => [],
             'sat' => [],
             'sun' => [],
+        ];
+        $pseudo_tasks = [
+            'mon' => [],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
         ];
         $lines = explode("\n", $blocking_config ?? '');
         foreach ($lines as &$line) {
@@ -230,7 +271,7 @@ class DistributionLogic
             if (count($parts) > 1) {
                 $times = $parts[1];
             } else {
-                return $out;
+                return [$blocking_timespans, $pseudo_tasks];
             }
             if (count($parts) > 2) {
                 $title = $parts[2];
@@ -248,13 +289,28 @@ class DistributionLogic
                 $end = 0;
             }
 
-            // add a time span to array
-            $out[$day][] = [
-                'timespan' => new TimeSpan($start,$end),
+            // add a time span to blocking_timespans array
+            $blocking_timespans[$day][] = [
+                'timespan' => new TimeSpan($start, $end),
                 'title' => $title
             ];
+
+            // add a pseudo task
+            $pseudo_tasks[$day][] = [
+                'task' => [
+                    'title' => $title,
+                    'project_name' => 'Blocking Dates',
+                    'project_alias' => 'BLOCKING'
+                ],
+                'start' => $start,
+                'end' => $end,
+                'length' => $end - $start,
+                'spent' => 0,
+                'remaining' => $end - $start,
+
+            ];
         }
-        return $out;
+        return [$blocking_timespans, $pseudo_tasks];
     }
 
     /**
@@ -276,5 +332,15 @@ class DistributionLogic
             }
         }
         $this->tasks_plan->copyPlannedProjectTimesFromTasksPlan($this->worked_plan);
+    }
+
+    /**
+     * Return the internal blocking pseudo tasks.
+     *
+     * @return array
+     */
+    public function getBlockingPseudoTasks()
+    {
+        return $this->blocking_pseudo_tasks;
     }
 }
