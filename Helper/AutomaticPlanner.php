@@ -75,6 +75,30 @@ class AutomaticPlanner extends Base
     var $tasks_plan_planned_week = null;
 
     /**
+     * The pseudo tasks array from the DistributionLogic
+     * instance. Needed internally for also getting
+     * the blocking pseudo tasks as a tasks like they
+     * were planned tasks.
+     *
+     * For the active week.
+     *
+     * @var array
+     **/
+    var $blocking_pseudo_tasks_active_week = null;
+
+    /**
+     * The pseudo tasks array from the DistributionLogic
+     * instance. Needed internally for also getting
+     * the blocking pseudo tasks as a tasks like they
+     * were planned tasks.
+     *
+     * For the planned week.
+     *
+     * @var array
+     **/
+    var $blocking_pseudo_tasks_planned_week = null;
+
+    /**
      * Get (and if needed first initialize it) the internal projects
      * array with the active projects and their additional meta data.
      *
@@ -321,12 +345,18 @@ class AutomaticPlanner extends Base
      */
     public function initTasksPlans()
     {
-        $this->tasks_plan_active_week = $this->prepareWeek(
+        [
+            $this->tasks_plan_active_week,
+            $this->blocking_pseudo_tasks_active_week
+        ] = $this->prepareWeek(
             $this->getTasksActiveWeek(),
             false,
             $this->configModel->get('weekhelper_block_active_week', '')
         );
-        $this->tasks_plan_planned_week = $this->prepareWeek(
+        [
+            $this->tasks_plan_planned_week,
+            $this->blocking_pseudo_tasks_planned_week
+        ] = $this->prepareWeek(
             $this->getTasksPlannedWeek(),
             true,
             $this->configModel->get('weekhelper_block_planned_week', '')
@@ -356,12 +386,18 @@ class AutomaticPlanner extends Base
 
     /**
      * Prepare an active week with the given tasks
-     * and return its TasksPlan instance.
+     * and return its TasksPlan instance and the
+     * blocking pseudo tasks as an array like:
+     *     [
+     *         TasksPlan,
+     *         blocking_pseudo_tasks
+     *     ]
      *
      * @param  array $tasks
      * @param  boolean $ignore_now
      * @param  string $blocking_config
-     * @return TasksPlan
+     * @param  boolean $add_blocking_pseudo_tasks
+     * @return array
      */
     public function prepareWeek(
         $tasks,
@@ -383,7 +419,7 @@ class AutomaticPlanner extends Base
         $distributor->distributeTasks($sorted_tasks);
         $tasks_plan = $distributor->getTasksPlan();
 
-        return $tasks_plan;
+        return [$tasks_plan, $distributor->getBlockingPseudoTasks()];
     }
 
     /**
