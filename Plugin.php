@@ -189,10 +189,10 @@ class Plugin extends Base
         );
         $this->api->getProcedureHandler()->withCallback(
             'automaticPlanner.getAutomaticPlanAsJSON',
-            function() use ($container) {
+            function($params) use ($container) {
                 return [
                     'ok' => true,
-                    'received' => $container['automaticPlanner']->getAutomaticPlanAsArray(),
+                    'received' => $container['automaticPlanner']->getAutomaticPlanAsArray($params),
                 ];
             }
         );

@@ -328,7 +328,9 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     {
         $type = $this->request->getStringParam('type', 'text');
         if ($type == 'json') {
-            $automatic_plan = json_encode($this->helper->automaticPlanner->getAutomaticPlanAsArray());
+            $automatic_plan = json_encode($this->helper->automaticPlanner->getAutomaticPlanAsArray(
+                $this->request->getStringParam('add_blocking', 0) == 1
+            ));
         } else {
             $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText(
                 [
@@ -340,7 +342,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
                     'prepend_project_name' => $this->request->getStringParam('prepend_project_name', 0) == 1,
                     'prepend_project_alias' => $this->request->getStringParam('prepend_project_alias', 0) == 1,
                     'show_day_planned' => $this->request->getStringParam('show_day_planned', 0) == 1,
-                    'show_week_times' => $this->request->getStringParam('show_week_times', 0) == 1
+                    'show_week_times' => $this->request->getStringParam('show_week_times', 0) == 1,
+                    'add_blocking' => $this->request->getStringParam('add_blocking', 0) == 1
                 ]
             );
         }

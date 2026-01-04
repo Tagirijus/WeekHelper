@@ -9,6 +9,7 @@ use Kanboard\Plugin\WeekHelper\Helper\TaskInfoParser;
 use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
 
 
 class AutomaticPlanner extends Base
@@ -80,23 +81,14 @@ class AutomaticPlanner extends Base
      * the blocking pseudo tasks as a tasks like they
      * were planned tasks.
      *
-     * For the active week.
+     *  [
+     *      'active' => ...,
+     *      'planned' => ...
+     *  ]
      *
      * @var array
      **/
-    var $blocking_pseudo_tasks_active_week = null;
-
-    /**
-     * The pseudo tasks array from the DistributionLogic
-     * instance. Needed internally for also getting
-     * the blocking pseudo tasks as a tasks like they
-     * were planned tasks.
-     *
-     * For the planned week.
-     *
-     * @var array
-     **/
-    var $blocking_pseudo_tasks_planned_week = null;
+    var $blocking_pseudo_tasks = null;
 
     /**
      * Get (and if needed first initialize it) the internal projects
@@ -330,13 +322,27 @@ class AutomaticPlanner extends Base
      *         maybe more data here later ...
      *     ]
      *
+     * @param  boolean $add_blocking
      * @return array
      */
-    public function getAutomaticPlanAsArray()
+    public function getAutomaticPlanAsArray($add_blocking = false)
     {
+        // prepare plans
+        $active_plan = $this->getTasksPlan('active')->getPlan();
+        $planned_plan = $this->getTasksPlan('planned')->getPlan();
+        if ($add_blocking) {
+            $active_plan = TasksPlan::combinePlans(
+                $active_plan,
+                $this->blocking_pseudo_tasks['active']
+            );
+            $planned_plan = TasksPlan::combinePlans(
+                $planned_plan,
+                $this->blocking_pseudo_tasks['planned']
+            );
+        }
         return [
-            'active' => $this->getTasksPlan('active')->getPlan(),
-            'planned' => $this->getTasksPlan('planned')->getPlan(),
+            'active' => $active_plan,
+            'planned' => $planned_plan,
         ];
     }
 
@@ -347,7 +353,7 @@ class AutomaticPlanner extends Base
     {
         [
             $this->tasks_plan_active_week,
-            $this->blocking_pseudo_tasks_active_week
+            $this->blocking_pseudo_tasks['active']
         ] = $this->prepareWeek(
             $this->getTasksActiveWeek(),
             false,
@@ -355,7 +361,7 @@ class AutomaticPlanner extends Base
         );
         [
             $this->tasks_plan_planned_week,
-            $this->blocking_pseudo_tasks_planned_week
+            $this->blocking_pseudo_tasks['planned']
         ] = $this->prepareWeek(
             $this->getTasksPlannedWeek(),
             true,
@@ -468,6 +474,10 @@ class AutomaticPlanner extends Base
      *     show_week_times:
      *         If true, shows time stats for the week.
      *
+     *     add_blocking:
+     *         If true, blocking timespans will be shown
+     *         as planned tasks as well.
+     *
      * @param  array $params See docstring for info
      * @return string
      */
@@ -559,8 +569,19 @@ class AutomaticPlanner extends Base
 
         // params preparation
         $days = $params['days'] ?? 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr';
+        $add_blocking = $params['add_blocking'] ?? false;
 
-        foreach ($this->getTasksPlan($week)->getPlan() as $day => $tasks) {
+        // prepare the plan to show
+        if ($add_blocking) {
+            $plan = TasksPlan::combinePlans(
+                $this->getTasksPlan($week)->getPlan(),
+                $this->blocking_pseudo_tasks[$week]
+            );
+        } else {
+            $plan = $this->getTasksPlan($week)->getPlan();
+        }
+
+        foreach ($plan as $day => $tasks) {
             if (
                 str_contains($days, $day)
                 || (
