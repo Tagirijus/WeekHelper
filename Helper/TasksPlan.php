@@ -468,10 +468,13 @@ class TasksPlan
 
     /**
      * Sort the tasks on the days according to their starting time.
+     *
+     * @param  array $plan
+     * @return array
      */
-    public function sortPlan()
+    public static function sortPlan($plan)
     {
-        foreach ($this->plan as &$tasks) {
+        foreach ($plan as &$tasks) {
             usort($tasks, function ($a, $b) {
                 if ($a['start'] == $b['start']) {
                     return 0;
@@ -479,6 +482,7 @@ class TasksPlan
                 return ($a['start'] < $b['start']) ? -1 : 1;
             });
         }
+        return $plan;
     }
 
     /**
@@ -489,7 +493,7 @@ class TasksPlan
      */
     public function getPlan()
     {
-        $this->sortPlan();
+        $this->plan = self::sortPlan($this->plan);
         return $this->plan;
     }
 
