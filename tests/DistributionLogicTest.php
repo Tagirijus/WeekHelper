@@ -292,13 +292,16 @@ final class DistributionLogicTest extends TestCase
             new TimePoint('mon 7:00')
         );
 
+        // the TimePoint should have "removed" the first blocking TimeSpan,
+        // since it's in the past (ending of 6:00 is before 7:00). So the
+        // first slot to check is the second, which now has the key of 0!
         $this->assertSame(
-            360,
+            420,
             $pseudo_tasks['mon'][0]['start'],
             'Parsed blocking config with TimePoint failed.'
         );
         $this->assertSame(
-            0,
+            180,
             $pseudo_tasks['mon'][0]['length'],
             'Parsed blocking config with TimePoint failed.'
         );
@@ -307,21 +310,9 @@ final class DistributionLogicTest extends TestCase
             $pseudo_tasks['mon'][0]['spent'],
             'Parsed blocking config with TimePoint failed.'
         );
-        $this->assertSame(
-            420,
-            $pseudo_tasks['mon'][1]['start'],
-            'Parsed blocking config with TimePoint failed.'
-        );
-        $this->assertSame(
-            180,
-            $pseudo_tasks['mon'][1]['length'],
-            'Parsed blocking config with TimePoint failed.'
-        );
-        $this->assertSame(
-            60,
-            $pseudo_tasks['mon'][1]['spent'],
-            'Parsed blocking config with TimePoint failed.'
-        );
+
+        // Tuesday should have still the full length and is not
+        // modified by the TimePoint at all.
         $this->assertSame(
             120,
             $pseudo_tasks['tue'][0]['length'],

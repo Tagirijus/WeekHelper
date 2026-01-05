@@ -352,20 +352,22 @@ class DistributionLogic
                 'title' => $title
             ];
 
-            // add a pseudo task
-            $pseudo_tasks[$day][] = [
-                'task' => [
-                    'title' => $title,
-                    'project_name' => 'Blocking Dates',
-                    'project_alias' => '---'
-                ],
-                'start' => $start,
-                'end' => $end,
-                'length' => $end - $start,
-                'spent' => $spent,
-                'remaining' => $end - $start,
+            // add a pseudo task; but only if it has a length at all!
+            if ($end - $start > 0) {
+                $pseudo_tasks[$day][] = [
+                    'task' => [
+                        'title' => $title,
+                        'project_name' => 'Blocking Dates',
+                        'project_alias' => '---'
+                    ],
+                    'start' => $start,
+                    'end' => $end,
+                    'length' => $end - $start,
+                    'spent' => $spent,
+                    'remaining' => $end - $start,
 
-            ];
+                ];
+            }
         }
         return [$blocking_timespans, $pseudo_tasks];
     }
