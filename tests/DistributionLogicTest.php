@@ -275,4 +275,57 @@ final class DistributionLogicTest extends TestCase
             'Parsed blocking config failed.'
         );
     }
+
+    public function testBlockingConfigParserWithTimePoint()
+    {
+        $distributor = new DistributionLogic();
+
+        $blocking_config = "mon 5:00-6:00\nmon 6:00-10:00 monday 2\ntue 9:00-11:00 tuesday";
+
+        // unfortunately I cannot compare the array, since the TimeSpan instances
+        // are different. So I have to compare their components.
+        [
+            $blocking_timespans,
+            $pseudo_tasks
+        ] = $distributor::blockingConfigParser(
+            $blocking_config,
+            new TimePoint('mon 7:00')
+        );
+
+        $this->assertSame(
+            360,
+            $pseudo_tasks['mon'][0]['start'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            0,
+            $pseudo_tasks['mon'][0]['length'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            60,
+            $pseudo_tasks['mon'][0]['spent'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            420,
+            $pseudo_tasks['mon'][1]['start'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            180,
+            $pseudo_tasks['mon'][1]['length'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            60,
+            $pseudo_tasks['mon'][1]['spent'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+        $this->assertSame(
+            120,
+            $pseudo_tasks['tue'][0]['length'],
+            'Parsed blocking config with TimePoint failed.'
+        );
+    }
 }

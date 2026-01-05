@@ -210,17 +210,40 @@ class DistributionLogic
      * Wrapper for depleteByTimeSpans, except that the parameter
      * can be the config string, which will be parsed internally.
      *
+     * If $time_point is given, the blocking pseudo tasks will have
+     * their start, spent and remaining time set by the actual time.
+     * This way, if the actual time is inside or after such pseudo
+     * task, it will be done automatically. By default this value
+     * is null, thus no TimePoint instance, which will deactivate
+     * this automatic calculation.
+     *
      * @param  string $blocking_config
+     * @param  TimePoint|null $time_point
      * @return boolean
      */
-    public function depleteByTimeSpansConfig($blocking_config)
+    public function depleteByTimeSpansConfig($blocking_config, $time_point = null)
     {
         [
             $blocking_timespans,
             $this->blocking_pseudo_tasks
-        ] = self::blockingConfigParser($blocking_config);
+        ] = self::blockingConfigParser($blocking_config, $time_point);
         return $this->depleteByTimeSpans(
             $blocking_timespans
+        );
+    }
+
+    /**
+     * Basically a wrapper for depleteByTimeSpansConfig, where the
+     * TimePoint for "now" will be generated automatically.
+     *
+     * @param  string $blocking_config
+     * @return boolean
+     */
+    public function depleteByTimeSpansConfigUntilNow($blocking_config)
+    {
+        return $this->depleteByTimeSpansConfig(
+            $blocking_config,
+            new TimePoint()
         );
     }
 
@@ -235,10 +258,18 @@ class DistributionLogic
      *         pseudo_tasks: array
      *     ]
      *
+     * If $time_point is given, the blocking pseudo tasks will have
+     * their start, spent and remaining time set by the actual time.
+     * This way, if the actual time is inside or after such pseudo
+     * task, it will be done automatically. By default this value
+     * is null, thus no TimePoint instance, which will deactivate
+     * this automatic calculation.
+     *
      * @param  string $blocking_config
+     * @param  TimePoint|null $time_point
      * @return array
      */
-    public static function blockingConfigParser($blocking_config)
+    public static function blockingConfigParser($blocking_config, $time_point = null)
     {
         // this one is needed for depleting
         $blocking_timespans = [
@@ -289,6 +320,32 @@ class DistributionLogic
                 $end = 0;
             }
 
+            // alter the blocking pseudo tasks length by the
+            // given timepoint
+            $spent = 0;
+            if (!is_null($time_point)) {
+                // make the task fully done, since it is in the past
+                if (
+                    TimeHelper::diffOfWeekDays($time_point->getDay(), $day) < 0
+                    || (
+                        TimeHelper::diffOfWeekDays($day, $time_point->getDay()) == 0
+                        && $end <= $time_point->getTime()
+                    )
+                ) {
+                    $spent = $end - $start;
+                    $start = $end;
+
+                // make a part of the task done, since the TimePoint is inside
+                // the tasks time span
+                } elseif (
+                    TimeHelper::diffOfWeekDays($time_point->getDay(), $day) == 0
+                    && $end > $time_point->getTime()
+                ) {
+                    $spent = $time_point->getTime() - $start;
+                    $start = $time_point->getTime();
+                }
+            }
+
             // add a time span to blocking_timespans array
             $blocking_timespans[$day][] = [
                 'timespan' => new TimeSpan($start, $end),
@@ -300,12 +357,12 @@ class DistributionLogic
                 'task' => [
                     'title' => $title,
                     'project_name' => 'Blocking Dates',
-                    'project_alias' => 'BLOCKING'
+                    'project_alias' => '---'
                 ],
                 'start' => $start,
                 'end' => $end,
                 'length' => $end - $start,
-                'spent' => 0,
+                'spent' => $spent,
                 'remaining' => $end - $start,
 
             ];

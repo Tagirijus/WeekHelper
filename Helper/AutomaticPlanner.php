@@ -420,8 +420,10 @@ class AutomaticPlanner extends Base
         if (!$ignore_now) {
             $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
             $distributor->depleteUntilNow();
+            $distributor->depleteByTimeSpansConfigUntilNow($blocking_config);
+        } else {
+            $distributor->depleteByTimeSpansConfig($blocking_config);
         }
-        $distributor->depleteByTimeSpansConfig($blocking_config);
         $distributor->distributeTasks($sorted_tasks);
         $tasks_plan = $distributor->getTasksPlan();
 
