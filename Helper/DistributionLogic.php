@@ -340,6 +340,7 @@ class DistributionLogic
                 } elseif (
                     TimeHelper::diffOfWeekDays($time_point->getDay(), $day) == 0
                     && $end > $time_point->getTime()
+                    && $start < $time_point->getTime()
                 ) {
                     $spent = $time_point->getTime() - $start;
                     $start = $time_point->getTime();

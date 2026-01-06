@@ -213,11 +213,20 @@ final class DistributionLogicTest extends TestCase
 
         $time_spans = [
             'mon' => [
+                // 5:00-6:00
                 ['timespan' => new TimeSpan(300, 360), 'title' => ''],
+                // 6:00-10:00
                 ['timespan' => new TimeSpan(360, 600), 'title' => '']
             ],
             'tue' => [
+                // 9:00-11:00
                 ['timespan' => new TimeSpan(540, 660), 'title' => '']
+            ],
+            'wed' => [
+                // 10:30-15:00
+                ['timespan' => new TimeSpan(630, 900), 'title' => ''],
+                // 17:30 - 19:00
+                ['timespan' => new TimeSpan(1050, 1140), 'title' => '']
             ]
         ];
         $distributor->depleteByTimeSpans($time_spans);
@@ -230,6 +239,124 @@ final class DistributionLogicTest extends TestCase
             60,
             $distributor->time_slots_days['tue']->getLength(),
             'Tuesday should only have 1 hour / 60 min left.'
+        );
+        $this->assertSame(
+            1,
+            $distributor->time_slots_days['wed']->nextSlot(),
+            'Wednesday should only have the second slot left.'
+        );
+        $this->assertSame(
+            1020,
+            $distributor->time_slots_days['wed']->getStartOfSlot(1),
+            'Wednesday second slot should start at 17:00 / 1020 minutes.'
+        );
+        $this->assertSame(
+            30,
+            $distributor->time_slots_days['wed']->getLengthOfSlot(1),
+            'Wednesday second slot should have 0.5 hours / 30 minutes left.'
+        );
+    }
+
+    public function testDepleteByTimeSpansB()
+    {
+        $time_slots_config = [
+            'mon' => "6:00-8:30\n11:00-13:00",
+            'tue' => '5:45-10:00',
+            'wed' => '10:15-11:20',
+            'thu' => '',
+            'fri' => '',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 0,
+        ];
+        $distributor = new DistributionLogic($time_slots_config);
+
+        $time_spans = [
+            'mon' => [
+                // 7:45-17:00
+                ['timespan' => new TimeSpan(465, 1020), 'title' => '']
+            ],
+            'tue' => [
+                // 5:45-9:00
+                ['timespan' => new TimeSpan(345, 540), 'title' => '']
+            ],
+            'wed' => [
+                // 10:15-11:20
+                ['timespan' => new TimeSpan(615, 680), 'title' => '']
+            ],
+        ];
+        $distributor->depleteByTimeSpans($time_spans);
+
+        // from Monday the second TimeSlot of 11:00-13:00 should be
+        // depleted completely.
+        // the first TimeSlot of 6:00-8:30 should be depleted
+        // between 7:45-8:30; thus leaving only
+        // 6:00-7:45 available; 1:45 hours of length
+        // (360-465)            (105 minutes)
+        $this->assertSame(
+            0,
+            $distributor->time_slots_days['mon']->nextSlot(),
+            'Only the first slot of Monday should be available.'
+        );
+        $this->assertSame(
+            105,
+            $distributor->time_slots_days['mon']->getLength(),
+            'Monday should have the length of 1:45 hours / 105 min.'
+        );
+        $this->assertSame(
+            360,
+            $distributor->time_slots_days['mon']->getStartOfSlot(0),
+            'Monday should start at 6:00 / 360 min.'
+        );
+        $this->assertSame(
+            465,
+            $distributor->time_slots_days['mon']->getEndOfSlot(0),
+            'Monday should end at 7:45 / 465 min.'
+        );
+
+        // for Tuesday the first timeslot should be depleted until 9:00,
+        // leaving 1 hour / 60 min between 9:00-10:00 (540-600)
+        $this->assertSame(
+            0,
+            $distributor->time_slots_days['tue']->nextSlot(),
+            'Only the first slot of Tuesday should be available.'
+        );
+        $this->assertSame(
+            60,
+            $distributor->time_slots_days['tue']->getLength(),
+            'Tuesday should have the length of 1 hours / 60 min.'
+        );
+        $this->assertSame(
+            540,
+            $distributor->time_slots_days['tue']->getStartOfSlot(0),
+            'Tuesday should start at 9:00 / 540 min.'
+        );
+        $this->assertSame(
+            600,
+            $distributor->time_slots_days['tue']->getEndOfSlot(0),
+            'Tuesday should end at 10:00 / 600 min.'
+        );
+
+        // for Wednesday everything should be depleted
+        $this->assertSame(
+            -1,
+            $distributor->time_slots_days['wed']->nextSlot(),
+            'No slot of Wednesday should be available.'
+        );
+        $this->assertSame(
+            0,
+            $distributor->time_slots_days['wed']->getLength(),
+            'Wednesday should have the length of 0 hours / 0 min.'
+        );
+        $this->assertSame(
+            680,
+            $distributor->time_slots_days['wed']->getStartOfSlot(0),
+            'Wednesday should start at its end of 11:20 / 680 min.'
+        );
+        $this->assertSame(
+            680,
+            $distributor->time_slots_days['wed']->getEndOfSlot(0),
+            'Wednesday should end at its end of 11:20 / 680 min.'
         );
     }
 
@@ -318,6 +445,35 @@ final class DistributionLogicTest extends TestCase
         );
     }
 
+    public function testBlockingConfigParserWithTimePointB()
+    {
+        // I had a bug that I created a pseudo blocking task from 9:00-17:00.
+        // Then it was 7:45 and normally another task should still be planned,
+        // until that point, but somehow this blocking task got shown from
+        // 7:45-17:00 ...
+        // With this test I try to solve this issue
+
+        $distributor = new DistributionLogic();
+
+        $blocking_config = "mon 9:00-17:00";
+
+        [
+            $blocking_timespans,
+            $pseudo_tasks
+        ] = $distributor::blockingConfigParser(
+            $blocking_config,
+            new TimePoint('mon 7:45')
+        );
+
+        // the start should still be 9:00 and not 7:45
+        $this->assertSame(
+            540,
+            $blocking_timespans['mon'][0]['timespan']->getStart(),
+            'Start of blocking pseudo task should not be "now", if "now" is before its original start.'
+        );
+
+    }
+
     public function testMinSlotLength(): void
     {
         $task_a = TestTask::create('1a', 1, 'office', 4, 0.5, 0);
@@ -386,6 +542,81 @@ final class DistributionLogicTest extends TestCase
             $sorted_plan,
             $distributed_plan,
             'DistributionLogic with Min Slot Length did not distribute tasks as expected.'
+        );
+    }
+
+    public function testBlockingTaskWithNow(): void
+    {
+        // I had a bug that I created a pseudo blocking task from 9:00-17:00.
+        // Then it was 7:45 and normally another task should still be planned,
+        // until that point, but somehow this blocking task got shown from
+        // 7:45-17:00 ...
+        // With this test I try to solve this issue
+
+        $blocking_config = "mon 9:00-17:00";
+
+        $task = TestTask::create('a', 1, '', 4, 1, 0);
+        $init_tasks = [
+            $task
+        ];
+
+        $time_slots_config = [
+            'mon' => "6:00-8:30\n11:00-13:00",
+            'tue' => '10:00-11:00',
+            'wed' => '',
+            'thu' => '',
+            'fri' => '',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 30,
+        ];
+
+        // fakes "now"
+        $time_point = new TimePoint('mon 7:45');
+
+        // expected sorted plan
+        $sorted_plan = [
+            'mon' => [
+                [
+                    'task' => $task,
+                    'start' => 465,
+                    'end' => 510,
+                    'length' => 45,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => $task,
+                    'start' => 600,
+                    'end' => 615,
+                    'length' => 15,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // now the final distribution instance
+        $distributor = new DistributionLogic($time_slots_config);
+        // will fake a depletion of slots until "now", which is set above with
+        // the $time_point variable, which should be 7:45 on Monday
+        $distributor->depleteUntilTimePoint($time_point);
+        $distributor->depleteByTimeSpansConfig($blocking_config, $time_point);
+        $distributor->distributeTasks($init_tasks);
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
+
+        $this->assertSame(
+            $sorted_plan,
+            $distributed_plan,
+            'DistributionLogic with blocking pseudo tasts and "now" did not distribute tasks as expected.'
         );
     }
 }
