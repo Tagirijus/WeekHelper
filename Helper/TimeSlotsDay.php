@@ -330,7 +330,7 @@ class TimeSlotsDay
         try {
             $new_slots = [];
             foreach ($this->slots as $slot) {
-                $slot_updated = $this->depleteSingleSlotByTimeSpan($slot, $time_span);
+                $slot_updated = self::depleteSingleSlotByTimeSpan($slot, $time_span);
                 $new_slots = array_merge($new_slots, $slot_updated);
             }
             $this->slots = $new_slots;
@@ -352,7 +352,7 @@ class TimeSlotsDay
      * @param  TimeSpan $time_span
      * @return array
      */
-    public function depleteSingleSlotByTimeSpan($slot, $time_span)
+    public static function depleteSingleSlotByTimeSpan($slot, $time_span)
     {
         // time span is not in the slot at all and won't do anything
         if (
