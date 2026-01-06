@@ -292,6 +292,84 @@ final class TasksPlanTest extends TestCase
         );
     }
 
+    public function testMinSlotLengthAgain()
+    {
+        $tasks_plan = new TasksPlan(30);
+
+        $time_slots_day_mon = new TimeSlotsDay("6:00-6:20\n10:00-12:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
+        //                          title, project_id, type, max_hours, remain, spent
+        $task_a1 = TestTask::create('a1',  1,          '',   4,         0.5,   0);
+        $task_a2 = TestTask::create('a2',  1,          '',   4,         1.5,   0);
+        $task_b  = TestTask::create('b',   1,          '',   4,         2,      0);
+
+        // should be planned on Monday both
+        $tasks_plan->planTask(
+            $task_a1,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_a2,
+            $time_slots_day_mon
+        );
+        // should not be planned on Monday
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+        // should be planned on Monday already
+        $tasks_plan->planTask(
+            $task_a1,
+            $time_slots_day_tue
+        );
+        $tasks_plan->planTask(
+            $task_a2,
+            $time_slots_day_tue
+        );
+        // should not be planned on Tuesday now
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_tue
+        );
+
+        $this->assertSame(
+            [
+                'mon' => [[
+                    'task' => $task_a1,
+                    'start' => 600,
+                    'end' => 630,
+                    'length' => 30,
+                    'spent' => 0,
+                    'remaining' => 30,
+                ],
+                [
+                    'task' => $task_a2,
+                    'start' => 630,
+                    'end' => 720,
+                    'length' => 90,
+                    'spent' => 0,
+                    'remaining' => 90,
+                ]],
+                'tue' => [[
+                    'task' => $task_b,
+                    'start' => 360,
+                    'end' => 480,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ]],
+                'wed' => [],
+                'thu' => [],
+                'fri' => [],
+                'sat' => [],
+                'sun' => [],
+                'overflow' => [],
+            ],
+            $tasks_plan->getPlan(),
+            'TasksPlan plan with min slot length is incorrect.'
+        );
+    }
+
     public function testWorkedMode()
     {
         $tasks_plan = new TasksPlan();

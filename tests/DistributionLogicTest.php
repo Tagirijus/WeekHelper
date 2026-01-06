@@ -319,4 +319,75 @@ final class DistributionLogicTest extends TestCase
             'Parsed blocking config with TimePoint failed.'
         );
     }
+
+    public function testMinSlotLength(): void
+    {
+        $task_a = TestTask::create('1a', 1, 'office', 4, 0.5, 0);
+        $task_b = TestTask::create('1b', 1, 'office', 4, 1, 0);
+        $task_c = TestTask::create('1c', 1, 'office', 4, 2, 0);
+        $init_tasks = [
+            $task_a,
+            $task_b,
+            $task_c,
+        ];
+
+        $time_slots_config = [
+            'mon' => "6:00-6:20\n11:00-15:00",
+            'tue' => '',
+            'wed' => '',
+            'thu' => '',
+            'fri' => '',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 30,
+        ];
+
+        // expected sorted plan
+        $sorted_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 660,
+                    'end' => 690,
+                    'length' => 30,
+                    'spent' => 0,
+                    'remaining' => 30,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 690,
+                    'end' => 750,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ],
+                [
+                    'task' => $task_c,
+                    'start' => 750,
+                    'end' => 870,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 120,
+                ],
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // now the final distribution instance
+        $distributor = new DistributionLogic($time_slots_config);
+        $distributor->distributeTasks($init_tasks);
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
+
+        $this->assertSame(
+            $sorted_plan,
+            $distributed_plan,
+            'DistributionLogic with Min Slot Length did not distribute tasks as expected.'
+        );
+    }
 }

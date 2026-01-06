@@ -321,9 +321,9 @@ class TasksPlan
             // for it is to plan. I want the remaining and especially the spent
             // time anyway added into the global array!
             $this->addTimesToGlobal($time_slots_day->getDay(), $time_to_plan, $task);
-            // and now check; no time to plan? return false as success already
+            // and now check; no time to plan? maybe next slot then?
             if ($time_to_plan == 0) {
-                break;
+                continue;
             }
 
             // then there should be an available slot left on the day
