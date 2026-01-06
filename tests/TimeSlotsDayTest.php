@@ -215,7 +215,7 @@ final class TimeSlotsDayTest extends TestCase
             'Time slot of instance shoudl be depleted.'
         );
 
-        // this shoudl also work, when there are mor slots; then
+        // this should also work, when there are more slots; then
         // all slots should get depleted
         $time_slots_day = new TimeSlotsDay("6:00-10:00\n15:00-16:00");
         $time_span = new TimeSpan(
