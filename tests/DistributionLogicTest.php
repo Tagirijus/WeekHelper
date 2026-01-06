@@ -282,8 +282,6 @@ final class DistributionLogicTest extends TestCase
 
         $blocking_config = "mon 5:00-6:00\nmon 6:00-10:00 monday 2\ntue 9:00-11:00 tuesday";
 
-        // unfortunately I cannot compare the array, since the TimeSpan instances
-        // are different. So I have to compare their components.
         [
             $blocking_timespans,
             $pseudo_tasks
