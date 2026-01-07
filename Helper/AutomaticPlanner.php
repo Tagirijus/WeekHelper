@@ -548,6 +548,7 @@ class AutomaticPlanner extends Base
         $out .= ' (Remaining: ' . TimeHelper::minutesToReadable($remaining, ' h');
         $out .= ', Spent: ' . TimeHelper::minutesToReadable($spent, ' h');
         $out .= ')';
+        $out .= "\n";
         return $out;
     }
 
@@ -609,7 +610,8 @@ class AutomaticPlanner extends Base
                 // print out day name, if there are probably more
                 // than one day wanted
                 if (str_contains($days, ',')) {
-                    $out .= strtoupper($day) . ($day_times ? " ($day_times)" : '') . ":\n";
+                    $out .= "\t";
+                    $out .= strtoupper($day) . ($day_times ? " ($day_times)" : '') . "\n";
 
                 // probably just one day; then maybe at least
                 // print out the day time stats if wanted
