@@ -610,7 +610,7 @@ class AutomaticPlanner extends Base
                 // print out day name, if there are probably more
                 // than one day wanted
                 if (str_contains($days, ',')) {
-                    $out .= "\t";
+                    $out .= "\t\t";
                     $out .= strtoupper($day) . ($day_times ? " ($day_times)" : '') . "\n";
 
                 // probably just one day; then maybe at least
