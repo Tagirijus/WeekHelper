@@ -544,10 +544,8 @@ class AutomaticPlanner extends Base
         $spent = $this->getTasksPlan($week)->getGlobalTimesForWeek()['spent'];
         $planned = $this->getTasksPlan($week)->getGlobalTimesForWeek()['planned'];
 
-        $out = 'Planned: ' . TimeHelper::minutesToReadable($planned, ' h');
-        $out .= ' (Remaining: ' . TimeHelper::minutesToReadable($remaining, ' h');
+        $out = 'Remaining: ' . TimeHelper::minutesToReadable($remaining, ' h');
         $out .= ', Spent: ' . TimeHelper::minutesToReadable($spent, ' h');
-        $out .= ')';
         $out .= "\n";
         return $out;
     }
