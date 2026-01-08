@@ -266,7 +266,15 @@ class TasksPlan
         }
 
         // otherwise go on as usual for the weekdays
-        $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
+        // also, rather new feature: it is possible to assign individual
+        // project daily limits per weekday. keys like "project_max_hours_mon"
+        // can exist with a daily hours number (this will be used) or "-1" as
+        // a value (project_max_hours_day will be used instead then)
+        if ($task['project_max_hours_' . $day] != -1) {
+            $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_' . $day]);
+        } else {
+            $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
+        }
         $project_id = $task['project_id'];
         return $project_daily_limit - $this->getPlannedTimeForProject($project_id, $day);
     }

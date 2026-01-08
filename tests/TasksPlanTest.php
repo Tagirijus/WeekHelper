@@ -93,6 +93,96 @@ final class TasksPlanTest extends TestCase
         );
     }
 
+    public function testTasksPlanDailyLimitsPerDay()
+    {
+        $tasks_plan = new TasksPlan();
+
+        // this makes the default project_max_hours_day to 2,
+        // but the Wednesday should be 4
+        $task   = TestTask::create('a', 1, '', 2, 13, 0, -1, -1, 4);
+
+        // Monday should get 2 hours, Tuesday 2 hours, but Wednesday 4 hours,
+        // Thursday 2 hours again, and the rest goes to overflow: 3 hours
+        $time_slots_day_mon = new TimeSlotsDay("10:00-20:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("10:00-20:00", 'tue');
+        $time_slots_day_wed = new TimeSlotsDay("10:00-20:00", 'wed');
+        $time_slots_day_thu = new TimeSlotsDay("10:00-20:00", 'thu');
+        $time_slots_day_fri = new TimeSlotsDay("0:00-0:00", 'fri');
+        $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
+
+        // plan the task to deplete the projects daily limit for this day
+        $tasks_plan->planTask($task, $time_slots_day_mon);
+        $tasks_plan->planTask($task, $time_slots_day_tue);
+        $tasks_plan->planTask($task, $time_slots_day_wed);
+        $tasks_plan->planTask($task, $time_slots_day_thu);
+        $tasks_plan->planTask($task, $time_slots_day_fri);
+        $tasks_plan->planTask($task, $time_slots_day_ovr);
+
+        // expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task,
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 780,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => $task,
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 780,
+                ]
+            ],
+            'wed' => [
+                [
+                    'task' => $task,
+                    'start' => 600,
+                    'end' => 840,
+                    'length' => 240,
+                    'spent' => 0,
+                    'remaining' => 780,
+                ]
+            ],
+            'thu' => [
+                [
+                    'task' => $task,
+                    'start' => 600,
+                    'end' => 720,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 780,
+                ]
+            ],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 180,
+                    'length' => 180,
+                    'spent' => 0,
+                    'remaining' => 780,
+                ]
+            ],
+        ];
+
+        // now let's see if the plan is correct
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'TaskPlan was not able to plan with the correct individual daily limit.'
+        );
+    }
+
     public function testTasksPlanRemainingMinutesMaxFromTask()
     {
         $tasks_plan = new TasksPlan();

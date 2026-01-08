@@ -19,6 +19,13 @@ class TestTask
         $project_max_hours_day,
         $time_remaining,
         $time_spent,
+        $project_max_hours_mon = -1,
+        $project_max_hours_tue = -1,
+        $project_max_hours_wed = -1,
+        $project_max_hours_thu = -1,
+        $project_max_hours_fri = -1,
+        $project_max_hours_sat = -1,
+        $project_max_hours_sun = -1,
     )
     {
         $id = self::$nextId++;
@@ -30,6 +37,13 @@ class TestTask
             'project_max_hours_day' => $project_max_hours_day,
             'time_remaining' => $time_remaining,
             'time_spent' => $time_spent,
+            'project_max_hours_mon' => $project_max_hours_mon,
+            'project_max_hours_tue' => $project_max_hours_tue,
+            'project_max_hours_wed' => $project_max_hours_wed,
+            'project_max_hours_thu' => $project_max_hours_thu,
+            'project_max_hours_fri' => $project_max_hours_fri,
+            'project_max_hours_sat' => $project_max_hours_sat,
+            'project_max_hours_sun' => $project_max_hours_sun,
         ];
     }
 }
