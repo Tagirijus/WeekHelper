@@ -35,6 +35,17 @@ class ProjectInfoParser
             // the max hours the projects tasks can be
             // planned for one day.
             'project_max_hours_day' => 24.0,
+            // or for other weekdays specifically
+            // planned for one day. if the value is
+            // -1, the "project_max_hours_day" value
+            // will be used
+            'project_max_hours_mon' => -1,
+            'project_max_hours_tue' => -1,
+            'project_max_hours_wed' => -1,
+            'project_max_hours_thu' => -1,
+            'project_max_hours_fri' => -1,
+            'project_max_hours_sat' => -1,
+            'project_max_hours_sun' => -1,
 
             // the max hours the projects tasks can be
             // planned for one consecutive work block.
@@ -86,6 +97,27 @@ class ProjectInfoParser
 
             } elseif (str_starts_with($line, 'project_max_hours_day=')) {
                 $data['project_max_hours_day'] = (float) str_replace('project_max_hours_day=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_mon=')) {
+                $data['project_max_hours_mon'] = (float) str_replace('project_max_hours_mon=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_tue=')) {
+                $data['project_max_hours_tue'] = (float) str_replace('project_max_hours_tue=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_wed=')) {
+                $data['project_max_hours_wed'] = (float) str_replace('project_max_hours_wed=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_thu=')) {
+                $data['project_max_hours_thu'] = (float) str_replace('project_max_hours_thu=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_fri=')) {
+                $data['project_max_hours_fri'] = (float) str_replace('project_max_hours_fri=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_sat=')) {
+                $data['project_max_hours_sat'] = (float) str_replace('project_max_hours_sat=', '', $line);
+
+            } elseif (str_starts_with($line, 'project_max_hours_sun=')) {
+                $data['project_max_hours_sun'] = (float) str_replace('project_max_hours_sun=', '', $line);
 
             } elseif (str_starts_with($line, 'project_max_hours_block=')) {
                 $data['project_max_hours_block'] = (float) str_replace('project_max_hours_block=', '', $line);
