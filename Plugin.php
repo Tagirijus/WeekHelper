@@ -8,6 +8,8 @@ use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeekOnCreate;
 use Kanboard\Plugin\WeekHelper\Model;
 use Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner;
+use Kanboard\Plugin\WeekHelper\Console\UpdateBlockingTasks;
+
 
 
 class Plugin extends Base
@@ -196,6 +198,9 @@ class Plugin extends Base
                 ];
             }
         );
+
+        // CLI Commands
+        $this->cli->add(new UpdateBlockingTasks($this->container));
     }
 
     public function onStartup()
