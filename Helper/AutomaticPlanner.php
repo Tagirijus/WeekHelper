@@ -717,9 +717,9 @@ class AutomaticPlanner extends Base
      * This function will update the blocking tasks / timeslots
      * from the CalDAV calendar/s from the config.
      *
-     * Output is success message or info about fail.
+     * Output is True on success or string message on fail.
      *
-     * @return string
+     * @return boolean|string
      */
     public function updateBlockingTasks()
     {

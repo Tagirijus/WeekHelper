@@ -23,6 +23,11 @@
             <?= $this->form->textarea('block_planned_week', ['block_planned_week' => $block_planned_week], [], [
                 "placeholder='mon 9:00-10:00 dentist\nwed 0:00-24:00 vacation\nthu 13:00-24:00 closing time'"
             ], 'weekhelper-textarea-config') ?>
+            &nbsp;
+            <p>
+                <a href="/weekhelper/updateblockingtasks" class="js-modal-small">Update from CalDAV</a>
+            </p>
+            &nbsp;
         </div>
     </div>
 

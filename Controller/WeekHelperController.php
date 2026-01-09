@@ -363,6 +363,16 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
      */
     public function updateBlockingTasks()
     {
-        return $this->response->text($this->helper->automaticPlanner->updateBlockingTasks());
+        $success = $this->helper->automaticPlanner->updateBlockingTasks();
+
+        $this->languageModel->loadCurrentLanguage();
+
+        if ($success === true) {
+            $this->flash->success(t('Blocking tasks update successful'));
+        } else {
+            $this->flash->failure(t($success));
+        }
+
+        return $this->response->redirect($this->request->getUri(), true);
     }
 }
