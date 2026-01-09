@@ -61,7 +61,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t('Show a sticky div on the screen, which contains the automatic week planning.') ?>
     </p>
 
@@ -73,7 +73,7 @@
 
     <!-- which levels are planned vs. active week? -->
 
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t('Technically the automatic planner will plan the task form the "active week" into the actual running week and the task from the "planned week" onto the next week. Tell the system which level stands for which of those weeks.') ?>
     </p>
 
@@ -97,7 +97,7 @@
 
 
     <!-- time slots help text -->
-    <?php $slots_help = 'A slot should contain 24h format starting and end times (e.g. "6:00-9:00"). It can also contain a single project type after that times, separated with a single whitespace. Final example: "6:00-9:00 office". Multiple lines for time slots are possible.' ?>
+    <?php $slots_help = 'A slot should contain 24h format starting and end times (e.g. "6:00-9:00"). It can also contain a condition after that times, separated with a single whitespace and in the format "key:value", which would represent a tasks array condition. E.g. you can have only tasks with the category_name "General" on that slot (e.g. "6:00-9:00 category_name:General"), or all tasks without the category_name "Music" on that slot by using a negatvion sign before the value (e.g. "6:00-9:00 category_name:!Music"). Also you can have multiple conditions separated by a whitespace. Possible task array keys are below.'; ?>
 
 
     <!-- Monday time slots -->
@@ -114,7 +114,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -133,7 +133,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -152,7 +152,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -171,7 +171,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -190,7 +190,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -209,7 +209,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -228,7 +228,7 @@
         </div>
 
     </div>
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t($slots_help) ?>
     </p>
 
@@ -237,9 +237,28 @@
 
 
 
+    <!-- Available task keys -->
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <b>Task Keys</b>
+        </div>
+
+        <div class="task-form-main-column">
+            assignee_avatar_path - assignee_email - assignee_name - assignee_username - category_color_id - category_description - category_id - category_name - color_id - column_id - column_name - column_position - creator_id - date_completed - date_creation - date_due - date_modification - date_moved - date_started - description - id - is_active - is_milestone - nb_comments - nb_completed_subtasks - nb_external_links - nb_files - nb_links - nb_subtasks - open_subtasks - owner_id - plan_from - position - priority - project_alias - project_id - project_max_hours_block - project_max_hours_day - project_max_hours_fri - project_max_hours_mon - project_max_hours_sat - project_max_hours_sun - project_max_hours_thu - project_max_hours_tue - project_max_hours_wed - project_name - project_priority - project_type - project_wage - recurrence_basedate - recurrence_child - recurrence_factor - recurrence_parent - recurrence_status - recurrence_timeframe - recurrence_trigger - reference - score - swimlane_id - swimlane_name - time_estimated - time_overtime - time_remaining - time_spent - title
+        </div>
+
+    </div>
+
+    <br>
+    <br>
+
+
+
     <!-- minimum block length -->
 
-    <p class="weekhelper-config-weak-text">
+    <p class="task-form-main-column weekhelper-config-weak-text">
         <?= t('While planing tasks into time slots, time slots get depleted, technically. This is the minimum amount of minutes a time slot should have available for a task to be planned on it. Otherwise the time slot gets depleted automatically without any task planned. This way I can have some "minimum block length" for task to be planned on. (Disabled with anything < 1)') ?>
     </p>
 
