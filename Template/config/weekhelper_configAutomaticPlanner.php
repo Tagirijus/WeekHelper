@@ -24,6 +24,33 @@
                 "placeholder='mon 9:00-10:00 dentist\nwed 0:00-24:00 vacation\nthu 13:00-24:00 closing time'"
             ], 'weekhelper-textarea-config') ?>
         </div>
+    </div>
+
+    <br>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <b>Calendar sync</b>
+            <p class="weekhelper-config-weak-text">
+                <?= t('Here you can set up the config for getting blocking timeslots / tasks from a CalDAV calendar. User and app-password are needed (at the moment only for one user, sorry!). In the calendar-urls textarea you can have multiple calendar urls in each line, using the credentials with the user and app-password.') ?>
+            </p>
+        </div>
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('CalDAV User'), 'caldav_user') ?>
+            <?= $this->form->text('caldav_user', ['caldav_user' => $caldav_user], [], []) ?>
+        </div>
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('CalDAV App-Pwd'), 'caldav_app_pwd') ?>
+            <?= $this->form->text('caldav_app_pwd', ['caldav_app_pwd' => $caldav_app_pwd], [], []) ?>
+        </div>
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Calendar URLs'), 'calendar_urls') ?>
+            <?= $this->form->textarea('calendar_urls', ['calendar_urls' => $calendar_urls], [], [], 'weekhelper-textarea-config') ?>
+        </div>
 
     </div>
 

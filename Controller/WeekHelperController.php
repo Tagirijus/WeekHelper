@@ -219,6 +219,9 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'weekhelper_minimum_slot_length' => $form['minimum_slot_length'],
             'weekhelper_block_active_week' => $form['block_active_week'],
             'weekhelper_block_planned_week' => $form['block_planned_week'],
+            'weekhelper_caldav_user' => $form['caldav_user'],
+            'weekhelper_caldav_app_pwd' => $form['caldav_app_pwd'],
+            'weekhelper_calendar_urls' => $form['calendar_urls'],
         ];
 
         $this->languageModel->loadCurrentLanguage();

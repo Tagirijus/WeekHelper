@@ -101,6 +101,9 @@ class WeekHelperHelper extends Base
             'minimum_slot_length' =>  $this->configModel->get('weekhelper_minimum_slot_length', 0),
             'block_active_week' =>  $this->configModel->get('weekhelper_block_active_week', ''),
             'block_planned_week' =>  $this->configModel->get('weekhelper_block_planned_week', ''),
+            'caldav_user' =>  $this->configModel->get('weekhelper_caldav_user', ''),
+            'caldav_app_pwd' =>  $this->configModel->get('weekhelper_caldav_app_pwd', ''),
+            'calendar_urls' =>  $this->configModel->get('weekhelper_calendar_urls', ''),
         ];
     }
 
