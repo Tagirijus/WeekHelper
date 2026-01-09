@@ -1,18 +1,15 @@
-<!--
-
-This whole class is a tiny bit magic to me (not 100%, but parts of it).
-I have to confess here: I used LLM to generate parts of it, since I
-really do not understand the whole CalDAV fetching process. I tested it
-and it seem to work. But still: please use at your own risk! I think it
-should be save ... but I am not sure, since I really do not quite understand
-this whole XML query part. It really looks gibberish and I do not know, why
-people came up with such weird query language. Also I do not know why
-CalDAV has to be so complicated in 2026 ... Maybe I am just a monkey.
-
--->
-
-
 <?php
+
+/**
+ * This whole class is a tiny bit magic to me (not 100%, but parts of it).
+ * I have to confess here: I used LLM to generate parts of it, since I
+ * really do not understand the whole CalDAV fetching process. I tested it
+ * and it seem to work. But still: please use at your own risk! I think it
+ * should be save ... but I am not sure, since I really do not quite understand
+ * this whole XML query part. It really looks gibberish and I do not know, why
+ * people came up with such weird query language. Also I do not know why
+ * CalDAV has to be so complicated in 2026 ... Maybe I am just a monkey.
+ */
 
 namespace Kanboard\Plugin\WeekHelper\Helper;
 
