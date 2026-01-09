@@ -170,6 +170,7 @@ class Plugin extends Base
         $this->route->addRoute('/weekhelper/weekpattern', 'WeekHelperController', 'getWeekPattern', 'WeekHelper');
         $this->route->addRoute('/weekhelper/dashboard_level/:level', 'WeekHelperController', 'showLevelHoverAsPage', 'WeekHelper');
         $this->route->addRoute('/weekhelper/automaticplan', 'WeekHelperController', 'getAutomaticPlan', 'WeekHelper');
+        $this->route->addRoute('/weekhelper/updateblockingtasks', 'WeekHelperController', 'updateBlockingTasks', 'WeekHelper');
 
         // JSONRPC - Methods
         $this->container['automaticPlanner'] = function ($c) {

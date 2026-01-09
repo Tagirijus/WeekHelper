@@ -352,4 +352,17 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         }
         return $this->response->text($automatic_plan);
     }
+
+    /**
+     * This function will update the blocking tasks / timeslots
+     * from the CalDAV calendar/s from the config.
+     *
+     * Output is success message or info about fail.
+     *
+     * @return Response
+     */
+    public function updateBlockingTasks()
+    {
+        return $this->response->text($this->helper->automaticPlanner->updateBlockingTasks());
+    }
 }
