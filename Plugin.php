@@ -201,7 +201,7 @@ class Plugin extends Base
         );
 
         // CLI Commands
-        $this->cli->add(new UpdateBlockingTasks($this->container));
+        $this->cli->add(new UpdateBlockingTasks($this->helper->automaticPlanner));
     }
 
     public function onStartup()

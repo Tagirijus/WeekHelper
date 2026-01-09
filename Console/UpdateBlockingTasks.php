@@ -9,11 +9,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UpdateBlockingTasks extends Command
 {
     protected static $defaultName = 'weekhelper:update-blocking-tasks';
-    protected $container;
+    protected $automaticPlanner;
 
-    public function __construct($container)
+    public function __construct($automaticPlanner)
     {
-        $this->container = $container;
+        $this->automaticPlanner = $automaticPlanner;
         parent::__construct();
     }
 
@@ -25,7 +25,13 @@ class UpdateBlockingTasks extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $output->writeln('WeekHelper will update blocking tasks from calendar ...');
-        $output->writeln('THIS METHOD IS WIP');
+        $success = $this->automaticPlanner->updateBlockingTasks();
+        if ($success === true) {
+            $output->writeln('Successfully updated blocking tasks from CalDAV!');
+        } else {
+            $output->writeln('Fail. Message:');
+            $output->writeln($success);
+        }
 
         return 0;
     }
