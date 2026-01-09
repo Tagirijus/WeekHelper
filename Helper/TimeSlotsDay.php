@@ -24,7 +24,13 @@ class TimeSlotsDay
      * A slot might have the following structure:
      *     [
      *         'timespan' => TimeSpan instance,
-     *         'project_type' => type of this slot or empty string for ALL
+     *         'timespan_init' => TimeSpan instance (with initialized values),
+     *         'conditions_allow' => array for the readable conditions for "allow",
+     *         'conditions_refuse' => array for the readable conditions for "refuse",
+     *         'conditions_set' => [
+     *             'allow' => array with the conditions for internal checkings,
+     *             'refuse' => array with the conditions for internal checkings,
+     *         ]
      *     ]
      *
      * @var array
@@ -68,14 +74,17 @@ class TimeSlotsDay
         foreach ($lines as &$line) {
 
             $line = trim($line);
+            if ($line == '') {
+                continue;
+            }
 
-            // splitting initial config string into times and project_type
-            $parts = preg_split('/\s+/', $line);
+            // splitting initial config string into times and conditions
+            $parts = preg_split('/\s+/', $line, 2);
             $times = $parts[0];
             if (count($parts) > 1) {
-                $project_type = $parts[1];
+                $conditions = trim($parts[1]);
             } else {
-                $project_type = '';
+                $conditions = '';
             }
 
             // now splitting times into start and end
@@ -88,11 +97,19 @@ class TimeSlotsDay
                 $end = 0;
             }
 
+            // now create the conditions
+            [$conditions_allow, $conditions_refuse] = self::parseConditionsString($conditions);
+
             // add a time slot finally
             $this->slots[] = [
                 'timespan' => new TimeSpan($start, $end),
                 'timespan_init' => new TimeSpan($start, $end),
-                'project_type' => $project_type
+                'conditions_allow' => $conditions_allow,
+                'conditions_refuse' => $conditions_refuse,
+                'conditions_set' => self::prepareConditionsSet([
+                    'allow' => $conditions_allow,
+                    'refuse' => $conditions_refuse
+                ]),
             ];
         }
 
@@ -107,13 +124,80 @@ class TimeSlotsDay
     }
 
     /**
-     * Return the internal slots.
+     * Make a set out of the given conditions array for later
+     * better checking against a test array. This should avoid
+     * unneccessary iteration loops.
      *
+     * @param  array $conditions
      * @return array
      */
-    public function getSlots()
+    public static function prepareConditionsSet($conditions)
     {
-        return $this->slots;
+        $out = ['allow' => [], 'refuse' => []];
+        foreach (['allow','refuse'] as $mode) {
+            foreach ($conditions[$mode] ?? [] as $k => $vals) {
+                $out[$mode][$k] = array_fill_keys($vals, true);
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Parse a given conditions string from the timeslots config.
+     * It's basically a whitespace separated array, which can hold
+     * an array key or not. If not, "project_type" is used for backwards
+     * compabilities.
+     * It returns and array for conditions_allow and conditions_refuse:
+     *   [conditions_allow, conditions_refuse]
+     *
+     * @param  string $conditions
+     * @return array
+     */
+    public static function parseConditionsString($conditions = '')
+    {
+        if ($conditions == '') {
+            return [[], []];
+        }
+        $allow = [];
+        $refuse = [];
+        $parts = preg_split('/\s+/', $conditions);
+        foreach ($parts as $part) {
+            $split = explode(':', $part);
+            // if no colon is given, it's the old behaviour, which
+            // was "project_type" only, basically.
+            $key = count($split) == 2 ? $split[0] : 'project_type';
+            $value = count($split) == 2 ? $split[1] : $split[0];
+            // now add it to either allow or refuse, depending
+            // on a prefix "!".
+            $prefix = $value[0] != '!' ? 'allow' : 'refuse';
+            $value  = ltrim($value, '!');
+            // multiple options for a key should be possible
+            if (!array_key_exists($key, ${$prefix})) {
+                ${$prefix}[$key] = [];
+            }
+            ${$prefix}[$key][] = $value;
+        }
+        return [$allow, $refuse];
+    }
+
+    /**
+     * Return the internal slots or even just a single
+     * one with the given slot key.
+     *
+     * @param integer|null  $slot_key
+     * @return array
+     */
+    public function getSlots($slot_key = null)
+    {
+        if (is_null($slot_key)) {
+            return $this->slots;
+        } else {
+            if (isset($this->slots[$slot_key])) {
+                return $this->slots[$slot_key];
+            } else {
+                return $this->slots;
+            }
+        }
     }
 
     /**
@@ -132,20 +216,19 @@ class TimeSlotsDay
      * Otherwise it will return the key of the internal slot array
      * for the slot, which still has remaining time to plan left.
      *
-     * @param  string $project_type
+     * The given condition parameter can be a single string, which
+     * stands for a "project_type" key (old behaviour) or it should
+     * rather be an array like the task array. It's keys and values
+     * will be checked against the internal timeslots "conditions_allow"
+     * and "conditions_refuse" array.
+     *
+     * @param  string|array $condition
      * @param  string $time_point_str
      * @return int
      */
-    public function nextSlot($project_type = '', $time_point_str = '')
+    public function nextSlot($condition = '', $time_point_str = '')
     {
         foreach ($this->slots as $key => $slot) {
-            // if a slot type is empty, it means that every project_type
-            // may be planned here!
-            $type_is_valid = (
-                $project_type == ''
-                || $slot['project_type'] == ''
-                || $slot['project_type'] == $project_type
-            );
             $has_remaining_time = $slot['timespan']->length() > 0;
             $time_point = new TimePoint($time_point_str);
             $time_point_str_is_in_or_before = (
@@ -164,11 +247,83 @@ class TimeSlotsDay
                     ) < 1
                 )
             );
-            if ($type_is_valid && $has_remaining_time && $time_point_str_is_in_or_before) {
+            if (
+                self::slotConditionCheck($slot, $condition)
+                && $has_remaining_time
+                && $time_point_str_is_in_or_before
+            ) {
                 return $key;
             }
         }
         return -1;
+    }
+
+    /**
+     * The check, which checks for the given slot with the given
+     * test (probably a task array), if the task could be
+     * planned on that slot according to the slots conditions.
+     *
+     * @param  array $slot
+     * @param  string|array $test
+     * @return boolean
+     */
+    public static function slotConditionCheck($slot, $test)
+    {
+        if (empty($test)) {
+            return true;
+        }
+
+        // backwards compability: earlier if only a string was
+        // given for the check, it was supposed to be a check
+        // for the "project_type" key only
+        if (is_string($test)) {
+            $test = ['project_type' => $test];
+        }
+
+        $allow = 0;
+
+        foreach ($test as $key => $value) {
+            // refuse condition has priority. first possible refusion
+            // will return false immediately due to that priority; and
+            // this can skip all the other tests and the loop
+            if (isset($slot['conditions_set']['refuse'][$key][$value])) {
+                return false;
+            }
+
+            // no allow conditions set in slot, which means: if so far
+            // no refuse condition was met, everything else is allowed
+            if (empty($slot['conditions_set']['allow'])) {
+                $allow++;
+                continue;
+            }
+
+            // or at least the key does not exist at all, which means
+            // from the perspective of "allowing" that all such
+            // kinds are allowed (at least this shall be my logic here)
+            if (!isset($slot['conditions_set']['allow'][$key])) {
+                $allow++;
+                continue;
+            }
+
+            // otherwise a check for allowed condition is needed with
+            // the given value
+            if (isset($slot['conditions_set']['allow'][$key][$value])) {
+                $allow++;
+                continue;
+            }
+
+            // maybe the key does exist in "allow" but does not contain
+            // the value, which would result in a refuse, basically
+            if (
+                isset($slot['conditions_set']['allow'][$key])
+                && !array_key_exists($value, $slot['conditions_set']['allow'][$key])
+            ) {
+                return false;
+            }
+
+        }
+
+        return $allow !== 0;
     }
 
     /**
@@ -386,20 +541,23 @@ class TimeSlotsDay
             && $time_span->getEnd() > $slot['timespan']->getStart()
             && $time_span->getEnd() < $slot['timespan']->getEnd()
         ) {
-            $project_type = $slot['project_type'];
             $slot_a = [
                 'timespan' => new TimeSpan(
                     $slot['timespan']->getStart(),
                     $time_span->getStart()
                 ),
-                'project_type' => $project_type
+                'conditions_allow' => $slot['conditions_allow'],
+                'conditions_refuse' => $slot['conditions_refuse'],
+                'conditions_set' => $slot['conditions_set']
             ];
             $slot_b = [
                 'timespan' => new TimeSpan(
                     $time_span->getEnd(),
                     $slot['timespan']->getEnd()
                 ),
-                'project_type' => $project_type
+                'conditions_allow' => $slot['conditions_allow'],
+                'conditions_refuse' => $slot['conditions_refuse'],
+                'conditions_set' => $slot['conditions_set']
             ];
             return [$slot_a, $slot_b];
 
@@ -522,7 +680,9 @@ class TimeSlotsDay
                             $slot['timespan_init']->getStart(),
                             $time_point->getTime()
                         ),
-                        'project_type' => $slot['project_type']
+                        'conditions_allow' => $slot['conditions_allow'],
+                        'conditions_refuse' => $slot['conditions_refuse'],
+                        'conditions_set' => $slot['conditions_set']
                     ];
                     $second_half = [
                         'timespan' => new TimeSpan(
@@ -533,7 +693,9 @@ class TimeSlotsDay
                             $time_point->getTime(),
                             $slot['timespan_init']->getEnd()
                         ),
-                        'project_type' => $slot['project_type']
+                        'conditions_allow' => $slot['conditions_allow'],
+                        'conditions_refuse' => $slot['conditions_refuse'],
+                        'conditions_set' => $slot['conditions_set']
                     ];
                     $new_slots[] = $first_half;
                     $new_slots[] = $second_half;

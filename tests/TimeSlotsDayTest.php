@@ -162,7 +162,11 @@ final class TimeSlotsDayTest extends TestCase
             TimeHelper::readableToMinutes("7:00"),
             TimeHelper::readableToMinutes("15:00"),
         );
-        $time_slots_day->depleteByTimeSpan($time_span);
+        $success = $time_slots_day->depleteByTimeSpan($time_span);
+        $this->assertTrue(
+            $success,
+            'depleteByTimeSpan() did not return True.'
+        );
         // there now should be two slots:
         // 1: 6:00-7:00 / 360-420
         // 2: 15:00-16:00 / 900-960
@@ -370,6 +374,96 @@ final class TimeSlotsDayTest extends TestCase
         );
     }
 
+    public function testConditionsInitArrays()
+    {
+        $config = "0:00-1:00 office key_a:!a\n";
+        $config .= "1:00-2:00 key_a:a\n";
+        $config .= "2:00-3:00 key_a:b\n";
+
+        $time_slots_day = new TimeSlotsDay($config, 'mon');
+
+        $slot_0 = [
+            'conditions_allow' => [
+                'project_type' => ['office']
+            ],
+            'conditions_refuse' => [
+                'key_a' => ['a']
+            ],
+            'conditions_set' => TimeSlotsDay::prepareConditionsSet([
+                'allow' => ['project_type' => ['office']],
+                'refuse' => ['key_a' => ['a']]
+            ]),
+        ];
+        $slot_1 = [
+            'conditions_allow' => [
+                'key_a' => ['a']
+            ],
+            'conditions_refuse' => [],
+            'conditions_set' => TimeSlotsDay::prepareConditionsSet([
+                'allow' => ['key_a' => ['a']],
+                'refuse' => []
+            ]),
+        ];
+        $slot_2 = [
+            'conditions_allow' => [
+                'key_a' => ['b']
+            ],
+            'conditions_refuse' => [],
+            'conditions_set' => TimeSlotsDay::prepareConditionsSet([
+                'allow' => ['key_a' => ['b']],
+                'refuse' => []
+            ]),
+        ];
+
+        $this->assertSame(
+            $slot_0['conditions_allow'],
+            $time_slots_day->getSlots(0)['conditions_allow'],
+            'Slot conditions_allow was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_1['conditions_allow'],
+            $time_slots_day->getSlots(1)['conditions_allow'],
+            'Slot conditions_allow was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_2['conditions_allow'],
+            $time_slots_day->getSlots(2)['conditions_allow'],
+            'Slot conditions_allow was not parsed correctly on init.'
+        );
+
+        $this->assertSame(
+            $slot_0['conditions_refuse'],
+            $time_slots_day->getSlots(0)['conditions_refuse'],
+            'Slot conditions_refuse was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_1['conditions_refuse'],
+            $time_slots_day->getSlots(1)['conditions_refuse'],
+            'Slot conditions_refuse was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_2['conditions_refuse'],
+            $time_slots_day->getSlots(2)['conditions_refuse'],
+            'Slot conditions_refuse was not parsed correctly on init.'
+        );
+
+        $this->assertSame(
+            $slot_0['conditions_set'],
+            $time_slots_day->getSlots(0)['conditions_set'],
+            'Slot conditions_set was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_1['conditions_set'],
+            $time_slots_day->getSlots(1)['conditions_set'],
+            'Slot conditions_set was not parsed correctly on init.'
+        );
+        $this->assertSame(
+            $slot_2['conditions_set'],
+            $time_slots_day->getSlots(2)['conditions_set'],
+            'Slot conditions_set was not parsed correctly on init.'
+        );
+    }
+
     public function testGetOverallLength()
     {
         $time_slots_day = new TimeSlotsDay("10:00-11:00\n20:00-22:00", 'mon');
@@ -474,6 +568,231 @@ final class TimeSlotsDayTest extends TestCase
             240,
             $time_slots_day->getLengthOfSlot(1, true),
             'The new second slot should only be 4 hours / 240 minutes in length for initial as well.'
+        );
+    }
+
+    public function testParseConditionsString()
+    {
+        $conditions = "backwards";
+        [$allow, $refuse] = TimeSlotsDay::parseConditionsString($conditions);
+        $this->assertSame(
+            ['project_type' => ['backwards']],
+            $allow,
+            'TimeSlots parsing is not backwards compatible.'
+        );
+
+        $conditions = "!backwards";
+        [$allow, $refuse] = TimeSlotsDay::parseConditionsString($conditions);
+        $this->assertSame(
+            ['project_type' => ['backwards']],
+            $refuse,
+            'TimeSlots backwards compatible parsing should be posible with negation as well now.'
+        );
+
+        $conditions = "the_type category_name:Musik category_name:Sound category_name:!General";
+        [$allow, $refuse] = TimeSlotsDay::parseConditionsString($conditions);
+        $this->assertSame(
+            [
+                'project_type' => ['the_type'],
+                'category_name' => ['Musik', 'Sound']
+            ],
+            $allow,
+            'TimeSlots parsing with multiple values for allowed did not work.'
+        );
+        $this->assertSame(
+            [
+                'category_name' => ['General']
+            ],
+            $refuse,
+            'TimeSlots parsing with multiple values for refused did not work.'
+        );
+
+        $conditions = "key_a:a";
+        [$allow, $refuse] = TimeSlotsDay::parseConditionsString($conditions);
+        $set = TimeSlotsDay::prepareConditionsSet([
+            'allow' => $allow,
+            'refuse' => $refuse
+        ]);
+        $this->assertSame(
+            [
+                'allow' => ['key_a' => ['a' => true]],
+                'refuse' => []
+            ],
+            $set,
+            'Conditions set was parsed incorrectly with parseConditionsString() + prepareConditionsSet()'
+        );
+
+        $conditions = "key_a:a key_a:b key_b:!c";
+        [$allow, $refuse] = TimeSlotsDay::parseConditionsString($conditions);
+        $set = TimeSlotsDay::prepareConditionsSet([
+            'allow' => $allow,
+            'refuse' => $refuse
+        ]);
+        $this->assertSame(
+            [
+                'allow' => ['key_a' => ['a' => true, 'b' => true]],
+                'refuse' => ['key_b' => ['c' => true]]
+            ],
+            $set,
+            'Conditions set was parsed incorrectly with parseConditionsString() + prepareConditionsSet()'
+        );
+    }
+
+    public function testSlotConditionCheck()
+    {
+        $config = "0:00-1:00 office key_a:!a\n";
+        $config .= "1:00-2:00 key_a:a\n";
+        $config .= "2:00-3:00 key_a:b\n";
+        $config .= "3:00-4:00 key_a:a key_a:b\n";
+
+        $time_slots_day = new TimeSlotsDay($config, 'mon');
+
+        // for empty parameters
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(0),
+                ''
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(1),
+                []
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+
+        // key_a == a
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(0),
+                ['key_a' => 'a']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(1),
+                ['key_a' => 'a']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+
+        // key_a == b
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(0),
+                ['key_a' => 'b']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(1),
+                ['key_a' => 'b']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(2),
+                ['key_a' => 'b']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+
+        // key_a == c
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(0),
+                ['key_a' => 'c']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(1),
+                ['key_a' => 'c']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(2),
+                ['key_a' => 'c']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+
+        // key_a == a, project_type == office
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(0),
+                ['key_a' => 'a', 'project_type' => 'office']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(1),
+                ['key_a' => 'a', 'project_type' => 'office']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertFalse(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(2),
+                ['key_a' => 'a', 'project_type' => 'office']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+        $this->assertTrue(
+            $time_slots_day::slotConditionCheck(
+                $time_slots_day->getSlots(3),
+                ['key_a' => 'a', 'project_type' => 'office']
+            ),
+            'slotConditionsCheck() did not work as intended.'
+        );
+    }
+
+    public function testNewNextSlotWithNewConditionFeature()
+    {
+        // earlier it was only possible to assign a timeslote with
+        // an optional project_type like so:
+        //    6:00-9:00 project_type_here
+        // I added the feature that 1. multiple conditions can be set
+        // and 2. a condition can contain a colon to represent a tasks key
+        // like so:
+        //    6:00-9:00 task_key:string task_key:!other_string other_task_key:string
+        //
+        // With this method I will test it, but I leave the other tests as they were,
+        // since the new method obverall should be backwards compatible
+
+        $config = "0:00-1:00 office\n";
+        $config .= "1:00-2:00 musik task_key_a:condition1\n";
+        $config .= "2:00-3:00 training !sound\n";
+        $config .= "3:00-4:00 project_type:!studio";
+        $config .= "4:00-5:00 project_type:studio\n";
+        $time_slots = new TimeSlotsDay($config);
+
+        // some tests, which might represent backwards compability as well;
+        // the first parameter earlier was ONLY a string. now it can be both:
+        // a string and an array (the task, for example)
+        $this->assertSame(
+            0,
+            $time_slots->nextSlot(),
+            'nextSlot() returned the wrong slot key.'
+        );
+        $this->assertSame(
+            0,
+            $time_slots->nextSlot('office'),
+            'nextSlot("office") returned the wrong slot key.'
+        );
+        $this->assertSame(
+            1,
+            $time_slots->nextSlot('musik'),
+            'nextSlot("musik") returned the wrong slot key.'
         );
     }
 }

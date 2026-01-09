@@ -307,7 +307,7 @@ class TasksPlan
         // with (maybe) a plan_from there is no next
         // slot at all.
         $next_slot_key = $time_slots_day->nextSlot(
-            $task['project_type'],
+            $task,
             $time_point_str
         );
         if ($next_slot_key == -1) {
@@ -336,7 +336,7 @@ class TasksPlan
 
             // then there should be an available slot left on the day
             $next_slot_key = $time_slots_day->nextSlot(
-                $task['project_type'],
+                $task,
                 $time_point_str
             );
             if ($next_slot_key == -1) {
@@ -442,7 +442,7 @@ class TasksPlan
 
         // get next possible slot
         $time_point_str = $task['plan_from'] ?? '';
-        $next_slot_key = $time_slots_day->nextSlot($task['project_type'], $time_point_str);
+        $next_slot_key = $time_slots_day->nextSlot($task, $time_point_str);
         if ($next_slot_key == -1) {
             return 0;
         }
