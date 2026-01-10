@@ -29,7 +29,7 @@ UID:e93d7f35-d34a-43ad-a8de-6c0b24da4840
 DTSTART;TZID=Europe/Berlin:20260109T100000
 DTEND;TZID=Europe/Berlin:20260109T110000
 STATUS:CONFIRMED
-SUMMARY:Kanboard TEST
+SUMMARY:active fri
 END:VEVENT
 BEGIN:VTIMEZONE
 TZID:Europe/Berlin
@@ -61,7 +61,22 @@ UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0008
 DTSTART;VALUE=DATE:20260108
 DTEND;VALUE=DATE:20260109
 STATUS:CONFIRMED
-SUMMARY:Kanbaord Test Donnerstag
+SUMMARY:active thu
+END:VEVENT
+END:VCALENDAR</cal:calendar-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response><d:response><d:href>/remote.php/dav/calendars/manu/personal/DF79DE48-BA4C-48BF-982E-8D0C67D950C6.ics</d:href><d:propstat><d:prop><d:getetag>&quot;eba30309868bc551f0f6fcb352e0b6a1&quot;</d:getetag><cal:calendar-data>BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260110T081612Z
+DTSTAMP:20260110T081623Z
+LAST-MODIFIED:20260110T081623Z
+SEQUENCE:2
+UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0009
+DTSTART;VALUE=DATE:20260115
+DTEND;VALUE=DATE:20260116
+STATUS:CONFIRMED
+SUMMARY:planned thu
 END:VEVENT
 END:VCALENDAR</cal:calendar-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response></d:multistatus>';
 
@@ -79,7 +94,7 @@ UID:e93d7f35-d34a-43ad-a8de-6c0b24da4840
 DTSTART;TZID=Europe/Berlin:20260109T100000
 DTEND;TZID=Europe/Berlin:20260109T110000
 STATUS:CONFIRMED
-SUMMARY:Kanboard TEST
+SUMMARY:active fri
 END:VEVENT
 BEGIN:VTIMEZONE
 TZID:Europe/Berlin
@@ -112,7 +127,23 @@ UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0008
 DTSTART;VALUE=DATE:20260108
 DTEND;VALUE=DATE:20260109
 STATUS:CONFIRMED
-SUMMARY:Kanbaord Test Donnerstag
+SUMMARY:active thu
+END:VEVENT
+END:VCALENDAR',
+    'BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260110T081612Z
+DTSTAMP:20260110T081623Z
+LAST-MODIFIED:20260110T081623Z
+SEQUENCE:2
+UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0009
+DTSTART;VALUE=DATE:20260115
+DTEND;VALUE=DATE:20260116
+STATUS:CONFIRMED
+SUMMARY:planned thu
 END:VEVENT
 END:VCALENDAR'
     ];
@@ -138,7 +169,7 @@ END:VCALENDAR'
             [
                 'start' => '2026-01-09T10:00:00Z',
                 'end' => '2026-01-09T11:00:00Z',
-                'title' => 'Kanboard TEST',
+                'title' => 'active fri',
                 'uid' => 'e93d7f35-d34a-43ad-a8de-6c0b24da4840',
                 'source' => 'calendar_url_here/calendar_name',
                 'calendar' => 'calendar_name',
@@ -146,8 +177,16 @@ END:VCALENDAR'
             [
                 'start' => '2026-01-08T00:00:00Z',
                 'end' => '2026-01-09T00:00:00Z',
-                'title' => 'Kanbaord Test Donnerstag',
+                'title' => 'active thu',
                 'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0008',
+                'source' => 'calendar_url_here/calendar_name',
+                'calendar' => 'calendar_name',
+            ],
+            [
+                'start' => '2026-01-15T00:00:00Z',
+                'end' => '2026-01-16T00:00:00Z',
+                'title' => 'planned thu',
+                'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0009',
                 'source' => 'calendar_url_here/calendar_name',
                 'calendar' => 'calendar_name',
             ]
