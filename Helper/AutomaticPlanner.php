@@ -10,6 +10,7 @@ use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
+use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
 
 
 class AutomaticPlanner extends Base
@@ -723,6 +724,23 @@ class AutomaticPlanner extends Base
      */
     public function updateBlockingTasks()
     {
+        $caldav_fetcher = new CalDAVFetcher(
+            $this->configModel->get('weekhelper_caldav_user', ''),
+            $this->configModel->get('weekhelper_caldav_app_pwd', '')
+        );
+
+        $url = trim($this->configModel->get('weekhelper_calendar_urls', ''));
+
+        // TODO / WEITER HIER
+        // Klasse, die CalDAVFetcher und die urls nutzen kann, um blocking timeslots zu erzeugen
+        // also den config string! - sowohl für aktive, wie auch kommende woche
+
+        print_r("\n\n");
+        print_r(
+            $caldav_fetcher->fetchEvents($url, '20260105T000000Z', '20260110T000000Z')
+        );
+        print_r("\n\n\n");
+
         return 'updateBlockingTasks() ... wip / to implement ...';
     }
 }
