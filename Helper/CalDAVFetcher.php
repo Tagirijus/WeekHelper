@@ -53,6 +53,9 @@ class CalDAVFetcher
         }
         // Expect multistatus XML; parse responses and extract calendar-data nodes
         $calendarDatas = self::extractCalendarDataFromMultistatus($response);
+        print_r("\n\n");
+        print_r($calendarDatas);
+        print_r("\n\n");
         $events = [];
         foreach ($calendarDatas as $ical) {
             foreach (self::parseICalEvents($ical) as $evt) {
@@ -148,7 +151,7 @@ class CalDAVFetcher
      * @param  string $xmlString
      * @return array
      */
-    protected static function extractCalendarDataFromMultistatus(string $xmlString) {
+    public static function extractCalendarDataFromMultistatus(string $xmlString) {
         $result = [];
         libxml_use_internal_errors(true);
         $doc = simplexml_load_string($xmlString);

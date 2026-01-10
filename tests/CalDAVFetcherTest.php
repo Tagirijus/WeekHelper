@@ -1,0 +1,129 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Helper/CalDAVFetcher.php';
+
+use PHPUnit\Framework\TestCase;
+use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
+
+
+final class CalDAVFetcherTest extends TestCase
+{
+    private static string $caldav_response;
+    private static array $caldav_entries;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$caldav_response = '<?xml version="1.0"?>
+<d:multistatus xmlns:d="DAV:" xmlns:s="http://sabredav.org/ns" xmlns:cal="urn:ietf:params:xml:ns:caldav" xmlns:cs="http://calendarserver.org/ns/" xmlns:oc="http://owncloud.org/ns" xmlns:nc="http://nextcloud.org/ns"><d:response><d:href>/remote.php/dav/calendars/manu/personal/EAD6F7E9-2066-4515-A888-B0636209943E.ics</d:href><d:propstat><d:prop><d:getetag>&quot;532cb8dc38fc790f1d97c8cfe3dc2d61&quot;</d:getetag><cal:calendar-data>BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260109T221405Z
+DTSTAMP:20260109T221422Z
+LAST-MODIFIED:20260109T221422Z
+SEQUENCE:2
+UID:e93d7f35-d34a-43ad-a8de-6c0b24da4840
+DTSTART;TZID=Europe/Berlin:20260109T100000
+DTEND;TZID=Europe/Berlin:20260109T110000
+STATUS:CONFIRMED
+SUMMARY:Kanboard TEST
+END:VEVENT
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+END:VCALENDAR</cal:calendar-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response><d:response><d:href>/remote.php/dav/calendars/manu/personal/DF79DE48-BA4C-48BF-982E-8D0C67D950C6.ics</d:href><d:propstat><d:prop><d:getetag>&quot;eba30309868bc551f0f6fcb352e0b6a1&quot;</d:getetag><cal:calendar-data>BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260110T061612Z
+DTSTAMP:20260110T061623Z
+LAST-MODIFIED:20260110T061623Z
+SEQUENCE:2
+UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0008
+DTSTART;VALUE=DATE:20260108
+DTEND;VALUE=DATE:20260109
+STATUS:CONFIRMED
+SUMMARY:Kanbaord Test Donnerstag
+END:VEVENT
+END:VCALENDAR</cal:calendar-data></d:prop><d:status>HTTP/1.1 200 OK</d:status></d:propstat></d:response></d:multistatus>';
+
+    self::$caldav_entries = [
+        'BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260109T221405Z
+DTSTAMP:20260109T221422Z
+LAST-MODIFIED:20260109T221422Z
+SEQUENCE:2
+UID:e93d7f35-d34a-43ad-a8de-6c0b24da4840
+DTSTART;TZID=Europe/Berlin:20260109T100000
+DTEND;TZID=Europe/Berlin:20260109T110000
+STATUS:CONFIRMED
+SUMMARY:Kanboard TEST
+END:VEVENT
+BEGIN:VTIMEZONE
+TZID:Europe/Berlin
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0200
+TZNAME:CEST
+DTSTART:19700329T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0100
+TZNAME:CET
+DTSTART:19701025T030000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+END:VCALENDAR',
+    'BEGIN:VCALENDAR
+PRODID:-//IDN nextcloud.com//Calendar app 5.0.9//EN
+CALSCALE:GREGORIAN
+VERSION:2.0
+BEGIN:VEVENT
+CREATED:20260110T061612Z
+DTSTAMP:20260110T061623Z
+LAST-MODIFIED:20260110T061623Z
+SEQUENCE:2
+UID:5d9a838e-eabf-4d90-8b2b-4401e5ba0008
+DTSTART;VALUE=DATE:20260108
+DTEND;VALUE=DATE:20260109
+STATUS:CONFIRMED
+SUMMARY:Kanbaord Test Donnerstag
+END:VEVENT
+END:VCALENDAR'
+    ];
+    }
+
+    public function testExtractCalendarDataFromMultistatus()
+    {
+        $this->assertSame(
+            self::$caldav_entries,
+            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
+            'CalDAVFetcher converter from raw CalDAV response to separated entries doe snot work.'
+        );
+    }
+}
