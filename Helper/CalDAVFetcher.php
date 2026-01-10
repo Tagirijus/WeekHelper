@@ -52,9 +52,24 @@ class CalDAVFetcher
             return [];
         }
         // Expect multistatus XML; parse responses and extract calendar-data nodes
-        $calendarDatas = self::extractCalendarDataFromMultistatus($response);
+        return self::rawDatasToEvents(
+            self::extractCalendarDataFromMultistatus($response),
+            $calendar_url
+        );
+    }
+
+    /**
+     * Convert the given raw calendar datas into an array, which holds
+     * readable data.
+     *
+     * @param  array $calendar_datas
+     * @param  string $calendar_url
+     * @return array
+     */
+    public static function rawDatasToEvents($calendar_datas, $calendar_url)
+    {
         $events = [];
-        foreach ($calendarDatas as $ical) {
+        foreach ($calendar_datas as $ical) {
             foreach (self::parseICalEvents($ical) as $evt) {
                 $evt['source'] = $calendar_url;
                 $evt['calendar'] = basename($calendar_url);

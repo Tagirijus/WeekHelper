@@ -126,4 +126,37 @@ END:VCALENDAR'
             'CalDAVFetcher converter from raw CalDAV response to separated entries doe snot work.'
         );
     }
+
+    public function testRawDatasToEvents()
+    {
+        $output = CalDAVFetcher::rawDatasToEvents(
+            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
+            'calendar_url_here/calendar_name'
+        );
+
+        $expected = [
+            [
+                'start' => '2026-01-09T10:00:00Z',
+                'end' => '2026-01-09T11:00:00Z',
+                'title' => 'Kanboard TEST',
+                'uid' => 'e93d7f35-d34a-43ad-a8de-6c0b24da4840',
+                'source' => 'calendar_url_here/calendar_name',
+                'calendar' => 'calendar_name',
+            ],
+            [
+                'start' => '2026-01-08T00:00:00Z',
+                'end' => '2026-01-09T00:00:00Z',
+                'title' => 'Kanbaord Test Donnerstag',
+                'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0008',
+                'source' => 'calendar_url_here/calendar_name',
+                'calendar' => 'calendar_name',
+            ]
+        ];
+
+        $this->assertSame(
+            $expected,
+            $output,
+            'rawDatasToEvents() does not convert as intended.'
+        );
+    }
 }
