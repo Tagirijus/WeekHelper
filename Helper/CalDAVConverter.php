@@ -35,4 +35,27 @@ class CalDAVConverter
             fn($s) => $s !== ''
         );
     }
+
+    /**
+     * A CalDAV event from the CalDAVFetcher. It's no
+     * full CalDAV event, which might exist in the real
+     * world. It's probably just a trimmed down version
+     * of it.
+     *
+     * This method will return another kind of representation
+     * of the given CalDAV event with which this class can
+     * continue working.
+     *
+     * @param  array $caldav_event
+     * @return array
+     */
+    public static function convertSingleCalDAVEvent($caldav_event)
+    {
+        return [
+            'title' => $caldav_event['title'],
+            'calendar' => $caldav_event['calendar'],
+            'start' => new \DateTime($caldav_event['start']),
+            'end' => new \DateTime($caldav_event['end']),
+        ];
+    }
 }

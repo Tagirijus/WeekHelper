@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Kanboard\Plugin\WeekHelper\tests;
+
 require_once __DIR__ . '/../Helper/CalDAVFetcher.php';
 
 use PHPUnit\Framework\TestCase;
@@ -12,6 +14,7 @@ final class CalDAVFetcherTest extends TestCase
 {
     public static string $caldav_response;
     public static array $caldav_entries;
+    public static array $caldav_events;
 
     public static function setUpBeforeClass(): void
     {
@@ -147,25 +150,8 @@ SUMMARY:planned thu
 END:VEVENT
 END:VCALENDAR'
     ];
-    }
 
-    public function testExtractCalendarDataFromMultistatus()
-    {
-        $this->assertSame(
-            self::$caldav_entries,
-            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
-            'CalDAVFetcher converter from raw CalDAV response to separated entries doe snot work.'
-        );
-    }
-
-    public function testRawDatasToEvents()
-    {
-        $output = CalDAVFetcher::rawDatasToEvents(
-            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
-            'calendar_url_here/calendar_name'
-        );
-
-        $expected = [
+    self::$caldav_events = [
             [
                 'start' => '2026-01-09T10:00:00Z',
                 'end' => '2026-01-09T11:00:00Z',
@@ -191,9 +177,26 @@ END:VCALENDAR'
                 'calendar' => 'calendar_name',
             ]
         ];
+    }
+
+    public function testExtractCalendarDataFromMultistatus()
+    {
+        $this->assertSame(
+            self::$caldav_entries,
+            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
+            'CalDAVFetcher converter from raw CalDAV response to separated entries doe snot work.'
+        );
+    }
+
+    public function testRawDatasToEvents()
+    {
+        $output = CalDAVFetcher::rawDatasToEvents(
+            CalDAVFetcher::extractCalendarDataFromMultistatus(self::$caldav_response),
+            'calendar_url_here/calendar_name'
+        );
 
         $this->assertSame(
-            $expected,
+            self::$caldav_events,
             $output,
             'rawDatasToEvents() does not convert as intended.'
         );
