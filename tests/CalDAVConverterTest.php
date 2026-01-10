@@ -66,4 +66,33 @@ final class CalDAVConverterTest extends TestCase
             'convertSingleCalDAVEvent() did not convert the event correctly.'
         );
     }
+
+    public function testEventToTimeSpanString()
+    {
+        CalDAVFetcherTest::setUpBeforeClass();
+        $caldav_event = CalDAVFetcherTest::$caldav_events[0];
+        $converted = CalDAVConverter::eventToTimeSpanString(
+            CalDAVConverter::convertSingleCalDAVEvent($caldav_event)
+        );
+
+        $this->assertSame(
+            'fri 10:00-11:00 active fri (calendar_name)',
+            $converted,
+            'CalDAVConverter event was not translated correctly into a string.'
+        );
+
+        // now the full day, which is basically 0:00 on the start day
+        // and 0:00 on the following day. it should be converted internally
+        // to 0:00 of the start day and 23:59 of the start day
+        $caldav_event = CalDAVFetcherTest::$caldav_events[1];
+        $converted = CalDAVConverter::eventToTimeSpanString(
+            CalDAVConverter::convertSingleCalDAVEvent($caldav_event)
+        );
+
+        $this->assertSame(
+            'thu 0:00-23:59 active thu (calendar_name)',
+            $converted,
+            'CalDAVConverter event was not translated correctly into a string.'
+        );
+    }
 }

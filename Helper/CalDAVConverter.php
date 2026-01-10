@@ -58,4 +58,28 @@ class CalDAVConverter
             'end' => new \DateTime($caldav_event['end']),
         ];
     }
+
+    /**
+     * Convert the given internal event and return a valid
+     * timespan string for it, which can be used in the
+     * blocking config of the WeekHelper automatic planner
+     * configuration.
+     *
+     * @param  array $event
+     * @return string
+     */
+    public static function eventToTimeSpanString($event)
+    {
+        $day = strtolower($event['start']->format('D'));
+        $start = $event['start']->format('G:i');
+        $diff = $event['start']->diff($event['end']);
+        $diff = (int) $diff->format('%r%a');
+        if ($diff == 1 && $event['end']->format('G:i') == '0:00') {
+            $end = '23:59';
+        } else {
+            $end = $event['end']->format('G:i');
+        }
+        $title = $event['title'] . ' (' . $event['calendar'] . ')';
+        return $day . ' ' . $start . '-' . $end . ' ' . $title;
+    }
 }
