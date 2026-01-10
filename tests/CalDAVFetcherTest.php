@@ -10,8 +10,8 @@ use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
 
 final class CalDAVFetcherTest extends TestCase
 {
-    private static string $caldav_response;
-    private static array $caldav_entries;
+    public static string $caldav_response;
+    public static array $caldav_entries;
 
     public static function setUpBeforeClass(): void
     {
