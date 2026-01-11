@@ -86,7 +86,8 @@ class CalDAVConverter
                 )
             );
         }
-        return$caldav_events;
+
+        return $caldav_events;
     }
 
     /**
