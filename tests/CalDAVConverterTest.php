@@ -7,6 +7,7 @@ require_once __DIR__ . '/../tests/CalDAVFetcherTest.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\CalDAVConverter;
+use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
 use Kanboard\Plugin\WeekHelper\tests\CalDAVFetcherTest;
 
 
@@ -72,6 +73,33 @@ final class CalDAVConverterTest extends TestCase
             '2026-01-11 23:59:59',
             $end->format('Y-m-d H:i:s'),
             'CalDAVConverter::getEndOfWeekForDatetime did not create the correct ending datetime.'
+        );
+    }
+
+    public function testDistribution()
+    {
+        // basically create an "empty" CalDAV fetcher and converter;
+        // for testing purposes only
+        $caldav_converter = new CalDAVConverter(new CalDAVFetcher('', ''));
+        $caldav_converter->distributeEvents(
+            CalDAVFetcherTest::$caldav_events,
+            '2026-01-10'
+        );
+
+        $this->assertSame(
+            'active thu',
+            $caldav_converter->getEventsActive()[0]['title'],
+            'CalDAVConverter->distributeEvents() did not distribute the events correctly.'
+        );
+        $this->assertSame(
+            'active fri',
+            $caldav_converter->getEventsActive()[1]['title'],
+            'CalDAVConverter->distributeEvents() did not distribute the events correctly.'
+        );
+        $this->assertSame(
+            'planned thu',
+            $caldav_converter->getEventsPlanned()[0]['title'],
+            'CalDAVConverter->distributeEvents() did not distribute the events correctly.'
         );
     }
 }

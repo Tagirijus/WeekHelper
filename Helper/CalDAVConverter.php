@@ -45,7 +45,7 @@ class CalDAVConverter
         $this->caldav_fetcher = $caldav_fetcher;
         $this->calendar_urls = self::parseUrls($urls);
         $caldav_events = $this->getCalDAVEventsFor2Weeks();
-        $this->distributeEvents($caldav_events, new \DateTime());
+        $this->distributeEvents($caldav_events);
     }
 
     /**
@@ -131,18 +131,30 @@ class CalDAVConverter
 
     /**
      * Distribute the given CalDAV events into active and planned
-     * internal arrays.
+     * internal arrays. Also sort them.
      *
-     * I have this method separately so that I can better write tests
-     * for the internal logic, without the need of having to
-     * actually fetch real CalDAV events.
+     * I have the parameter "now" separately so that I can better
+     * write tests for the internal logic, without the need of having
+     * to actually fetch real CalDAV events.
      *
      * @param  array  $caldav_events
-     * @param  null|DateTime $now
+     * @param  string $now_dt_string
      */
-    public function distributeEvents($caldav_events, $now = null)
+    public function distributeEvents($caldav_events, $now_dt_string = 'now')
     {
-        // TODO
+        $this->events_active = [];
+        $this->events_planned = [];
+        $end_of_active_week = self::getEndOfWeekForDatetime($now_dt_string);
+        usort($caldav_events, function($a, $b) {
+            return $a['start'] <=> $b['start'];
+        });
+        foreach ($caldav_events as $event) {
+            if ($event['start'] < $end_of_active_week) {
+                $this->events_active[] = $event;
+            } else {
+                $this->events_planned[] = $event;
+            }
+        }
     }
 
     /**
