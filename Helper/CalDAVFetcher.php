@@ -303,15 +303,18 @@ class CalDAVFetcher
         // DATE (YYYYMMDD) -> treat as all-day: make start at 00:00 and end exclusive could be handled by caller
         if (preg_match('/^\d{8}$/', $val)) {
             $dt = \DateTime::createFromFormat('Ymd', $val, new \DateTimeZone('UTC'));
-            if ($dt) return $dt->format('Y-m-d\\T00:00:00\\Z');
+            if ($dt) {
+                $dt->setTime(0, 0, 0, 0);
+                return $dt; #->format('Y-m-d\\T00:00:00\\Z');
+            }
         }
         // If value ends with Z -> UTC
         if (substr($val, -1) === 'Z') {
             $dt = \DateTime::createFromFormat('Ymd\THis\Z', $val, new \DateTimeZone('UTC'));
-            if ($dt) return $dt->format('Y-m-d\\TH:i:s\\Z');
+            if ($dt) return $dt; #->format('Y-m-d\\TH:i:s\\Z');
             // fallback generic parse
             $dt = new \DateTime($val, new \DateTimeZone('UTC'));
-            return $dt->format('Y-m-d\\TH:i:s\\Z');
+            return $dt; #->format('Y-m-d\\TH:i:s\\Z');
         }
         // If TZID param present, try to use it
         if (isset($params['TZID'])) {
@@ -324,14 +327,14 @@ class CalDAVFetcher
             $dt = \DateTime::createFromFormat('Ymd\THis', $val, $tz) ?: \DateTime::createFromFormat('Ymd\THis', $val);
             if ($dt) {
                 $dt->setTimezone(new \DateTimeZone($params['TZID']));
-                return $dt->format('Y-m-d\\TH:i:s\\Z');
+                return $dt; #->format('Y-m-d\\TH:i:s\\Z');
             }
         }
         // No TZ info: assume local naive time; parse and convert to UTC (assume server default TZ)
         $dt = \DateTime::createFromFormat('Ymd\THis', $val) ?: @new \DateTime($val);
         if ($dt) {
             $dt->setTimezone(new \DateTimeZone('UTC'));
-            return $dt->format('Y-m-d\\TH:i:s\\Z');
+            return $dt; #->format('Y-m-d\\TH:i:s\\Z');
         }
         // fallback: return raw
         return $val;

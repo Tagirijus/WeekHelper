@@ -20,6 +20,20 @@ class CalDAVConverter
     var $calendar_urls;
 
     /**
+     * Internal arrays of events for the active week.
+     *
+     * @var array
+     **/
+    var $events_active = [];
+
+    /**
+     * Internal arrays of events for the planned week.
+     *
+     * @var array
+     **/
+    var $events_planned = [];
+
+    /**
      * Initialize the instance with the given CalDAVFetcher
      * and the raw calendar urls string from the Kanboard config.
      *
@@ -34,29 +48,6 @@ class CalDAVConverter
             array_map('trim', explode("\n", $urls)),
             fn($s) => $s !== ''
         );
-    }
-
-    /**
-     * A CalDAV event from the CalDAVFetcher. It's no
-     * full CalDAV event, which might exist in the real
-     * world. It's probably just a trimmed down version
-     * of it.
-     *
-     * This method will return another kind of representation
-     * of the given CalDAV event with which this class can
-     * continue working.
-     *
-     * @param  array $caldav_event
-     * @return array
-     */
-    public static function convertSingleCalDAVEvent($caldav_event)
-    {
-        return [
-            'title' => $caldav_event['title'],
-            'calendar' => $caldav_event['calendar'],
-            'start' => new \DateTime($caldav_event['start']),
-            'end' => new \DateTime($caldav_event['end']),
-        ];
     }
 
     /**

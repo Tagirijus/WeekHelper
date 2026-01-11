@@ -153,24 +153,42 @@ END:VCALENDAR'
 
     self::$caldav_events = [
             [
-                'start' => '2026-01-09T10:00:00Z',
-                'end' => '2026-01-09T11:00:00Z',
+                'start' => new \DateTime(
+                    '2026-01-09T10:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
+                'end' => new \DateTime(
+                    '2026-01-09T11:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
                 'title' => 'active fri',
                 'uid' => 'e93d7f35-d34a-43ad-a8de-6c0b24da4840',
                 'source' => 'calendar_url_here/calendar_name',
                 'calendar' => 'calendar_name',
             ],
             [
-                'start' => '2026-01-08T00:00:00Z',
-                'end' => '2026-01-09T00:00:00Z',
+                'start' => new \DateTime(
+                    '2026-01-08T00:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
+                'end' => new \DateTime(
+                    '2026-01-09T00:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
                 'title' => 'active thu',
                 'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0008',
                 'source' => 'calendar_url_here/calendar_name',
                 'calendar' => 'calendar_name',
             ],
             [
-                'start' => '2026-01-15T00:00:00Z',
-                'end' => '2026-01-16T00:00:00Z',
+                'start' => new \DateTime(
+                    '2026-01-15T00:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
+                'end' => new \DateTime(
+                    '2026-01-16T00:00:00',
+                    new \DateTimeZone('Europe/Berlin')
+                ),
                 'title' => 'planned thu',
                 'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0009',
                 'source' => 'calendar_url_here/calendar_name',
@@ -195,8 +213,21 @@ END:VCALENDAR'
             'calendar_url_here/calendar_name'
         );
 
+        // same DateTimes will still be different objects internally. So I have to
+        // convert both first ... unluckily. I will replace the DateTime instances
+        // with equally formatted strings instead.
+        foreach ($output as &$event) {
+            $event['start'] = $event['start']->format('Y-m-d H:i:s');
+            $event['end'] = $event['end']->format('Y-m-d H:i:s');
+        }
+        $caldav_events_original = self::$caldav_events;
+        foreach ($caldav_events_original as &$event) {
+            $event['start'] = $event['start']->format('Y-m-d H:i:s');
+            $event['end'] = $event['end']->format('Y-m-d H:i:s');
+        }
+
         $this->assertSame(
-            self::$caldav_events,
+            $caldav_events_original,
             $output,
             'rawDatasToEvents() does not convert as intended.'
         );

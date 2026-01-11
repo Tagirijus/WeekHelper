@@ -33,47 +33,11 @@ final class CalDAVConverterTest extends TestCase
         );
     }
 
-    public function testconvertSingleCalDAVEvent()
-    {
-        CalDAVFetcherTest::setUpBeforeClass();
-        $caldav_event = CalDAVFetcherTest::$caldav_events[0];
-        $converted = CalDAVConverter::convertSingleCalDAVEvent($caldav_event);
-        $expected = [
-            'title' => 'active fri',
-            'calendar' => 'calendar_name',
-            'start' => new \DateTime('2026-01-09T10:00:00Z'),
-            'end' => new \DateTime('2026-01-09T11:00:00Z'),
-        ];
-
-        $this->assertSame(
-            $expected['title'],
-            $converted['title'],
-            'convertSingleCalDAVEvent() did not convert the event correctly.'
-        );
-        $this->assertSame(
-            $expected['calendar'],
-            $converted['calendar'],
-            'convertSingleCalDAVEvent() did not convert the event correctly.'
-        );
-        $this->assertSame(
-            $expected['start']->format('Y-m-d H:i:s'),
-            $converted['start']->format('Y-m-d H:i:s'),
-            'convertSingleCalDAVEvent() did not convert the event correctly.'
-        );
-        $this->assertSame(
-            $expected['end']->format('Y-m-d H:i:s'),
-            $converted['end']->format('Y-m-d H:i:s'),
-            'convertSingleCalDAVEvent() did not convert the event correctly.'
-        );
-    }
-
     public function testEventToTimeSpanString()
     {
         CalDAVFetcherTest::setUpBeforeClass();
         $caldav_event = CalDAVFetcherTest::$caldav_events[0];
-        $converted = CalDAVConverter::eventToTimeSpanString(
-            CalDAVConverter::convertSingleCalDAVEvent($caldav_event)
-        );
+        $converted = CalDAVConverter::eventToTimeSpanString($caldav_event);
 
         $this->assertSame(
             'fri 10:00-11:00 active fri (calendar_name)',
@@ -85,9 +49,7 @@ final class CalDAVConverterTest extends TestCase
         // and 0:00 on the following day. it should be converted internally
         // to 0:00 of the start day and 23:59 of the start day
         $caldav_event = CalDAVFetcherTest::$caldav_events[1];
-        $converted = CalDAVConverter::eventToTimeSpanString(
-            CalDAVConverter::convertSingleCalDAVEvent($caldav_event)
-        );
+        $converted = CalDAVConverter::eventToTimeSpanString($caldav_event);
 
         $this->assertSame(
             'thu 0:00-23:59 active thu (calendar_name)',
