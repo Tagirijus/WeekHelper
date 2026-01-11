@@ -542,13 +542,19 @@ class AutomaticPlanner extends Base
      */
     public function prepareWeekTimesString($week = 'active')
     {
-        $remaining = $this->getTasksPlan($week)->getGlobalTimesForWeek()['remaining'];
-        $spent = $this->getTasksPlan($week)->getGlobalTimesForWeek()['spent'];
         $planned = $this->getTasksPlan($week)->getGlobalTimesForWeek()['planned'];
+        $spent = $this->getTasksPlan($week)->getGlobalTimesForWeek()['spent'];
+        $overflow = $this->getTasksPlan($week)->getGlobalTimesForOverflow()['planned'];
 
-        $out = 'Remaining: ' . TimeHelper::minutesToReadable($remaining, ' h');
+        $out = 'Planned: ' . TimeHelper::minutesToReadable($planned, ' h');
         $out .= ', Spent: ' . TimeHelper::minutesToReadable($spent, ' h');
         $out .= "\n";
+
+        if ($overflow > 0) {
+            $out .= '⚠ Overflow: ' . TimeHelper::minutesToReadable($overflow, ' h');
+            $out .= "\n";
+        }
+
         return $out;
     }
 
