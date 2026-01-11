@@ -718,6 +718,12 @@ class AutomaticPlanner extends Base
             : $title
         );
 
+        $title = (
+            $task['task']['is_blocking'] ?? false ?
+            '~~  ' . $title
+            : $title
+        );
+
         return $title;
     }
 

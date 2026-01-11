@@ -359,7 +359,8 @@ class DistributionLogic
                     'task' => [
                         'title' => $title,
                         'project_name' => 'Blocking Dates',
-                        'project_alias' => '---'
+                        'project_alias' => '',
+                        'is_blocking' => true
                     ],
                     'start' => $start,
                     'end' => $end,
