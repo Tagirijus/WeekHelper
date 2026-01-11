@@ -200,4 +200,44 @@ class CalDAVConverter
         $title = $event['title'] . ' (' . $event['calendar'] . ')';
         return $day . ' ' . $start . '-' . $end . ' ' . $title;
     }
+
+    /**
+     * Generate a string for the config for the blocking
+     * tasks for the given week.
+     *
+     * @param  string $week
+     * @return string
+     */
+    public function generateBlockingStringForWeek($week = 'active')
+    {
+        $events = $week == 'active' ? $this->getEventsActive() : $this->getEventsPlanned();
+        $out = '';
+        foreach ($events as $event) {
+            $out .= self::eventToTimeSpanString($event);
+            $out .= "\n";
+        }
+        return $out;
+    }
+
+    /**
+     * Generate a string for the config for the blocking
+     * tasks for the active week.
+     *
+     * @return string
+     */
+    public function generateBlockingStringForActiveWeek()
+    {
+        return $this->generateBlockingStringForWeek('active');
+    }
+
+    /**
+     * Generate a string for the config for the blocking
+     * tasks for the planned week.
+     *
+     * @return string
+     */
+    public function generateBlockingStringForPlannedWeek()
+    {
+        return $this->generateBlockingStringForWeek('planned');
+    }
 }

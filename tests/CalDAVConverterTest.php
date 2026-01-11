@@ -103,4 +103,31 @@ final class CalDAVConverterTest extends TestCase
             'CalDAVConverter->distributeEvents() did not distribute the events correctly.'
         );
     }
+
+    public function testConfigStringGeneration()
+    {
+        // basically create an "empty" CalDAV fetcher and converter;
+        // for testing purposes only. If nor $urls stinrg is given,
+        // now server CalDAV fetching will be done.
+        $caldav_converter = new CalDAVConverter(new CalDAVFetcher('', ''));
+        $caldav_converter->distributeEvents(
+            CalDAVFetcherTest::$caldav_events,
+            '2026-01-10'
+        );
+
+        $expected_active = 'thu 0:00-23:59 active thu (calendar_name)' . "\n";
+        $expected_active .= 'fri 10:00-11:00 active fri (calendar_name)' . "\n";
+        $this->assertSame(
+            $expected_active,
+            $caldav_converter->generateBlockingStringForActiveWeek(),
+            'CalDAVConverter did not convert blocking config string for active week correctly.'
+        );
+
+        $expected_planned = 'thu 0:00-23:59 planned thu (calendar_name)' . "\n";
+        $this->assertSame(
+            $expected_planned,
+            $caldav_converter->generateBlockingStringForPlannedWeek(),
+            'CalDAVConverter did not convert blocking config string for active week correctly.'
+        );
+    }
 }
