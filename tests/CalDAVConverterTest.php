@@ -3,32 +3,24 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Helper/CalDAVConverter.php';
-require_once __DIR__ . '/../Helper/CalDAVFetcher.php';
 require_once __DIR__ . '/../tests/CalDAVFetcherTest.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\CalDAVConverter;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
 use Kanboard\Plugin\WeekHelper\tests\CalDAVFetcherTest;
 
 
 final class CalDAVConverterTest extends TestCase
 {
-    public function testInitCalDAVConverter()
+    public function testParseCalendarUrls()
     {
-        $caldav_fetcher = new CalDAVFetcher('', '');
-        $caldav_converter = new CalDAVConverter(
-            $caldav_fetcher,
-            "urls/calendar1\nurls/calendar2\nurls/calendar3"
-        );
-
         $this->assertSame(
             [
                 'urls/calendar1',
                 'urls/calendar2',
                 'urls/calendar3'
             ],
-            $caldav_converter->calendar_urls,
+            CalDAVConverter::parseUrls("urls/calendar1\nurls/calendar2\nurls/calendar3"),
             'CalDAVConverter did not fetch calendar URLS correctly.'
         );
     }
@@ -55,6 +47,21 @@ final class CalDAVConverterTest extends TestCase
             'thu 0:00-23:59 active thu (calendar_name)',
             $converted,
             'CalDAVConverter event was not translated correctly into a string.'
+        );
+    }
+
+    public function testGetUtcRangeFor2Weeks()
+    {
+        [$start, $end] = CalDAVConverter::getRangeFor2Weeks('2026-01-11');
+        $this->assertSame(
+            '2026-01-05 00:00:00',
+            $start->format('Y-m-d H:i:s'),
+            'CalDAVConverter::getUtcRangeFor2Weeks did not create the correct starting datetime.'
+        );
+        $this->assertSame(
+            '2026-01-18 23:59:59',
+            $end->format('Y-m-d H:i:s'),
+            'CalDAVConverter::getUtcRangeFor2Weeks did not create the correct ending datetime.'
         );
     }
 }
