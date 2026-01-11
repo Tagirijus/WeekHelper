@@ -73,6 +73,8 @@ class CalDAVFetcher
             foreach (self::parseICalEvents($ical) as $evt) {
                 $evt['source'] = $calendar_url;
                 $evt['calendar'] = basename($calendar_url);
+                $evt['start']->setTimezone(new \DateTimezone(date_default_timezone_get()));
+                $evt['end']->setTimezone(new \DateTimezone(date_default_timezone_get()));
                 $events[] = $evt;
             }
         }
@@ -95,7 +97,9 @@ class CalDAVFetcher
         <C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:">
           <D:prop>
             <D:getetag/>
-            <C:calendar-data/>
+            <C:calendar-data>
+              <C:expand start="$startUtc" end="$endUtc"/>
+            </C:calendar-data>
           </D:prop>
           <C:filter>
             <C:comp-filter name="VCALENDAR">
