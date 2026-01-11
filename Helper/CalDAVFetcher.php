@@ -88,20 +88,24 @@ class CalDAVFetcher
      * @return string
      */
     protected static function buildCalendarQueryXml(string $startUtc, string $endUtc) {
-        return '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
-            . '<c:calendar-query xmlns:c="urn:ietf:params:xml:ns:caldav" xmlns:d="DAV:">' . "\n"
-            . '  <d:prop>' . "\n"
-            . '    <d:getetag/>' . "\n"
-            . '    <c:calendar-data/>' . "\n"
-            . '  </d:prop>' . "\n"
-            . '  <c:filter>' . "\n"
-            . '    <c:comp-filter name="VCALENDAR">' . "\n"
-            . '      <c:comp-filter name="VEVENT">' . "\n"
-            . '        <c:time-range start="' . htmlspecialchars($startUtc) . '" end="' . htmlspecialchars($endUtc) . '"/>' . "\n"
-            . '      </c:comp-filter>' . "\n"
-            . '    </c:comp-filter>' . "\n"
-            . '  </c:filter>' . "\n"
-            . '</c:calendar-query>';
+        $startUtc = htmlspecialchars($startUtc);
+        $endUtc = htmlspecialchars($endUtc);
+        return <<<XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <C:calendar-query xmlns:C="urn:ietf:params:xml:ns:caldav" xmlns:D="DAV:">
+          <D:prop>
+            <D:getetag/>
+            <C:calendar-data/>
+          </D:prop>
+          <C:filter>
+            <C:comp-filter name="VCALENDAR">
+              <C:comp-filter name="VEVENT">
+                <C:time-range start="$startUtc" end="$endUtc"/>
+              </C:comp-filter>
+            </C:comp-filter>
+          </C:filter>
+        </C:calendar-query>
+        XML;
     }
 
     /**
