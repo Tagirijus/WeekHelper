@@ -29,8 +29,7 @@ class UpdateBlockingTasks extends Command
         if ($success === true) {
             $output->writeln('Successfully updated blocking tasks from CalDAV!');
         } else {
-            $output->writeln('Fail. Message:');
-            $output->writeln($success);
+            $output->writeln('Fail. See debug.log for more info.');
         }
 
         return 0;

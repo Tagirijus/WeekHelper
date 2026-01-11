@@ -11,6 +11,7 @@ use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
+use Kanboard\Plugin\WeekHelper\Helper\CalDAVConverter;
 
 
 class AutomaticPlanner extends Base
@@ -720,27 +721,37 @@ class AutomaticPlanner extends Base
      *
      * Output is True on success or string message on fail.
      *
-     * @return boolean|string
+     * @return boolean
      */
     public function updateBlockingTasks()
     {
-        $caldav_fetcher = new CalDAVFetcher(
-            $this->configModel->get('weekhelper_caldav_user', ''),
-            $this->configModel->get('weekhelper_caldav_app_pwd', '')
-        );
+        try {
+            $caldav_fetcher = new CalDAVFetcher(
+                $this->configModel->get('weekhelper_caldav_user', ''),
+                $this->configModel->get('weekhelper_caldav_app_pwd', '')
+            );
+            $urls = trim($this->configModel->get('weekhelper_calendar_urls', ''));
 
-        $url = trim($this->configModel->get('weekhelper_calendar_urls', ''));
+            $caldav_converter = new CalDAVConverter($caldav_fetcher, $urls);
 
-        // TODO / WEITER HIER
-        // Klasse, die CalDAVFetcher und die urls nutzen kann, um blocking timeslots zu erzeugen
-        // also den config string! - sowohl für aktive, wie auch kommende woche
+            $blocking_active = $caldav_converter->generateBlockingStringForActiveWeek();
+            $blocking_planned = $caldav_converter->generateBlockingStringForPlannedWeek();
 
-        print_r("\n\n");
-        print_r(
-            $caldav_fetcher->fetchEvents($url, '20260105T000000Z', '20260110T000000Z')
-        );
-        print_r("\n\n\n");
+            $values = [
+                'weekhelper_block_active_week' => $blocking_active,
+                'weekhelper_block_planned_week' => $blocking_planned,
+            ];
 
-        return 'updateBlockingTasks() ... wip / to implement ...';
+            if ($this->configModel->save($values)) {
+                return true;
+            } else {
+                $this->logger->info(json_encode('WeekHelper blocking config could not be saved.'));
+                return false;
+            }
+        } catch (\Exception $e) {
+            $this->logger->info(json_encode($e));
+            return false;
+        }
+
     }
 }
