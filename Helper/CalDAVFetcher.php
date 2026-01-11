@@ -310,7 +310,7 @@ class CalDAVFetcher
         $val = trim($val);
         // DATE (YYYYMMDD) -> treat as all-day: make start at 00:00 and end exclusive could be handled by caller
         if (preg_match('/^\d{8}$/', $val)) {
-            $dt = \DateTime::createFromFormat('Ymd', $val, new \DateTimeZone('UTC'));
+            $dt = \DateTime::createFromFormat('Ymd', $val, new \DateTimeZone(date_default_timezone_get()));
             if ($dt) {
                 $dt->setTime(0, 0, 0, 0);
                 return $dt; #->format('Y-m-d\\T00:00:00\\Z');
@@ -318,10 +318,10 @@ class CalDAVFetcher
         }
         // If value ends with Z -> UTC
         if (substr($val, -1) === 'Z') {
-            $dt = \DateTime::createFromFormat('Ymd\THis\Z', $val, new \DateTimeZone('UTC'));
+            $dt = \DateTime::createFromFormat('Ymd\THis\Z', $val, new \DateTimeZone(date_default_timezone_get()));
             if ($dt) return $dt; #->format('Y-m-d\\TH:i:s\\Z');
             // fallback generic parse
-            $dt = new \DateTime($val, new \DateTimeZone('UTC'));
+            $dt = new \DateTime($val, new \DateTimeZone(date_default_timezone_get()));
             return $dt; #->format('Y-m-d\\TH:i:s\\Z');
         }
         // If TZID param present, try to use it
@@ -329,7 +329,7 @@ class CalDAVFetcher
             try {
                 $tz = new \DateTimeZone($params['TZID']);
             } catch (\Exception $e) {
-                $tz = new \DateTimeZone('UTC');
+                $tz = new \DateTimeZone(date_default_timezone_get());
             }
             // try formats
             $dt = \DateTime::createFromFormat('Ymd\THis', $val, $tz) ?: \DateTime::createFromFormat('Ymd\THis', $val);
@@ -341,7 +341,7 @@ class CalDAVFetcher
         // No TZ info: assume local naive time; parse and convert to UTC (assume server default TZ)
         $dt = \DateTime::createFromFormat('Ymd\THis', $val) ?: @new \DateTime($val);
         if ($dt) {
-            $dt->setTimezone(new \DateTimeZone('UTC'));
+            $dt->setTimezone(new \DateTimeZone(date_default_timezone_get()));
             return $dt; #->format('Y-m-d\\TH:i:s\\Z');
         }
         // fallback: return raw

@@ -155,11 +155,11 @@ END:VCALENDAR'
             [
                 'start' => new \DateTime(
                     '2026-01-09T10:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'end' => new \DateTime(
                     '2026-01-09T11:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'title' => 'active fri',
                 'uid' => 'e93d7f35-d34a-43ad-a8de-6c0b24da4840',
@@ -169,11 +169,11 @@ END:VCALENDAR'
             [
                 'start' => new \DateTime(
                     '2026-01-08T00:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'end' => new \DateTime(
                     '2026-01-09T00:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'title' => 'active thu',
                 'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0008',
@@ -183,11 +183,11 @@ END:VCALENDAR'
             [
                 'start' => new \DateTime(
                     '2026-01-15T00:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'end' => new \DateTime(
                     '2026-01-16T00:00:00',
-                    new \DateTimeZone('Europe/Berlin')
+                    new \DateTimeZone(date_default_timezone_get())
                 ),
                 'title' => 'planned thu',
                 'uid' => '5d9a838e-eabf-4d90-8b2b-4401e5ba0009',
