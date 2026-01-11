@@ -64,4 +64,14 @@ final class CalDAVConverterTest extends TestCase
             'CalDAVConverter::getUtcRangeFor2Weeks did not create the correct ending datetime.'
         );
     }
+
+    public function testGetEndOfWeekForDatetime()
+    {
+        $end = CalDAVConverter::getEndOfWeekForDatetime('2026-01-11');
+        $this->assertSame(
+            '2026-01-11 23:59:59',
+            $end->format('Y-m-d H:i:s'),
+            'CalDAVConverter::getEndOfWeekForDatetime did not create the correct ending datetime.'
+        );
+    }
 }

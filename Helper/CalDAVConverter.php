@@ -114,6 +114,22 @@ class CalDAVConverter
     }
 
     /**
+     * Get the end of week for the given DateTime string as a new
+     * DateTime instance.
+     *
+     * @param  string $datetime
+     * @return DateTime
+     */
+    public static function getEndOfWeekForDatetime($now_dt_string = 'now')
+    {
+        // two weeks range first; only to get the start
+        [$start, $end] = self::getRangeFor2Weeks($now_dt_string);
+
+        // End of THIS week now: ONE week from start minus one second
+        return (clone $start)->modify('+7 days')->modify('-1 second');
+    }
+
+    /**
      * Distribute the given CalDAV events into active and planned
      * internal arrays.
      *
