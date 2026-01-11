@@ -79,7 +79,8 @@ final class CalDAVConverterTest extends TestCase
     public function testDistribution()
     {
         // basically create an "empty" CalDAV fetcher and converter;
-        // for testing purposes only
+        // for testing purposes only. If nor $urls stinrg is given,
+        // now server CalDAV fetching will be done.
         $caldav_converter = new CalDAVConverter(new CalDAVFetcher('', ''));
         $caldav_converter->distributeEvents(
             CalDAVFetcherTest::$caldav_events,
