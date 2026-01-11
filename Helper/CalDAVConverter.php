@@ -146,6 +146,26 @@ class CalDAVConverter
     }
 
     /**
+     * Return the events for the active week.
+     *
+     * @return array
+     */
+    public function getEventsActive()
+    {
+        return $this->events_active;
+    }
+
+    /**
+     * Return the events for the planned week.
+     *
+     * @return array
+     */
+    public function getEventsPlanned()
+    {
+        return $this->events_planned;
+    }
+
+    /**
      * Convert the given internal event and return a valid
      * timespan string for it, which can be used in the
      * blocking config of the WeekHelper automatic planner
