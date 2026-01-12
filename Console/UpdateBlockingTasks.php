@@ -24,12 +24,9 @@ class UpdateBlockingTasks extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $output->writeln('WeekHelper will update blocking tasks from calendar ...');
         $success = $this->automaticPlanner->updateBlockingTasks();
-        if ($success === true) {
-            $output->writeln('Successfully updated blocking tasks from CalDAV!');
-        } else {
-            $output->writeln('Fail. See debug.log for more info.');
+        if ($success === false) {
+            $output->writeln(date('Y-m-d H:i:s') . ': Fail. See debug.log for more info.');
         }
 
         return 0;
