@@ -96,4 +96,5 @@ return array(
     'Here you can set up the config for getting blocking timeslots / tasks from a CalDAV calendar. User and app-password are needed (at the moment only for one user, sorry!). In the calendar-urls textarea you can have multiple calendar urls in each line, using the credentials with the user and app-password.' => 'Hier kann man die Konfiguration festlegen, um "blocking Timeslots / Tasks" aus einem CalDAV Kalendaer zu bekommen. User und App-Passwort werden benötigt (momentan nur für einen einzelnen User, sorry!). In dem Textfeld für Kalender-URLS kann man pro Zeile einen Kalender angeben, der die Zugangsdaten des angegebenen Users und des App-Passworts nutzen wird.',
     'Calendar URLs' => 'Kalender URLS',
     'Blocking tasks update successful' => 'Blocking Tasks Update erfolgreich',
+    'Move the task in a specific swimland and a specific column to another column if on Monday.' => 'Verschiebe den Task in einer gewissen Swimlane von einer in eine andere Spalte, sobald Montag ist.',
 );

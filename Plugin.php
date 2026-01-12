@@ -6,6 +6,7 @@ use Kanboard\Core\Plugin\Base;
 use Kanboard\Core\Translator;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeekOnCreate;
+use Kanboard\Plugin\WeekHelper\Action\TaskMoveFromColumnToColumnOnMonday;
 use Kanboard\Plugin\WeekHelper\Model;
 use Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner;
 use Kanboard\Plugin\WeekHelper\Console\UpdateBlockingTasks;
@@ -27,6 +28,7 @@ class Plugin extends Base
         // Automatic Action
         $this->actionManager->register(new TaskAutoAddWeek($this->container));
         $this->actionManager->register(new TaskAutoAddWeekOnCreate($this->container));
+        $this->actionManager->register(new TaskMoveFromColumnToColumnOnMonday($this->container));
 
         // Helper
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
