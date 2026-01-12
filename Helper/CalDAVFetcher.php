@@ -318,10 +318,10 @@ class CalDAVFetcher
         }
         // If value ends with Z -> UTC
         if (substr($val, -1) === 'Z') {
-            $dt = \DateTime::createFromFormat('Ymd\THis\Z', $val, new \DateTimeZone(date_default_timezone_get()));
+            $dt = \DateTime::createFromFormat('Ymd\THis\Z', $val, new \DateTimeZone('UTC'));
             if ($dt) return $dt; #->format('Y-m-d\\TH:i:s\\Z');
             // fallback generic parse
-            $dt = new \DateTime($val, new \DateTimeZone(date_default_timezone_get()));
+            $dt = new \DateTime($val, new \DateTimeZone('UTC'));
             return $dt; #->format('Y-m-d\\TH:i:s\\Z');
         }
         // If TZID param present, try to use it
