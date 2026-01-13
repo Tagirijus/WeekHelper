@@ -231,14 +231,25 @@ class TimetaggerEvent
     {
         $data = json_decode($json, true);
 
-        $instance = new static();
+        return self::fromArray($data);
+    }
 
+    /**
+     * Create / instantiate a class with the given array.
+     *
+     * @param  array $data
+     * @return static
+     */
+    public static function fromArray($data = [])
+    {
         // either a full JSON with the key "records" is given,
         // then use the first item of it, if it exists; otherwise
         // it shall be an empty array as a fallback
         if (array_key_exists('records', $data)) {
             $data = $data['records'][0] ?? [];
         }
+
+        $instance = new static();
 
         // now suppose that the given / chosen array is a Timetagger
         // array with the needed keys
