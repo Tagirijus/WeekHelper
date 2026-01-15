@@ -181,4 +181,37 @@ final class TimetaggerEventTest extends TestCase
             'Parsing of TimetaggerEvent from JSON did not work as intended.'
         );
     }
+
+    public function testLengthGetter()
+    {
+        $data = [
+            'key' => 'ZXUpDgHD',
+            'mt' => 1768320606,
+            't1' => 1768320605,
+            't2' => 1768320605,
+            'ds' => '#tagi #kanboard-todo  #code',
+            'st' => 1768320607.813087
+        ];
+        $te = TimetaggerEvent::fromarray($data);
+        $this->assertSame(
+            time() - 1768320605,
+            $te->getLength(),
+            'TimetaggerEvent->getLength() not as expected.'
+        );
+
+        $data = [
+            'key' => 'ZXUpDgHB',
+            'mt' => 1768320606,
+            't1' => 1768320605,
+            't2' => 1768321605,
+            'ds' => '#tagi #kanboard-todo  #code',
+            'st' => 1768321607.813087
+        ];
+        $te = TimetaggerEvent::fromarray($data);
+        $this->assertSame(
+            1000,
+            $te->getLength(),
+            'TimetaggerEvent->getLength() not as expected.'
+        );
+    }
 }

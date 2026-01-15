@@ -263,4 +263,21 @@ class TimetaggerEvent
 
         return $instance;
     }
+
+    /**
+     * Get the length of the event in seconds. It basically
+     * substracts the start time from the end time, if the task
+     * is not running. Otherwise it will use "now" (time()) as
+     * the end time instead ot output the "live length".
+     *
+     * @return integer
+     */
+    public function getLength()
+    {
+        if ($this->isRunning()) {
+            return time() - $this->start;
+        } else {
+            return $this->end - $this->start;
+        }
+    }
 }
