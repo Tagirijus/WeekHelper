@@ -55,6 +55,16 @@ class TimetaggerEvent
     var $tags = [];
 
     /**
+     * The already distributed time of that TimetaggerEvent.
+     * It's something coming from my plugin with which I
+     * will be able to "distirbute" tracked times as spent times
+     * over the tasks.
+     *
+     * @var integer
+     **/
+    var $distributed = 0;
+
+    /**
      * Set the key string.
      *
      * @param string $key
@@ -279,5 +289,28 @@ class TimetaggerEvent
         } else {
             return $this->end - $this->start;
         }
+    }
+
+    /**
+     * "Distribute" the given amount of seconds.
+     * Will change the internal returning of
+     * getAvailable.
+     *
+     * @param  integer $seconds
+     */
+    public function distribute($seconds)
+    {
+        $this->distributed += $seconds;
+    }
+
+    /**
+     * Return the available "length" of the event.
+     * Internally it's the length - distrubted seconds.
+     *
+     * @return integer
+     */
+    public function getAvailable()
+    {
+        return $this->getLength() - $this->distributed;
     }
 }

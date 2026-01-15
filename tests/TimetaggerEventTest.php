@@ -214,4 +214,38 @@ final class TimetaggerEventTest extends TestCase
             'TimetaggerEvent->getLength() not as expected.'
         );
     }
+
+    public function testDistribution()
+    {
+        $data = [
+            'key' => 'ZXUpDgHD',
+            'mt' => 0,
+            't1' => 0,
+            't2' => 3600,
+            'ds' => '#doesntmatter',
+            'st' => 0.0
+        ];
+        $te = TimetaggerEvent::fromarray($data);
+        $this->assertSame(
+            3600,
+            $te->getLength(),
+            'Distribution logic in TimetaggerEvent doesn ot work as intended.'
+        );
+        $this->assertSame(
+            3600,
+            $te->getAvailable(),
+            'Distribution logic in TimetaggerEvent doesn ot work as intended.'
+        );
+        $te->distribute(1000);
+        $this->assertSame(
+            3600,
+            $te->getLength(),
+            'Distribution logic in TimetaggerEvent doesn ot work as intended.'
+        );
+        $this->assertSame(
+            2600,
+            $te->getAvailable(),
+            'Distribution logic in TimetaggerEvent doesn ot work as intended.'
+        );
+    }
 }
