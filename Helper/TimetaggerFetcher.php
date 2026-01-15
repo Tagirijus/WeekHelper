@@ -26,9 +26,9 @@ class TimetaggerFetcher
      * the API call, if such thing might be needed
      * for further security reasons or so.
      *
-     * @var array
+     * @var string
      **/
-    var $cookies = [];
+    var $cookies = '';
 
     /**
      * The internal TimetaggerEvent instances.
@@ -43,9 +43,9 @@ class TimetaggerFetcher
      *
      * @param string $url
      * @param string $authtoken
-     * @param array  $cookies
+     * @param string  $cookies
      */
-    public function __construct($url = '', $authtoken = '', $cookies = [])
+    public function __construct($url = '', $authtoken = '', $cookies = '')
     {
         $this->url = $url;
         $this->authtoken = $authtoken;
@@ -97,7 +97,7 @@ class TimetaggerFetcher
      *
      * @param  integer $start  Starting timestamp.
      * @param  null|integer $end    Ending timestamp. If null it's "now".
-     * @param  array $tags     Array of tags.
+     * @param  null|string $tags     Tags query string; comma separated tag strings.
      * @param  null|boolean $running If given it cna be true or false
      *         to either show only running or only stopped tasks.
      */
@@ -113,8 +113,8 @@ class TimetaggerFetcher
             $end = time();
         }
         $query['timerange'] = $start . '-' . $end;
-        if (is_array($tags)) {
-            $query['tag'] = implode(',', $tags);
+        if (!is_null($tags)) {
+            $query['tag'] = $tags;
         }
         if (!is_null($running)) {
             if ($running) {
@@ -157,12 +157,7 @@ class TimetaggerFetcher
         ];
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         if (!empty($this->cookies)) {
-            $cookieHeader = implode('; ', array_map(
-                fn($k,$v) => rawurlencode($k) . '=' . rawurlencode($v),
-                array_keys($this->cookies),
-                $this->cookies
-            ));
-            curl_setopt($ch, CURLOPT_COOKIE, $cookieHeader);
+            curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
         }
 
         $response = curl_exec($ch);
