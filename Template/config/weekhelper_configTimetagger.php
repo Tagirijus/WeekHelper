@@ -42,14 +42,23 @@
     <div class="task-form-container">
 
         <div class="task-form-main-column">
-            <?= $this->form->label(t('Timetagger can overwrite spent times for "active week" tasks'), 'timetagger_overwrites_active_spent') ?>
-            <?= $this->form->checkbox('timetagger_overwrites_active_spent', t('enabled'), 1, $timetagger_overwrites_active_spent) ?>
+            <?= $this->form->label(t('Timetagger can overwrite spent times for tasks in these levels'), 'timetagger_overwrites_levels_spent') ?>
+            <?= $this->form->text('timetagger_overwrites_levels_spent', ['timetagger_overwrites_levels_spent' => $timetagger_overwrites_levels_spent], [], [
+                'placeholder="e.g. \'level_1,level_3\'"'
+            ]) ?>
         </div>
 
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Timetagger start for timerange'), 'timetagger_start_fetch') ?>
+            <?= $this->form->text('timetagger_start_fetch', ['timetagger_start_fetch' => $timetagger_start_fetch], [], [
+                'placeholder="e.g. \'monday this week\'"'
+            ]) ?>
+        </div>
+        <p class="task-form-main-column weekhelper-config-weak-text">
+            <?= t('This is a string which will be used in the strtotime() PHP method, which can describe with words a time point.') ?>
+        </p>
+
     </div>
-    <p class="task-form-main-column weekhelper-config-weak-text">
-        <?= t('If enabled and if the task key "timetagger_tags" exist, internally the spent times for the tasks will be used from the actual Timetagger time tracking.') ?>
-    </p>
 
 
     <div class="task-form-bottom">

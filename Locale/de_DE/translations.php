@@ -98,7 +98,8 @@ return array(
     'Blocking tasks update successful' => 'Blocking Tasks Update erfolgreich',
     'Move the task in a specific swimland and a specific column to another column if on Monday.' => 'Verschiebe den Task in einer gewissen Swimlane von einer in eine andere Spalte, sobald Montag ist.',
     'WeekHelper Timetagger configuration' => 'WeekHelper Timetagger Konfiguration',
-    'Timetagger can overwrite spent times for "active week" tasks' => 'Timetagger kann "Spent Times" für die "aktive Woche" überschreiben',
-    'If enabled and if the task key "timetagger_tags" exist, internally the spent times for the tasks will be used from the actual Timetagger time tracking.' => 'Wenn aktiviert und der Task Key "timetagger_tags" existiert, werden intern die "Spent Times" für einen Task vom aktuellen Timetagger Time Tracking genutzt.',
-    'Optional cookies can be set as a single HEADER string here, in case further security cookies or so has to be set.' => 'Optionale Cookies können hier als HEADER string gesetzt werden, falls weitere Sicherheits-Cookies gesetzt werden müssen.'
+    'Timetagger can overwrite spent times for tasks in these levels' => 'Timetagger kann "Spent Times" für Tasks in diesen Leveln überschreiben',
+    'Optional cookies can be set as a single HEADER string here, in case further security cookies or so has to be set.' => 'Optionale Cookies können hier als HEADER string gesetzt werden, falls weitere Sicherheits-Cookies gesetzt werden müssen.',
+    'Timetagger start for timerange' => 'Timetagger Start-Punkt für Timerange',
+    'This is a string which will be used in the strtotime() PHP method, which can describe with words a time point.' => 'Das muss ein String sein, der in der PHP Funktion strtotime() genutzt wird und mit Wörtern einen Zeitpunkt definineren kann.',
 );
