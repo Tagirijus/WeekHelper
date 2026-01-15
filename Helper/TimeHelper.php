@@ -19,6 +19,17 @@ class TimeHelper
     }
 
     /**
+     * Convert the given seconds to hours float.
+     *
+     * @param  float $seconds
+     * @return integer
+     */
+    public static function secondsToHours($seconds)
+    {
+        return (float) $seconds / 3600;
+    }
+
+    /**
      * Convert the given readbale time string into full minutes.
      *
      * @param  string $readable

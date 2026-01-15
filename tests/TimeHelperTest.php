@@ -102,4 +102,13 @@ final class TimeHelperTest extends TestCase
             'TimeHelper could not convert minutes to proper readable.'
         );
     }
+
+    public function testSecondsToHours()
+    {
+        $this->assertSame(
+            1.25,
+            TimeHelper::secondsToHours(4500),
+            'TimeHelper could not convert seconds to hours.'
+        );
+    }
 }
