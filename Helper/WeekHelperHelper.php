@@ -104,6 +104,12 @@ class WeekHelperHelper extends Base
             'caldav_user' =>  $this->configModel->get('weekhelper_caldav_user', ''),
             'caldav_app_pwd' =>  $this->configModel->get('weekhelper_caldav_app_pwd', ''),
             'calendar_urls' =>  $this->configModel->get('weekhelper_calendar_urls', ''),
+
+            // Timetagger API
+            'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
+            'timetagger_authtoken' =>  $this->configModel->get('timetagger_authtoken', ''),
+            'timetagger_cookies' =>  $this->configModel->get('timetagger_cookies', ''),
+            'timetagger_overwrites_spent' => $this->configModel->get('timetagger_overwrites_spent', 0),
         ];
     }
 

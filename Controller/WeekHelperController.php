@@ -64,6 +64,20 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
+     * Show one of the settings pages of the WeekHelper plugin.
+     *
+     * @return HTML response
+     */
+    public function showConfigTimetagger()
+    {
+        // !!!!!
+        // When I want to add new config options, I also have to add them
+        // in the WeekHelperHelper.php in the getConfig() Method !
+        // !!!!!
+        $this->response->html($this->helper->layout->config('WeekHelper:config/weekhelper_configTimetagger', $this->helper->weekHelperHelper->getConfig()));
+    }
+
+    /**
      * Show one of the levels as a new page, instead of just a tooltip
      * like on the dashboard hovers.
      *
@@ -233,6 +247,31 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         }
 
         return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigAutomaticPlanner', ['plugin' => 'WeekHelper']), true);
+    }
+
+    /**
+     * Save the setting for WeekHelper Timetagger API.
+     */
+    public function saveConfigTimetagger()
+    {
+        $form = $this->request->getValues();
+
+        $values = [
+            'timetagger_url' => $form['timetagger_url'],
+            'timetagger_authtoken' => $form['timetagger_authtoken'],
+            'timetagger_cookies' => $form['timetagger_cookies'],
+            'timetagger_overwrites_spent' => isset($form['timetagger_overwrites_spent']) ? 1 : 0,
+        ];
+
+        $this->languageModel->loadCurrentLanguage();
+
+        if ($this->configModel->save($values)) {
+            $this->flash->success(t('Settings saved successfully.'));
+        } else {
+            $this->flash->failure(t('Unable to save your settings.'));
+        }
+
+        return $this->response->redirect($this->helper->url->to('WeekHelperController', 'showConfigTimetagger', ['plugin' => 'WeekHelper']), true);
     }
 
     /**
