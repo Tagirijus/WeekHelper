@@ -90,4 +90,59 @@ class TimetaggerFetcher
 
         return $events;
     }
+
+    /**
+     * Build the query string for the Timetagger API and
+     * with the given data.
+     *
+     * @param  integer $start  Starting timestamp.
+     * @param  null|integer $end    Ending timestamp. If null it's "now".
+     * @param  array $tags     Array of tags.
+     * @param  null|boolean $running If given it cna be true or false
+     *         to either show only running or only stopped tasks.
+     */
+    public static function queryBuilder(
+        $start,
+        $end = null,
+        $tags = null,
+        $running = null
+    )
+    {
+        $query = [];
+        if (is_null($end)) {
+            $end = time();
+        }
+        $query['timerange'] = $start . '-' . $end;
+        if (is_array($tags)) {
+            $query['tag'] = implode(',', $tags);
+        }
+        if (!is_null($running)) {
+            if ($running) {
+                $query['running'] = '1';
+            } else {
+                $query['running'] = '0';
+            }
+        }
+        return http_build_query($query);
+    }
+
+    /**
+     * Fetch Timetagger events from the Timetagger API, get
+     * the JSON string and convert it internall to events.
+     *
+     * @param  integer $start  Starting timestamp.
+     * @param  null|integer $end    Ending timestamp. If null it's "now".
+     * @param  array $tags     Array of tags.
+     * @param  null|boolean $running If given it cna be true or false
+     *         to either show only running or only stopped tasks.
+     */
+    public function fetchEvents(
+        $start,
+        $end = null,
+        $tags = null,
+        $running = null
+    )
+    {
+        $query_str = self::queryBuilder($start, $end, $tags, $running);
+    }
 }

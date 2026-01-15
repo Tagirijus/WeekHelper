@@ -59,4 +59,23 @@ final class TimetaggerFetcherTest extends TestCase
             'Parsing of TimetaggerFetcher from JSON did not work as intended.'
         );
     }
+
+    public function testQueryBuilder()
+    {
+        $this->assertSame(
+            'timerange=5000-6000&tag=abc%2Cdef%2Cghi&running=1',
+            TimetaggerFetcher::queryBuilder(5000, 6000, ['abc', 'def', 'ghi'], true),
+            'TimetaggerFetcher::queryBuilder() did not work as intended.'
+        );
+        $this->assertSame(
+            'timerange=5000-6000&tag=abc%2Cdef%2Cghi&running=0',
+            TimetaggerFetcher::queryBuilder(5000, 6000, ['abc', 'def', 'ghi'], false),
+            'TimetaggerFetcher::queryBuilder() did not work as intended.'
+        );
+        $this->assertSame(
+            'timerange=5000-'.time(),
+            TimetaggerFetcher::queryBuilder(5000),
+            'TimetaggerFetcher::queryBuilder() did not work as intended.'
+        );
+    }
 }
