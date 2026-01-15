@@ -42,8 +42,8 @@
     <div class="task-form-container">
 
         <div class="task-form-main-column">
-            <?= $this->form->label(t('Timetagger can overwrite spent times'), 'timetagger_overwrites_spent') ?>
-            <?= $this->form->checkbox('timetagger_overwrites_spent', t('enabled'), 1, $timetagger_overwrites_spent) ?>
+            <?= $this->form->label(t('Timetagger can overwrite spent times for "active week" tasks'), 'timetagger_overwrites_active_spent') ?>
+            <?= $this->form->checkbox('timetagger_overwrites_active_spent', t('enabled'), 1, $timetagger_overwrites_active_spent) ?>
         </div>
 
     </div>
