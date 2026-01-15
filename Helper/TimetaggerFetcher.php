@@ -130,11 +130,14 @@ class TimetaggerFetcher
      * Fetch Timetagger events from the Timetagger API, get
      * the JSON string and convert it internall to events.
      *
+     * Returns true on success or a string on fail.
+     *
      * @param  integer $start  Starting timestamp.
      * @param  null|integer $end    Ending timestamp. If null it's "now".
      * @param  array $tags     Array of tags.
      * @param  null|boolean $running If given it cna be true or false
      *         to either show only running or only stopped tasks.
+     * @return boolean|string
      */
     public function fetchEvents(
         $start,
@@ -144,5 +147,31 @@ class TimetaggerFetcher
     )
     {
         $query_str = self::queryBuilder($start, $end, $tags, $running);
+        $url = $this->url . '?' . $query_str;
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $headers = [
+            "authtoken: {$this->authtoken}",
+        ];
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        if (!empty($this->cookies)) {
+            $cookieHeader = implode('; ', array_map(
+                fn($k,$v) => rawurlencode($k) . '=' . rawurlencode($v),
+                array_keys($this->cookies),
+                $this->cookies
+            ));
+            curl_setopt($ch, CURLOPT_COOKIE, $cookieHeader);
+        }
+
+        $response = curl_exec($ch);
+        if ($response === false) {
+            return curl_error($ch);
+        }
+
+        $this->events = $this->eventsFromJSONString($response);
+
+        return true;
     }
 }
