@@ -111,4 +111,13 @@ final class TimeHelperTest extends TestCase
             'TimeHelper could not convert seconds to hours.'
         );
     }
+
+    public function testHoursToSeconds()
+    {
+        $this->assertSame(
+            6300,
+            TimeHelper::hoursToSeconds(1.75),
+            'TimeHelper could not convert hours to seconds.'
+        );
+    }
 }

@@ -22,11 +22,22 @@ class TimeHelper
      * Convert the given seconds to hours float.
      *
      * @param  float $seconds
-     * @return integer
+     * @return float
      */
     public static function secondsToHours($seconds)
     {
         return (float) $seconds / 3600;
+    }
+
+    /**
+     * Convert the given hours to seconds.
+     *
+     * @param  float $hours
+     * @return integer
+     */
+    public static function hoursToSeconds($hours)
+    {
+        return (integer) ($hours * 3600);
     }
 
     /**
