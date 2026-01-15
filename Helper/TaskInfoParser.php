@@ -43,6 +43,12 @@ class TaskInfoParser
             // maybe there are tasks, which should only be planned after
             // Tuesday or so.
             'plan_from' => '',
+
+            // A string representing the Timetagger tags, comma separated,
+            // which should represent this task, thus the internal Timetagger
+            // implementation / connection will be able to fill this tasks
+            // spent time.
+            'timetagger_tags' => '',
         ];
 
         self::parseData($data, $task['description']);
@@ -69,6 +75,9 @@ class TaskInfoParser
 
             } elseif (str_starts_with($line, 'plan_from=')) {
                 $data['plan_from'] = str_replace('plan_from=', '', $line);
+
+            } elseif (str_starts_with($line, 'timetagger_tags=')) {
+                $data['timetagger_tags'] = str_replace('timetagger_tags=', '', $line);
 
             }
         }

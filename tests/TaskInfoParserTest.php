@@ -89,4 +89,25 @@ final class TaskInfoParserTest extends TestCase
             'Task info was not parsed correctly.'
         );
     }
+
+    public function testTimetaggerValue()
+    {
+        $task = [
+            'description' => (
+                "any other descriptions text\nis here\nin multiline\n"
+                . "timetagger_tags=client,project,task\n"
+            )
+        ];
+
+        $this->assertFalse(
+            array_key_exists('timetagger_tags', $task),
+            '$task should not have the timetagger_tags key yet.'
+        );
+        TaskInfoParser::extendTask($task);
+        $this->assertSame(
+            'client,project,task',
+            $task['timetagger_tags'],
+            'Task info was not parsed correctly.'
+        );
+    }
 }
