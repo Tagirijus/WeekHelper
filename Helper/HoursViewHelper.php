@@ -99,6 +99,16 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get the TaskTimesPreparer tasks_per_level array.
+     *
+     * @return array
+     */
+    public function getTasksPerLevel()
+    {
+        return $this->task_times_preparer->getTasksPerLevel();
+    }
+
+    /**
      * Get the estimated and spent times in the columns for
      * the total (all) and the levels (level_1, level_2, ...).
      *
