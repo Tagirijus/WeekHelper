@@ -8,7 +8,6 @@ use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeek;
 use Kanboard\Plugin\WeekHelper\Action\TaskAutoAddWeekOnCreate;
 use Kanboard\Plugin\WeekHelper\Action\TaskMoveFromColumnToColumnOnMonday;
 use Kanboard\Plugin\WeekHelper\Model;
-use Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner;
 use Kanboard\Plugin\WeekHelper\Console\UpdateBlockingTasks;
 
 
@@ -33,7 +32,6 @@ class Plugin extends Base
         // Helper
         $this->helper->register('weekHelperHelper', '\Kanboard\Plugin\WeekHelper\Helper\WeekHelperHelper');
         $this->helper->register('hoursViewHelper', '\Kanboard\Plugin\WeekHelper\Helper\HoursViewHelper');
-        $this->helper->register('automaticPlanner', '\Kanboard\Plugin\WeekHelper\Helper\AutomaticPlanner');
 
         // CSS - Asset Hook
         $this->hook->on('template:layout:css', array('template' => 'plugins/WeekHelper/Assets/css/week-helper.min.css'));
@@ -178,9 +176,6 @@ class Plugin extends Base
         $this->route->addRoute('/weekhelper/updateblockingtasks', 'WeekHelperController', 'updateBlockingTasks', 'WeekHelper');
 
         // JSONRPC - Methods
-        $this->container['automaticPlanner'] = function ($c) {
-            return new AutomaticPlanner($c);
-        };
         $container = $this->container;
         $this->api->getProcedureHandler()->withCallback(
             'automaticPlanner.getAutomaticPlanAsText',
@@ -206,12 +201,21 @@ class Plugin extends Base
         );
 
         // CLI Commands
-        $this->cli->add(new UpdateBlockingTasks($this->helper->automaticPlanner));
+        $this->cli->add(new UpdateBlockingTasks($this->automaticPlanner));
     }
 
     public function onStartup()
     {
         Translator::load($this->languageModel->getCurrentLanguage(), __DIR__.'/Locale');
+    }
+
+    public function getClasses()
+    {
+        return [
+            'Plugin\WeekHelper\Service' => [
+                'AutomaticPlanner',
+            ],
+        ];
     }
 
     public function getPluginName()

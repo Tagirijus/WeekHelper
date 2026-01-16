@@ -371,11 +371,11 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     {
         $type = $this->request->getStringParam('type', 'text');
         if ($type == 'json') {
-            $automatic_plan = json_encode($this->helper->automaticPlanner->getAutomaticPlanAsArray(
+            $automatic_plan = json_encode($this->automaticPlanner->getAutomaticPlanAsArray(
                 $this->request->getStringParam('add_blocking', 0) == 1
             ));
         } else {
-            $automatic_plan = $this->helper->automaticPlanner->getAutomaticPlanAsText(
+            $automatic_plan = $this->automaticPlanner->getAutomaticPlanAsText(
                 [
                     'week_only' => $this->request->getStringParam('week_only', ''),
                     'days' => $this->request->getStringParam('days', 'mon,tue,wed,thu,fri,sat,sun,overflow,ovr'),
@@ -403,7 +403,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
      */
     public function updateBlockingTasks()
     {
-        $success = $this->helper->automaticPlanner->updateBlockingTasks();
+        $success = $this->automaticPlanner->updateBlockingTasks();
 
         $this->languageModel->loadCurrentLanguage();
 
