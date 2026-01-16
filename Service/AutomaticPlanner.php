@@ -6,8 +6,6 @@ use Kanboard\Core\Base;
 use Kanboard\Model\ProjectModel;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Model\ProjectInfoParser;
-use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
-use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
