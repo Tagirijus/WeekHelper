@@ -408,20 +408,15 @@ class AutomaticPlanner extends Base
         $blocking_config = ''
     )
     {
-        $sorted_tasks = SortingLogic::sortTasks(
-            $tasks,
-            $this->getSortingLogicConfig()
-        );
-
         $distributor = new DistributionLogic($this->getDistributionConfig());
         if (!$ignore_now) {
-            $distributor->updateWorkedTimesForTasksPlan($sorted_tasks);
+            $distributor->updateWorkedTimesForTasksPlan($tasks);
             $distributor->depleteUntilNow();
             $distributor->depleteByTimeSpansConfigUntilNow($blocking_config);
         } else {
             $distributor->depleteByTimeSpansConfig($blocking_config);
         }
-        $distributor->distributeTasks($sorted_tasks);
+        $distributor->distributeTasks($tasks);
         $tasks_plan = $distributor->getTasksPlan();
 
         return [$tasks_plan, $distributor->getBlockingPseudoTasks()];

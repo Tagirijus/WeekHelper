@@ -792,12 +792,6 @@ class TaskTimesPreparer
         }
         unset($task);
 
-        // TODO!
-        // $tasks = SortingLogic::sortTasks(
-        //     $tasks,
-        //     $this->getConfig('sorting_logic')
-        // );
-
         $levels_columns = [
             'level_1' => $this->getConfig('level_1_columns'),
             'level_2' => $this->getConfig('level_2_columns'),
@@ -856,6 +850,10 @@ class TaskTimesPreparer
             $this->addTimesForLevel($level_4, 'level_4', $levels_columns, $col_name, $swim_name, $task, $subtasks);
         }
         unset($task);
+
+        // update the tasks on the levels with correct sorting
+        // and TimetaggerTranscriber overwrite for the times_spent
+        $this->updateTasksPerLevel();
 
         return [
             'all' => $all,
@@ -988,5 +986,28 @@ class TaskTimesPreparer
             }
         }
         return false;
+    }
+
+    /**
+     * Update the internal tasks_per_level, which will contain:
+     *
+     * 1. The tasks there shall be sorted according to the wanted
+     * sortgin logic.
+     *
+     * 2. The level for which TimetaggerTranscriber should overwrite
+     * the times_spent values of the tasks should be updated.
+     */
+    public function updateTasksPerLevel()
+    {
+        foreach ($this->tasks_per_level as &$tasks) {
+            $tasks = SortingLogic::sortTasks(
+                $tasks,
+                $this->getConfig('sorting_logic')
+            );
+        }
+        unset($tasks);
+
+        // TODO
+        // TimetaggerTranscriber magic here ...
     }
 }
