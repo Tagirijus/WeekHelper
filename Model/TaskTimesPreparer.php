@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
+use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
 
 
 class TaskTimesPreparer
@@ -783,6 +784,14 @@ class TaskTimesPreparer
      */
     public function getTimesFromTasks(&$tasks, $subtasks_by_task_id = [])
     {
+        // a task can have certain values given in the description text, which
+        // can be parsed into task array keys. e.g. "project_type" can be overwritten
+        // here, etc.
+        foreach ($tasks as &$task) {
+            TaskInfoParser::extendTask($task);
+        }
+        unset($task);
+
         // TODO!
         // $tasks = SortingLogic::sortTasks(
         //     $tasks,

@@ -238,7 +238,7 @@ class AutomaticPlanner extends Base
     }
 
     /**
-     * Extend the given tasks array with the soem internal
+     * Extend the given tasks array with the some internal
      * or "still to parse" data. This will extend the basic
      * Kanboard tasks array. It will be given an array of
      * Kanboard task arrays. Each of this Kanboard arrays
@@ -254,11 +254,6 @@ class AutomaticPlanner extends Base
             // I should add them here. Otherwise with just the key "info"
             // there are the ones added / parsed by my plugin.
             $tasks[$key] = array_merge($task, $projects[$task['project_id']]['info']);
-
-            // also a task can have certain values given in the description text, which
-            // can be parsed into task array keys. e.g. "project_type" can be overwritten
-            // here
-            TaskInfoParser::extendTask($tasks[$key]);
         }
     }
 
