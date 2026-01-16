@@ -4,6 +4,8 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
 
 class TaskTimesPreparer
@@ -22,6 +24,11 @@ class TaskTimesPreparer
         'ignore_subtask_titles' => [],
         'non_time_mode_minutes' => 0,
         'sorting_logic' => '',
+        'timetagger_url' => '',
+        'timetagger_authtoken' => '',
+        'timetagger_cookies' => '',
+        'timetagger_overwrites_levels_spent' => '',
+        'timetagger_start_fetch' => '',
     ];
 
     /**
@@ -53,6 +60,14 @@ class TaskTimesPreparer
         'level_3' => [],
         'level_4' => [],
     ];
+
+    /**
+     * The TimetaggerTranscriber, which can overwrite
+     * spent times for tasks.
+     *
+     * @var TimetaggerTranscriber
+     **/
+    var $timetagger_transcriber = null;
 
     /**
      * Construct the instance with certain settings, if needed.
@@ -326,6 +341,22 @@ class TaskTimesPreparer
         }
         $task['time_remaining'] = round($remaining_time, 2);
         return $task['time_remaining'];
+    }
+
+    /**
+     * Fetch Timetagger events and set the internal TimetaggerTranscriber.
+     */
+    public function initTimetagger()
+    {
+        $timetagger_fetcher = new TimetaggerFetcher(
+            $this->getConfig('timetagger_url'),
+            $this->getConfig('timetagger_authtoken'),
+            $this->getConfig('timetagger_cookies')
+        );
+        $timetagger_fetcher->fetchEvents(
+            strtotime($this->getConfig('timetagger_start_fetch'))
+        );
+        $this->timetagger_transcriber = new TimetaggerTranscriber($timetagger_fetcher);
     }
 
     /**
@@ -865,6 +896,21 @@ class TaskTimesPreparer
     }
 
     /**
+     * Get the internal TimetaggerTranscriber. Maybe initialize it
+     * first and get the Timetagger events accordingly. So this way
+     * only if it really is needed, the API call will be made.
+     *
+     * @return TimetaggerTranscriber
+     */
+    public function getTimetaggerTranscriber()
+    {
+        if (is_null($this->timetagger_transcriber)) {
+            $this->initTimetagger();
+        }
+        return $this->timetagger_transcriber;
+    }
+
+    /**
      * The calculation logic for a task or subtask.
      * It varies on the state of the task / subtask.
      *
@@ -1007,7 +1053,17 @@ class TaskTimesPreparer
         }
         unset($tasks);
 
-        // TODO
-        // TimetaggerTranscriber magic here ...
+        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_1')) {
+            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_1']);
+        }
+        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_2')) {
+            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_2']);
+        }
+        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_3')) {
+            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_3']);
+        }
+        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_4')) {
+            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_4']);
+        }
     }
 }

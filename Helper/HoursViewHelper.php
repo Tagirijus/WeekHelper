@@ -56,6 +56,11 @@ class HoursViewHelper extends Base
             'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
             'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),
+            'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
+            'timetagger_authtoken' =>  $this->configModel->get('timetagger_authtoken', ''),
+            'timetagger_cookies' =>  $this->configModel->get('timetagger_cookies', ''),
+            'timetagger_overwrites_levels_spent' => $this->configModel->get('timetagger_overwrites_levels_spent', ''),
+            'timetagger_start_fetch' => $this->configModel->get('timetagger_start_fetch', ''),
         ];
         $this->task_times_preparer = new TaskTimesPreparer($config_task_times_preparer);
     }

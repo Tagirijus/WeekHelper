@@ -47,47 +47,47 @@ final class TimetaggerTranscriberTest extends TestCase
         $tasks = [
             [
                 'id' => 1,
-                'times_spent' => 0.0,  # should become 0.5
-                'times_estimated' => 0.5,
+                'time_spent' => 0.0,  # should become 0.5
+                'time_estimated' => 0.5,
                 'nb_subtasks' => 6,
                 'nb_completed_subtasks' => 6,
                 'timetagger_tags' => 'a,b,c'
             ],
             [
                 'id' => 2,
-                'times_spent' => 0.0,  # should become 2.0
-                'times_estimated' => 1.0,
+                'time_spent' => 0.0,  # should become 2.0
+                'time_estimated' => 1.0,
                 'nb_subtasks' => 2,
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'a,b,c'
             ],
             [
                 'id' => 3,
-                'times_spent' => 9.9,  # should stay 9.9
-                'times_estimated' => 10,
+                'time_spent' => 9.9,  # should stay 9.9
+                'time_estimated' => 10,
                 'nb_subtasks' => 0,
                 'nb_completed_subtasks' => 0,
             ],
             [
                 'id' => 4,
-                'times_spent' => 1.0,  # should become 2.5
-                'times_estimated' => 3.0,
+                'time_spent' => 1.0,  # should become 2.5
+                'time_estimated' => 3.0,
                 'nb_subtasks' => 0,
                 'nb_completed_subtasks' => 0,
                 'timetagger_tags' => 'e'
             ],
             [
                 'id' => 5,
-                'times_spent' => 1.0,  # should become 2.75
-                'times_estimated' => 0.5,
+                'time_spent' => 1.0,  # should become 2.75
+                'time_estimated' => 0.5,
                 'nb_subtasks' => 1,
                 'nb_completed_subtasks' => 0,
                 'timetagger_tags' => 'g'
             ],
             [
                 'id' => 6,
-                'times_spent' => 0.0,  # should become 0.25
-                'times_estimated' => 0.25,
+                'time_spent' => 0.0,  # should become 0.25
+                'time_estimated' => 0.25,
                 'nb_subtasks' => 1,
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'g'
@@ -103,32 +103,32 @@ final class TimetaggerTranscriberTest extends TestCase
         // final check
         $this->assertSame(
             0.5,
-            $tasks[0]['times_spent'],
+            $tasks[0]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
         $this->assertSame(
             2.0,
-            $tasks[1]['times_spent'],
+            $tasks[1]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
         $this->assertSame(
             9.9,
-            $tasks[2]['times_spent'],
+            $tasks[2]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
         $this->assertSame(
             2.5,
-            $tasks[3]['times_spent'],
+            $tasks[3]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
         $this->assertSame(
             2.75,
-            $tasks[4]['times_spent'],
+            $tasks[4]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
         $this->assertSame(
             0.25,
-            $tasks[5]['times_spent'],
+            $tasks[5]['time_spent'],
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
     }

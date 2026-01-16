@@ -84,11 +84,6 @@ class TimetaggerTranscriber
      */
     public function overwriteSpentTimesForTasks(&$tasks)
     {
-        // TODO
-        // times_spent, die bereits existiert, muss erst einmal auf 0.0 gesetzt
-        // werden, falls es ein event dafür gibt! denn momentan addiert
-        // der algorithmus stets zu times_spent!
-
         // get timetagger events (assume fetcher is already populated)
         $events = $this->timetagger_fetcher->getEvents();
 
@@ -109,9 +104,9 @@ class TimetaggerTranscriber
 
             // collect candidate task indices (in original order)
             // - and also convert times into seconds
-            // - and set indicator if times_spent was reset before
+            // - and set indicator if time_spent was reset before
             //   modification; otherwise the algorithm would always
-            //   just add the allocated time to the original times_spent,
+            //   just add the allocated time to the original time_spent,
             //   but ultimately it should overwrite it completely.
             $candidates = [];
             foreach ($tasks as $i => &$task) {
@@ -123,11 +118,11 @@ class TimetaggerTranscriber
                     $candidates[] = $i;
 
                     // change times from hours into seconds
-                    // and reset times_spent
+                    // and reset time_spent
                     if (!($task['_timetagger_transcribing'] ?? false)) {
                         $task['_timetagger_transcribing'] = true;
-                        $task['times_estimated'] = TimeHelper::hoursToSeconds($task['times_estimated']);
-                        $task['times_spent'] = 0;
+                        $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
+                        $task['time_spent'] = 0;
                     }
                 }
             }
@@ -138,7 +133,7 @@ class TimetaggerTranscriber
                 continue;
             }
 
-            // PHASE 1: fill matching DONE tasks up to times_estimated
+            // PHASE 1: fill matching DONE tasks up to time_estimated
             $modified_task_indices = []; // track which tasks we modified for fallback
             $non_done = [];  // for PHASE 2 later
             foreach ($candidates as $i) {
@@ -151,14 +146,14 @@ class TimetaggerTranscriber
                     continue;
                 }
 
-                $capacity = max(0, $tasks[$i]['times_estimated'] - $tasks[$i]['times_spent']);
+                $capacity = max(0, $tasks[$i]['time_estimated'] - $tasks[$i]['time_spent']);
                 if ($capacity <= 0) {
                     // nothing to fill for this done task
                     continue;
                 }
 
                 $alloc = min($capacity, $available);
-                $tasks[$i]['times_spent'] += $alloc;
+                $tasks[$i]['time_spent'] += $alloc;
                 $available -= $alloc;
                 $event->distribute($alloc);
                 $modified_task_indices[] = $i;
@@ -171,7 +166,7 @@ class TimetaggerTranscriber
                     // (this can be modified to round-robin or proportional later maybe)
                     $target = $non_done[0];
                     $alloc = $available;
-                    $tasks[$target]['times_spent'] += $alloc;
+                    $tasks[$target]['time_spent'] += $alloc;
                     $available -= $alloc;
                     $event->distribute($alloc);
                     $modified_task_indices[] = $target;
@@ -186,7 +181,7 @@ class TimetaggerTranscriber
                     }
 
                     $alloc = $available;
-                    $tasks[$target]['times_spent'] += $alloc;
+                    $tasks[$target]['time_spent'] += $alloc;
                     $available -= $alloc;
                     $event->distribute($alloc);
                     $modified_task_indices[] = $target;
@@ -198,8 +193,8 @@ class TimetaggerTranscriber
         foreach ($tasks as &$task) {
             if (($task['_timetagger_transcribing'] ?? false)) {
                 unset($task['_timetagger_transcribing']);
-                $task['times_estimated'] = TimeHelper::secondsToHours($task['times_estimated']);
-                $task['times_spent'] = TimeHelper::secondsToHours($task['times_spent']);
+                $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
+                $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
             }
         }
         unset($task);
