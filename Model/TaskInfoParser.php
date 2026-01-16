@@ -99,6 +99,7 @@ class TaskInfoParser
     public static function extendTask(&$task)
     {
         $fetched = self::getTaskInfoByTask($task);
+        $fetched['info_parsed'] = true;
         $task = array_merge($task, $fetched);
     }
 }

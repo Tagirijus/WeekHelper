@@ -110,4 +110,23 @@ final class TaskInfoParserTest extends TestCase
             'Task info was not parsed correctly.'
         );
     }
+
+    public function testInfoParserState()
+    {
+        $task = [
+            'description' => (
+                "any other descriptions text\nis here\nin multiline\n"
+                . "timetagger_tags=client,project,task\n"
+            )
+        ];
+        $this->assertFalse(
+            isset($task['info_parsed']),
+            'TaskInfoParser was parsed already?'
+        );
+        TaskInfoParser::extendTask($task);
+        $this->assertTrue(
+            isset($task['info_parsed']),
+            'TaskInfoParser should have a "i was parsed" state now!'
+        );
+    }
 }
