@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Kanboard\Plugin\WeekHelper\tests;
 
-require_once __DIR__ . '/../Helper/TimetaggerEvent.php';
+require_once __DIR__ . '/../Model/TimetaggerEvent.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\TimetaggerEvent;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerEvent;
 
 
 final class TimetaggerEventTest extends TestCase

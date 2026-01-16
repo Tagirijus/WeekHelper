@@ -11,7 +11,7 @@
  * CalDAV has to be so complicated in 2026 ... Maybe I am just a monkey.
  */
 
-namespace Kanboard\Plugin\WeekHelper\Helper;
+namespace Kanboard\Plugin\WeekHelper\Model;
 
 class CalDAVFetcher
 {

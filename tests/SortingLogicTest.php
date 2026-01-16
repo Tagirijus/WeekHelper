@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/SortingLogic.php';
+require_once __DIR__ . '/../Model/SortingLogic.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
+use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 
 
 final class SortingLogicTest extends TestCase

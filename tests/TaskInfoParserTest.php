@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/TaskInfoParser.php';
+require_once __DIR__ . '/../Model/TaskInfoParser.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
 
 
 final class TaskInfoParserTest extends TestCase

@@ -1,8 +1,8 @@
 <?php
 
-namespace Kanboard\Plugin\WeekHelper\Helper;
+namespace Kanboard\Plugin\WeekHelper\Model;
 
-use Kanboard\Plugin\WeekHelper\Helper\TimetaggerEvent;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerEvent;
 
 
 class TimetaggerFetcher

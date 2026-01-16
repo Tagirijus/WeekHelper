@@ -1,9 +1,9 @@
 <?php
 
-namespace Kanboard\Plugin\WeekHelper\Helper;
+namespace Kanboard\Plugin\WeekHelper\Model;
 
-use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
-use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
+use Kanboard\Plugin\WeekHelper\Model\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Kanboard\Plugin\WeekHelper\tests;
 
-require_once __DIR__ . '/../Helper/CalDAVFetcher.php';
+require_once __DIR__ . '/../Model/CalDAVFetcher.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
+use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
 
 
 final class CalDAVFetcherTest extends TestCase

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/CalDAVConverter.php';
+require_once __DIR__ . '/../Model/CalDAVConverter.php';
 require_once __DIR__ . '/../tests/CalDAVFetcherTest.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVConverter;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
+use Kanboard\Plugin\WeekHelper\Model\CalDAVConverter;
+use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
 use Kanboard\Plugin\WeekHelper\tests\CalDAVFetcherTest;
 
 

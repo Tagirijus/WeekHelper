@@ -3,15 +3,15 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Helper/TimeHelper.php';
-require_once __DIR__ . '/../Helper/TimeSpan.php';
-require_once __DIR__ . '/../Helper/TimePoint.php';
-require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
+require_once __DIR__ . '/../Model/TimeSpan.php';
+require_once __DIR__ . '/../Model/TimePoint.php';
+require_once __DIR__ . '/../Model/TimeSlotsDay.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
-use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
-use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
+use Kanboard\Plugin\WeekHelper\Model\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
+use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
 
 
 final class TimeSlotsDayTest extends TestCase

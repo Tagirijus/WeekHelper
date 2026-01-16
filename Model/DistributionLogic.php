@@ -1,10 +1,11 @@
 <?php
 
-namespace Kanboard\Plugin\WeekHelper\Helper;
+namespace Kanboard\Plugin\WeekHelper\Model;
 
-use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
-use Kanboard\Plugin\WeekHelper\Helper\TimeSlotsDay;
-use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
+use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
+use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 
 
 class DistributionLogic

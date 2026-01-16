@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/TimePoint.php';
+require_once __DIR__ . '/../Model/TimePoint.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 
 
 final class TimePointTest extends TestCase

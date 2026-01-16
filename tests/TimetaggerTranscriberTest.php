@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Kanboard\Plugin\WeekHelper\tests;
 
 require_once __DIR__ . '/../Helper/TimeHelper.php';
-require_once __DIR__ . '/../Helper/TimetaggerEvent.php';
-require_once __DIR__ . '/../Helper/TimetaggerFetcher.php';
-require_once __DIR__ . '/../Helper/TimetaggerTranscriber.php';
+require_once __DIR__ . '/../Model/TimetaggerEvent.php';
+require_once __DIR__ . '/../Model/TimetaggerFetcher.php';
+require_once __DIR__ . '/../Model/TimetaggerTranscriber.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\TimetaggerFetcher;
-use Kanboard\Plugin\WeekHelper\Helper\TimetaggerTranscriber;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
+use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
 
 final class TimetaggerTranscriberTest extends TestCase

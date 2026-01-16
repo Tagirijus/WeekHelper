@@ -1,6 +1,6 @@
 <?php
 
-namespace Kanboard\Plugin\WeekHelper\Helper;
+namespace Kanboard\Plugin\WeekHelper\Model;
 
 
 class TaskInfoParser

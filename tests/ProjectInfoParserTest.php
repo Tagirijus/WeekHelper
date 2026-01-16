@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/ProjectInfoParser.php';
+require_once __DIR__ . '/../Model/ProjectInfoParser.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\ProjectInfoParser;
 
 
 final class ProjectInfoParserTest extends TestCase

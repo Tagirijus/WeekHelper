@@ -4,14 +4,14 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Kanboard\Core\Base;
 use Kanboard\Model\ProjectModel;
-use Kanboard\Plugin\WeekHelper\Helper\ProjectInfoParser;
-use Kanboard\Plugin\WeekHelper\Helper\TaskInfoParser;
-use Kanboard\Plugin\WeekHelper\Helper\SortingLogic;
-use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Helper\TasksPlan;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVFetcher;
-use Kanboard\Plugin\WeekHelper\Helper\CalDAVConverter;
+use Kanboard\Plugin\WeekHelper\Model\ProjectInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
+use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
+use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
+use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
+use Kanboard\Plugin\WeekHelper\Model\CalDAVConverter;
 
 
 class AutomaticPlanner extends Base

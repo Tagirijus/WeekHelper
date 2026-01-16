@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Helper/DistributionLogic.php';
+require_once __DIR__ . '/../Model/DistributionLogic.php';
 require_once __DIR__ . '/../tests/TestTask.php';
-require_once __DIR__ . '/../Helper/TasksPlan.php';
-require_once __DIR__ . '/../Helper/TimeSlotsDay.php';
-require_once __DIR__ . '/../Helper/TimeSpan.php';
-require_once __DIR__ . '/../Helper/TimePoint.php';
+require_once __DIR__ . '/../Model/TasksPlan.php';
+require_once __DIR__ . '/../Model/TimeSlotsDay.php';
+require_once __DIR__ . '/../Model/TimeSpan.php';
+require_once __DIR__ . '/../Model/TimePoint.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Helper\DistributionLogic;
-use Kanboard\Plugin\WeekHelper\Helper\TimePoint;
-use Kanboard\Plugin\WeekHelper\Helper\TimeSpan;
+use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
+use Kanboard\Plugin\WeekHelper\Model\TimeSpan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 
 
