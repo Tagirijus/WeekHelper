@@ -2,6 +2,8 @@
 
 namespace Kanboard\Plugin\WeekHelper\Model;
 
+use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
+
 
 class TaskTimesPreparer
 {
@@ -17,7 +19,8 @@ class TaskTimesPreparer
         'level_3_columns' => [],
         'level_4_columns' => [],
         'ignore_subtask_titles' => [],
-        'non_time_mode_minutes' => 0
+        'non_time_mode_minutes' => 0,
+        'sorting_logic' => '',
     ];
 
     /**
@@ -780,6 +783,12 @@ class TaskTimesPreparer
      */
     public function getTimesFromTasks(&$tasks, $subtasks_by_task_id = [])
     {
+        // TODO!
+        // $tasks = SortingLogic::sortTasks(
+        //     $tasks,
+        //     $this->getConfig('sorting_logic')
+        // );
+
         $levels_columns = [
             'level_1' => $this->getConfig('level_1_columns'),
             'level_2' => $this->getConfig('level_2_columns'),

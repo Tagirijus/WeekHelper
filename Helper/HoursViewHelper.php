@@ -55,6 +55,7 @@ class HoursViewHelper extends Base
             'level_4_columns' => $this->configModel->get('hoursview_level_4_columns', ''),
             'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
+            'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),
         ];
         $this->task_times_preparer = new TaskTimesPreparer($config_task_times_preparer);
     }
