@@ -12,10 +12,10 @@ class TaskTimesPreparer
      * @var array
      **/
     var $config = [
-        'level_1_columns' => '',
-        'level_2_columns' => '',
-        'level_3_columns' => '',
-        'level_4_columns' => '',
+        'level_1_columns' => [],
+        'level_2_columns' => [],
+        'level_3_columns' => [],
+        'level_4_columns' => [],
         'ignore_subtask_titles' => [],
         'non_time_mode_minutes' => 0
     ];
@@ -88,25 +88,9 @@ class TaskTimesPreparer
         if (array_key_exists($level_key, $levels)) {
             $config = $levels[$level_key];
             foreach ($config as $col_swim) {
-                //            1     2     3
-                preg_match('/(.*)\[(.*)\](.*)/', $col_swim, $re);
-
-                // swimlane in bracktes given
-                if ($re) {
-                    // column check
-                    if (trim($re[1]) == $col_name || trim($re[3]) == $col_name) {
-                        // and swimlane check
-                        if (trim($re[2]) == $swim_name) {
-                            $exists = true;
-                        }
-                    }
-
-                // no swimlane in brackets given
-                } else {
-                    // column check
-                    if (trim($col_swim) == $col_name) {
-                        $exists = true;
-                    }
+                if (self::swimlaneColumnCheck($col_swim, $swim_name, $col_name)) {
+                    $exists = true;
+                    break;
                 }
             }
         }
@@ -260,6 +244,13 @@ class TaskTimesPreparer
         $this->config = array_merge($this->config, $config);
         if (is_string($this->config['ignore_subtask_titles'])) {
             $this->config['ignore_subtask_titles'] = explode(',', $this->config['ignore_subtask_titles']);
+        }
+        // if one is a string, the others are, too, probably
+        if (is_string($this->config['level_1_columns'])) {
+            $this->config['level_1_columns'] = explode(',', $this->config['level_1_columns']);
+            $this->config['level_2_columns'] = explode(',', $this->config['level_2_columns']);
+            $this->config['level_3_columns'] = explode(',', $this->config['level_3_columns']);
+            $this->config['level_4_columns'] = explode(',', $this->config['level_4_columns']);
         }
     }
 
@@ -774,15 +765,16 @@ class TaskTimesPreparer
      * ]
      *
      * @param  array &$tasks
+     * @param  array $subtasks_by_task_id
      * @return array
      */
-    public function getTimesFromTasks(&$tasks)
+    public function getTimesFromTasks(&$tasks, $subtasks_by_task_id = [])
     {
         $levels_columns = [
-            'level_1' => explode(',', $this->getConfig('level_1_columns')),
-            'level_2' => explode(',', $this->getConfig('level_2_columns')),
-            'level_3' => explode(',', $this->getConfig('level_3_columns')),
-            'level_4' => explode(',', $this->getConfig('level_4_columns'))
+            'level_1' => $this->getConfig('level_1_columns'),
+            'level_2' => $this->getConfig('level_2_columns'),
+            'level_3' => $this->getConfig('level_3_columns'),
+            'level_4' => $this->getConfig('level_4_columns')
         ];
 
         $all = [
@@ -800,10 +792,13 @@ class TaskTimesPreparer
         $level_4 = $all;
         $col_name = 'null';
 
-        foreach ($tasks as $task) {
+        foreach ($tasks as &$task) {
             // get column name and swimlane
             $col_name = $task['column_name'];
             $swim_name = $task['swimlane_name'];
+
+            // subtasks getting
+            $subtasks = $subtasks_by_task_id[$task['id']] ?? [];
 
             // set new column key in the time calc arrays
             self::setTimeCalcKey($all, $col_name);
@@ -814,24 +809,25 @@ class TaskTimesPreparer
 
             // all: column times
             $all[$col_name]['estimated'] += $this->getEstimatedTimeForTask($task);
-            $all[$col_name]['spent'] += $this->getSpentTimeForTask($task);
-            $all[$col_name]['remaining'] += $this->getRemainingTimeForTask($task);
-            $all[$col_name]['overtime'] += $this->getOvertimeForTask($task);
+            $all[$col_name]['spent'] += $this->getSpentTimeForTask($task, $subtasks);
+            $all[$col_name]['remaining'] += $this->getRemainingTimeForTask($task, $subtasks);
+            $all[$col_name]['overtime'] += $this->getOvertimeForTask($task, $subtasks);
 
             // all: total times
             $all['_total']['estimated'] += $this->getEstimatedTimeForTask($task);
-            $all['_total']['spent'] += $this->getSpentTimeForTask($task);
-            $all['_total']['remaining'] += $this->getRemainingTimeForTask($task);
-            $all['_total']['overtime'] += $this->getOvertimeForTask($task);
+            $all['_total']['spent'] += $this->getSpentTimeForTask($task, $subtasks);
+            $all['_total']['remaining'] += $this->getRemainingTimeForTask($task, $subtasks);
+            $all['_total']['overtime'] += $this->getOvertimeForTask($task, $subtasks);
             self::extendHasTimes($all);
 
 
             // level times
-            $this->addTimesForLevel($level_1, 'level_1', $levels_columns, $col_name, $swim_name, $task);
-            $this->addTimesForLevel($level_2, 'level_2', $levels_columns, $col_name, $swim_name, $task);
-            $this->addTimesForLevel($level_3, 'level_3', $levels_columns, $col_name, $swim_name, $task);
-            $this->addTimesForLevel($level_4, 'level_4', $levels_columns, $col_name, $swim_name, $task);
+            $this->addTimesForLevel($level_1, 'level_1', $levels_columns, $col_name, $swim_name, $task, $subtasks);
+            $this->addTimesForLevel($level_2, 'level_2', $levels_columns, $col_name, $swim_name, $task, $subtasks);
+            $this->addTimesForLevel($level_3, 'level_3', $levels_columns, $col_name, $swim_name, $task, $subtasks);
+            $this->addTimesForLevel($level_4, 'level_4', $levels_columns, $col_name, $swim_name, $task, $subtasks);
         }
+        unset($task);
 
         return [
             'all' => $all,
@@ -918,5 +914,51 @@ class TaskTimesPreparer
             }
             return $found;
         }
+    }
+
+    /**
+     * Check if the config string matches the given swimlane string
+     * and column string. E.g. the config can be something like:
+     *
+     *    "column_b [swimlane_a]"
+     *
+     * Now with the given swimlane "swimlane_a" and the given columne
+     * "column_b" the check would be true.
+     *
+     * Example with the config string:
+     *
+     *    "column_a"
+     *
+     * Here the given parameter column "column_a" would be sufficient
+     * already regardless of the swimlane, which is not given in brackets.
+     *
+     * @param  string $config_str
+     * @param  string $swimlane
+     * @param  string $column
+     * @return boolean
+     */
+    public static function swimlaneColumnCheck($config_str, $swimlane, $column)
+    {
+        //            1     2     3
+        preg_match('/(.*)\[(.*)\](.*)/', $config_str, $re);
+
+        // swimlane in bracktes given
+        if ($re) {
+            // column check
+            if (trim($re[1]) == $column || trim($re[3]) == $column) {
+                // and swimlane check
+                if (trim($re[2]) == $swimlane) {
+                    return true;
+                }
+            }
+
+        // no swimlane in brackets given
+        } else {
+            // column check
+            if (trim($config_str) == $column) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -102,50 +102,18 @@ class HoursViewHelper extends Base
      * Get the estimated and spent times in the columns for
      * the total (all) and the levels (level_1, level_2, ...).
      *
-     * New since v1.2.0: remaining
-     * New since v1.13.0: overtime
-     *
-     *
-     * Array output:
-     *
-     * [
-     *     'all' => [
-     *         '_total' => [
-     *             'estimated' => 8,
-     *             'spent' => 6.5,
-     *             'remaining' => 1.5,
-     *             'overtime' => 0
-     *         ],
-     *         'column b' => [
-     *             'estimated' => 5,
-     *             'spent' => 4.5,
-     *             'remaining' => 0.5,
-     *             'overtime' => 0
-     *         ]
-     *     ],
-     *     'level_1' => [
-     *         '_total' => [
-     *             'estimated' => 7,
-     *             'spent' => 5.5,
-     *             'remaining' => 1.5,
-     *             'overtime' => 0
-     *         ],
-     *         'column a' => [
-     *             'estimated' => 2,
-     *             'spent' => 3,
-     *             'remaining' => 0,
-     *             'overtime' => 1
-     *         ]
-     *     ],
-     *     'level_2' => ...
-     * ]
-     *
      * @param  array &$tasks
      * @return array
      */
     public function getTimesFromTasks(&$tasks)
     {
-        return $this->task_times_preparer->getTimesFromTasks($tasks);
+        $subtasks_by_task_id = [];
+        foreach ($tasks as $task) {
+            if (!isset($subtasks_by_task_id[$task['id']])) {
+                $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
+            }
+        }
+        return $this->task_times_preparer->getTimesFromTasks($tasks, $subtasks_by_task_id);
     }
 
     /**
