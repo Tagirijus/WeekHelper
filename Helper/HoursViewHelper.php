@@ -189,6 +189,19 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Simply get all open tasks.
+     *
+     * @return array
+     */
+    public function getOpenTasks()
+    {
+        $query = $this->taskFinderModel->getExtendedQuery();
+        $builder = $this->taskLexer;
+        $builder->withQuery($query);
+        return $builder->build('status:open')->toArray();
+    }
+
+    /**
      * Basically some kind of wrapper function for getting
      * the array with all the tasks for the project.
      *
