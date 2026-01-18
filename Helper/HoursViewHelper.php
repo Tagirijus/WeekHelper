@@ -53,7 +53,6 @@ class HoursViewHelper extends Base
             'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
             'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),
             'level_4_columns' => $this->configModel->get('hoursview_level_4_columns', ''),
-            'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
             'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),
             'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
@@ -76,16 +75,6 @@ class HoursViewHelper extends Base
             $this->block_hours = (int) $this->configModel->get('hoursview_block_hours', 0);
         }
         return $this->block_hours;
-    }
-
-    /**
-     * Init and/or ge the ignored subtask titles.
-     *
-     * @return array
-     */
-    public function getIgnoredSubtaskTitles()
-    {
-        return $this->task_times_preparer->getIgnoredSubtaskTitles();
     }
 
     /**
@@ -309,7 +298,6 @@ class HoursViewHelper extends Base
             'level_3_caption' => $this->configModel->get('hoursview_level_3_caption', ''),
             'level_4_caption' => $this->configModel->get('hoursview_level_4_caption', ''),
             'all_caption' => $this->configModel->get('hoursview_all_caption', ''),
-            'ignore_subtask_titles' => $this->configModel->get('hoursview_ignore_subtask_titles', ''),
             'progressbar_enabled' => $this->configModel->get('hoursview_progressbar_enabled', 1),
             'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
@@ -339,18 +327,13 @@ class HoursViewHelper extends Base
      * Get the spent time of a given task according to internal settings.
      *
      * @param  array  &$task
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getSpentTimeForTask(&$task, $use_ignore = 1)
+    public function getSpentTimeForTask(&$task)
     {
         return $this->task_times_preparer->getSpentTimeForTask(
             $task,
-            $this->getSubtasksByTaskId($task['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task['id'])
         );
     }
 
@@ -359,18 +342,13 @@ class HoursViewHelper extends Base
      * for the given task.
      *
      * @param  array  &$task
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getRemainingTimeForTask(&$task, $use_ignore = 1)
+    public function getRemainingTimeForTask(&$task)
     {
         return $this->task_times_preparer->getRemainingTimeForTask(
             $task,
-            $this->getSubtasksByTaskId($task['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task['id'])
         );
     }
 
@@ -379,18 +357,13 @@ class HoursViewHelper extends Base
      * for the given task.
      *
      * @param  array  &$task
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getOvertimeForTask(&$task, $use_ignore = 1)
+    public function getOvertimeForTask(&$task)
     {
         return $this->task_times_preparer->getOvertimeForTask(
             $task,
-            $this->getSubtasksByTaskId($task['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task['id'])
         );
     }
 
@@ -707,11 +680,6 @@ class HoursViewHelper extends Base
     /**
      * Get a times array for the tooltip on the tasks
      * detail page based on the subtasks of the task.
-     * Prepare three kinds of subtasks to be able to
-     * correctly split the subtasks into:
-     * 1. All times (ignored + not-ignored): key 'All'
-     * 2. Only ignored times: key 'Ignored'
-     * 3. Only not-ignored time: key 'Without ignored'
      *
      * @param  integer $task_id
      * @return array
@@ -720,14 +688,10 @@ class HoursViewHelper extends Base
     {
         $task_raw = $this->taskFinderModel->getById($task_id);
 
-        $task_all = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 3);
-        $task_ignored = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 2);
-        $task_without_ignored = $this->calculateEstimatedSpentOvertimeForTask($task_raw, 1);
+        $task_all = $this->calculateEstimatedSpentOvertimeForTask($task_raw);
 
         return [
             'All' => $task_all,
-            'Ignored' => $task_ignored,
-            'Without ignored' => $task_without_ignored
         ];
     }
 
@@ -741,26 +705,22 @@ class HoursViewHelper extends Base
      *                                       is enough already?
      *
      * @param  array  $task
-     * @param  integer $use_ignore
      * @return array
      */
-    public function calculateEstimatedSpentOvertimeForTask($task, $use_ignore = 1)
+    public function calculateEstimatedSpentOvertimeForTask($task)
     {
         $task_tmp = $task;
         $this->task_times_preparer->getEstimatedFromSubtasks(
             $task_tmp,
-            $this->getSubtasksByTaskId($task_tmp['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task_tmp['id'])
         );
         $this->task_times_preparer->getSpentFromSubtasks(
             $task_tmp,
-            $this->getSubtasksByTaskId($task_tmp['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task_tmp['id'])
         );
         $this->task_times_preparer->getOvertimeForTask(
             $task_tmp,
-            $this->getSubtasksByTaskId($task_tmp['id']),
-            $use_ignore
+            $this->getSubtasksByTaskId($task_tmp['id'])
         );
         return $task_tmp;
     }
@@ -834,14 +794,11 @@ class HoursViewHelper extends Base
      * time_remaining and time_overtime to calculate
      * a total out of them and return it as an array.
      *
-     * Array will contain all tasks, consider ignored
-     * subtasks and also non-ignored subtasks.
-     *
      * Output will be:
      * [
      *     'All' => 0.0,
-     *     'Ignored' => 0.0,
-     *     'Without ignored' => 0.0
+     *     (in older versions there were also the keys "ingored"
+     *     and "without_ignored" here)
      * ]
      *
      * @param  array $tasks
@@ -850,28 +807,16 @@ class HoursViewHelper extends Base
     public function generateTimesArrayFromTasksForWorkedTimesTooltip($tasks)
     {
         $tasks_all = $this->generateTaskTimesTemplate();
-        $tasks_ignored = $this->generateTaskTimesTemplate();
-        $tasks_without_ignored = $this->generateTaskTimesTemplate();
 
         foreach ($tasks as $task) {
             $task_all_tmp = $task;
-            $task_ignored_tmp = $task;
-            $task_without_ignored_tmp = $task;
             $this->addTimesFromOneTaskToAnother(
-                $tasks_all, $this->calculateEstimatedSpentOvertimeForTask($task_all_tmp, 3)
-            );
-            $this->addTimesFromOneTaskToAnother(
-                $tasks_ignored, $this->calculateEstimatedSpentOvertimeForTask($task_ignored_tmp, 2)
-            );
-            $this->addTimesFromOneTaskToAnother(
-                $tasks_without_ignored, $this->calculateEstimatedSpentOvertimeForTask($task_without_ignored_tmp, 1)
+                $tasks_all, $this->calculateEstimatedSpentOvertimeForTask($task_all_tmp)
             );
         }
 
         return [
             'All' => $tasks_all,
-            'Ignored' => $tasks_ignored,
-            'Without ignored' => $tasks_without_ignored
         ];
     }
 

@@ -21,7 +21,6 @@ class TaskTimesPreparer
         'level_2_columns' => [],
         'level_3_columns' => [],
         'level_4_columns' => [],
-        'ignore_subtask_titles' => [],
         'non_time_mode_minutes' => 0,
         'sorting_logic' => '',
         'timetagger_url' => '',
@@ -30,24 +29,6 @@ class TaskTimesPreparer
         'timetagger_overwrites_levels_spent' => '',
         'timetagger_start_fetch' => '',
     ];
-
-    /**
-     * Array describing, which subtask IDs
-     * are already found as "ignored".
-     * It's a cache variable
-     *
-     * @var array
-     **/
-    var $subtask_ids_have_ignore_substring_in_title = [];
-
-    /**
-     * Array describing, which subtask IDs
-     * are already found as "not ignored".
-     * It's a cache variable
-     *
-     * @var array
-     **/
-    var $subtask_ids_do_not_have_ignore_substring_in_title = [];
 
     /**
      * The class attribute, holding the tasks per level.
@@ -220,40 +201,6 @@ class TaskTimesPreparer
     }
 
     /**
-     * This logic will handle the ignore feature
-     * for subtasks calculation.
-     *
-     * use_ignore == 1
-     *     This means that subtasktitles should be skipped,
-     *     if they have a subtask title, which should
-     *     be ignored according to the settings
-     * use_ignore == 2
-     *     This means that subtasktitles should be skipped,
-     *     if they do not have a subtask title, which should
-     *     be ignored according to the settings
-     * use_ignore == 3 (or anything not 1|2)
-     *     Means that the method returns false,
-     *     thus nothing will be ignored. Will probably
-     *     be used for "get all subtasks".
-     *
-     * @param  array $subtask
-     * @param  integer $use_ignore
-     * @return bool
-     */
-    public function ignoreLogic($subtask, $use_ignore)
-    {
-        if (
-            ($use_ignore == 1 && $this->subtaskTitleHasIgnoreTitleSubString($subtask))
-            ||
-            ($use_ignore == 2 && !$this->subtaskTitleHasIgnoreTitleSubString($subtask))
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * Init the config with the given array.
      *
      * @param  array  $config
@@ -261,9 +208,6 @@ class TaskTimesPreparer
     protected function initConfig($config = [])
     {
         $this->config = array_merge($this->config, $config);
-        if (is_string($this->config['ignore_subtask_titles'])) {
-            $this->config['ignore_subtask_titles'] = explode(',', $this->config['ignore_subtask_titles']);
-        }
         // if one is a string, the others are, too, probably
         if (is_string($this->config['level_1_columns'])) {
             $this->config['level_1_columns'] = explode(',', $this->config['level_1_columns']);
@@ -278,20 +222,16 @@ class TaskTimesPreparer
      *
      * @param  array  &$task
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    protected function initOvertimeTimeForTask(&$task = [], $subtasks = [], $use_ignore = 1)
+    protected function initOvertimeTimeForTask(&$task = [], $subtasks = [])
     {
         $over_time = 0.0;
         if (isset($task['id'])) {
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getOvertimeFromSubtasks($subtasks, $use_ignore);
+                $tmp = $this->getOvertimeFromSubtasks($subtasks);
 
             // calculate remaining or overtime based only on task itself
             } else {
@@ -302,7 +242,7 @@ class TaskTimesPreparer
 
             // also add the remaining time, which otherwise
             // would generate an overtime, which is not wanted
-            $over_time += $this->getRemainingTimeForTask($task, $use_ignore);
+            $over_time += $this->getRemainingTimeForTask($task);
         }
         $task['time_overtime'] = round($over_time, 2);
         return $task['time_overtime'];
@@ -313,13 +253,9 @@ class TaskTimesPreparer
      *
      * @param  array  &$task
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    protected function initRemainingTimeForTask(&$task = [], $subtasks = [], $use_ignore = 1)
+    protected function initRemainingTimeForTask(&$task = [], $subtasks = [])
     {
         $remaining_time = 0.0;
         if (isset($task['id'])) {
@@ -327,7 +263,7 @@ class TaskTimesPreparer
 
             // calculate remaining or overtime based on subtasks
             if (!empty($subtasks)) {
-                $tmp = $this->getRemainingFromSubtasks($subtasks, $use_ignore, $task);
+                $tmp = $this->getRemainingFromSubtasks($subtasks, $task);
 
             // calculate remaining or overtime based only on task itself
             } else {
@@ -377,19 +313,12 @@ class TaskTimesPreparer
      *
      * @param  array &$task
      * @param  array $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getEstimatedFromSubtasks(&$task, $subtasks = [], $use_ignore = 1)
+    public function getEstimatedFromSubtasks(&$task, $subtasks = [])
     {
         $estimated_time = 0.0;
         foreach ($subtasks as $subtask) {
-            if ($this->ignoreLogic($subtask, $use_ignore)) {
-                continue;
-            }
             $estimated_time += $subtask['time_estimated'];
         }
         $task['time_estimated'] = round($estimated_time, 2);
@@ -417,16 +346,6 @@ class TaskTimesPreparer
     }
 
     /**
-     * Init and/or ge the ignored subtask titles.
-     *
-     * @return array
-     */
-    public function getIgnoredSubtaskTitles()
-    {
-        return $this->getConfig('ignore_subtask_titles');
-    }
-
-    /**
      * Get the config value for the non-time-mode minutes,
      * but just make a call once; while the original value
      * is still -1.
@@ -449,22 +368,13 @@ class TaskTimesPreparer
      * subtasks in the array.
      *
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    protected function getOvertimeFromSubtasks($subtasks = [], $use_ignore = 1)
+    protected function getOvertimeFromSubtasks($subtasks = [])
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
-            if ($this->ignoreLogic($subtask, $use_ignore)) {
-                continue;
-            }
-
             $tmp = $subtask['time_spent'] - $subtask['time_estimated'];
-
             $out += $tmp;
         }
         return $out;
@@ -476,17 +386,13 @@ class TaskTimesPreparer
      *
      * @param  array  &$task
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getOvertimeForTask(&$task, $subtasks = [], $use_ignore = 1)
+    public function getOvertimeForTask(&$task, $subtasks = [])
     {
         if ($this->getNonTimeModeEnabled()) {
             $full_hours = $this->getNonTimeModeMinutes() * $task['score'] / 60;
-            $new_spent = $this->getSpentTimeForTask($task, $subtasks, $use_ignore);
+            $new_spent = $this->getSpentTimeForTask($task, $subtasks);
             $new_overtime = $new_spent - $full_hours;
             if ($new_spent <= $full_hours) {
                 $new_overtime = 0;
@@ -497,7 +403,7 @@ class TaskTimesPreparer
             return $new_overtime;
         } else {
             if (!array_key_exists('time_overtime', $task)) {
-                $this->initOvertimeTimeForTask($task, $subtasks, $use_ignore);
+                $this->initOvertimeTimeForTask($task, $subtasks);
             }
             return $task['time_overtime'];
         }
@@ -536,21 +442,13 @@ class TaskTimesPreparer
      * subtasks in the array.
      *
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get only non-ignored subtasks times
-     *         2: get only ignored subtask times
-     *         3: get all times
      * @param  array   &$task    For modifying the open_subtasks key
      * @return float
      */
-    protected function getRemainingFromSubtasks($subtasks = [], $use_ignore = 1, &$task = [])
+    protected function getRemainingFromSubtasks($subtasks = [], &$task = [])
     {
         $out = 0.0;
         foreach ($subtasks as $subtask) {
-            if ($this->ignoreLogic($subtask, $use_ignore)) {
-                continue;
-            }
-
             // check if this subtask is open or not and add it, if it's open
             if ($subtask['status'] != 2) {
                 $task['open_subtasks']++;
@@ -575,22 +473,15 @@ class TaskTimesPreparer
      *
      * @param  array  &$task
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getRemainingTimeForTask(&$task, $subtasks = [], $use_ignore = 1)
+    public function getRemainingTimeForTask(&$task, $subtasks = [])
     {
         if ($this->getNonTimeModeEnabled()) {
 
             // get data from the subtasks
             $time_override = 0;
             foreach ($subtasks as $subtask) {
-                if ($this->ignoreLogic($subtask, $use_ignore)) {
-                    continue;
-                }
                 if (is_numeric($subtask['title'])) {
                     if ($subtask['title'] > 0) {
                         if ($subtask['status'] == 1) {
@@ -637,7 +528,7 @@ class TaskTimesPreparer
 
         } else {
             if (!array_key_exists('time_remaining', $task)) {
-                $this->initRemainingTimeForTask($task, $subtasks, $use_ignore);
+                $this->initRemainingTimeForTask($task, $subtasks);
             }
             return $task['time_remaining'];
         }
@@ -650,19 +541,12 @@ class TaskTimesPreparer
      *
      * @param  array &$task
      * @param  array $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getSpentFromSubtasks(&$task, $subtasks = [], $use_ignore = 1)
+    public function getSpentFromSubtasks(&$task, $subtasks = [])
     {
         $spent_time = 0.0;
         foreach ($subtasks as $subtask) {
-            if ($this->ignoreLogic($subtask, $use_ignore)) {
-                continue;
-            }
             $spent_time += $subtask['time_spent'];
         }
         $task['time_spent'] = round($spent_time, 2);
@@ -674,13 +558,9 @@ class TaskTimesPreparer
      *
      * @param  array  &$task
      * @param  array  $subtasks
-     * @param  integer   $use_ignore
-     *         1: get times and skip ignored subtasks
-     *         2: get only ignored subtask times
-     *         3: get ignored AND non-ignored subtasks times
      * @return float
      */
-    public function getSpentTimeForTask(&$task, $subtasks = [], $use_ignore = 1)
+    public function getSpentTimeForTask(&$task, $subtasks = [])
     {
         // this has to be initialized if not existend; it's needed
         // at another point in the plugin. it counts the open subtasks
@@ -702,9 +582,6 @@ class TaskTimesPreparer
             $time_override = 0;
             $has_override = false;
             foreach ($subtasks as $subtask) {
-                if ($this->ignoreLogic($subtask, $use_ignore)) {
-                    continue;
-                }
                 if (is_numeric($subtask['title'])) {
                     $has_override = true;
                     if ($subtask['title'] > 0) {
@@ -948,43 +825,6 @@ class TaskTimesPreparer
     {
         if (!isset($arr[$col_name])) {
             $arr[$col_name] = ['estimated' => 0, 'spent' => 0, 'remaining' => 0, 'overtime' => 0];
-        }
-    }
-
-    /**
-     * Checks, if the given subtask has a substring in its title,
-     * which exists in the configs "ignore subtasks" setting.
-     *
-     * @param  array $subtask
-     * @return bool
-     */
-    public function subtaskTitleHasIgnoreTitleSubString($subtask)
-    {
-        $subtask_is_ignored = in_array($subtask['id'], $this->subtask_ids_have_ignore_substring_in_title);
-        // return already to save some premature performance, since
-        // it means that the subtask was checked already
-        if ($subtask_is_ignored) {return $subtask_is_ignored;}
-        $subtask_is_not_ignored = in_array($subtask['id'], $this->subtask_ids_do_not_have_ignore_substring_in_title);
-        $subtask_was_checked = $subtask_is_ignored || $subtask_is_not_ignored;
-
-        // first check, if the subtask was checked already
-        if ($subtask_was_checked) {
-            return $subtask_is_ignored;
-
-        // or check it new
-        } else {
-            $found = false;
-            foreach ($this->getIgnoredSubtaskTitles() as $ignore_substring) {
-                if (strpos($subtask['title'], $ignore_substring) !== false) {
-                    $found = true;
-                }
-            }
-            if ($found) {
-                $this->subtask_ids_have_ignore_substring_in_title[] = $subtask['id'];
-            } else {
-                $this->subtask_ids_do_not_have_ignore_substring_in_title[] = $subtask['id'];
-            }
-            return $found;
         }
     }
 

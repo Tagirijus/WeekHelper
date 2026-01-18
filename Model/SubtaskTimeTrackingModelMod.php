@@ -283,12 +283,11 @@ class SubtaskTimeTrackingModelMod extends Base
      *
      * @access public
      * @param  integer   $task_id    Task id
-     * @param  bool      $use_ignores
      * @return bool
      */
-    public function updateTaskTimeTracking($task_id, $use_ignores = true)
+    public function updateTaskTimeTracking($task_id)
     {
-        $values = $this->calculateSubtaskTime($task_id, $use_ignores);
+        $values = $this->calculateSubtaskTime($task_id);
 
         return $this->db
                     ->table(\Kanboard\Model\TaskModel::TABLE)
@@ -301,16 +300,10 @@ class SubtaskTimeTrackingModelMod extends Base
      *
      * @access public
      * @param  integer   $task_id    Task id
-     * @param  bool      $use_ignores
      * @return array
      */
-    public function calculateSubtaskTime($task_id, $use_ignores = true)
+    public function calculateSubtaskTime($task_id)
     {
-        if ($use_ignores) {
-            $ignore_subtask_titles = $this->helper->hoursViewHelper->getIgnoredSubtaskTitles();
-        } else {
-            $ignore_subtask_titles = [];
-        }
         $tmpQuery = $this->db
                     ->table(\Kanboard\Model\SubtaskModel::TABLE)
                     ->eq('task_id', $task_id)
@@ -318,11 +311,6 @@ class SubtaskTimeTrackingModelMod extends Base
                         'SUM(time_spent) AS time_spent',
                         'SUM(time_estimated) AS time_estimated'
                     );
-        if (!empty($ignore_subtask_titles)) {
-            foreach ($ignore_subtask_titles as $ignore_title_substring) {
-                $tmpQuery->addCondition('`title` NOT LIKE \'%' . $ignore_title_substring . '%\'');
-            }
-        }
         return $tmpQuery->findOne();
     }
 }
