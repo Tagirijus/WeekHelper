@@ -31,7 +31,29 @@ class TaskTimesPreparer
     ];
 
     /**
+     * All "prepared" final tasks with their ID as the key.
+     *
+     *  [
+     *      task_id => [task_array],
+     *      ...
+     *  ]
+     *
+     * @var array
+     **/
+    var $tasks = [];
+
+    /**
      * The class attribute, holding the tasks per level.
+     * The value array has the task id as key and the task
+     * itself as value.
+     *
+     *  [
+     *      'level_1' => [
+     *          task_id => [task_array],
+     *          ...
+     *      ],
+     *      ...
+     *  ]
      *
      * @var array
      **/
@@ -41,6 +63,24 @@ class TaskTimesPreparer
         'level_3' => [],
         'level_4' => [],
     ];
+
+    /**
+     * All prepared tasks per project. This arrays key
+     * is the project id, while its value holds the
+     * array, where the key is the task id and its
+     * value is the final task array.
+     *
+     *  [
+     *      project_id => [
+     *          task_id => [task_array],
+     *          ...
+     *      ],
+     *      ...
+     *  ]
+     *
+     * @var array
+     **/
+    var $tasks_per_project = [];
 
     /**
      * The TimetaggerTranscriber, which can overwrite

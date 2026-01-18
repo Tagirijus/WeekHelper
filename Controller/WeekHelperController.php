@@ -315,53 +315,6 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
     }
 
     /**
-     * Get the tooltip for the task times.
-     *
-     * @return HTML
-     */
-    public function getTooltipTaskTimes()
-    {
-        $task_id = $this->request->getStringParam('task_id', -1);
-        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
-        $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_task_times', [
-            'task_id' => $task_id,
-            'times' => $times
-        ]));
-    }
-
-    /**
-     * Get the tooltip for the hours header, showing
-     * the worked times for done task for: days, weeks
-     * and months.
-     *
-     * @return HTML
-     */
-    public function getTooltipWorkedTimes()
-    {
-        $project_id = $this->request->getStringParam('project_id', -1);
-        $month_times = [
-            -1 => $this->helper->hoursViewHelper->getMonthTimes($project_id, -1),
-            0 => $this->helper->hoursViewHelper->getMonthTimes($project_id, 0)
-        ];
-        $week_times = [
-            -1 => $this->helper->hoursViewHelper->getWeekTimes($project_id, -1),
-            0 => $this->helper->hoursViewHelper->getWeekTimes($project_id, 0)
-        ];
-        $day_times = [
-            -2 => $this->helper->hoursViewHelper->getDayTimes($project_id, -2),
-            -1 => $this->helper->hoursViewHelper->getDayTimes($project_id, -1),
-            0 => $this->helper->hoursViewHelper->getDayTimes($project_id, 0)
-        ];
-
-        $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_worked_times', [
-            'project_id' => $project_id,
-            'month_times' => $month_times,
-            'week_times' => $week_times,
-            'day_times' => $day_times
-        ]));
-    }
-
-    /**
      * Get the automatic planned week as plaintext or JSON string.
      *
      * @return Response

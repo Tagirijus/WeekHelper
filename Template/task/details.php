@@ -99,9 +99,6 @@
             <div class="task-summary-column">
                 <ul class="no-bullet">
                     <li>
-                        <?php if (!$this->hoursViewHelper->getNonTimeModeEnabled()): ?>
-                            <span class="tooltip" data-href="/?controller=WeekHelperController&amp;plugin=WeekHelper&amp;action=getTooltipTaskTimes&amp;task_id=<?= $task['id'] ?>"><i class="fa fa-bars"></i></span>
-                        <?php endif ?>
                         <strong><?= t('Time estimated:') ?></strong>
                         <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?></span>
                     </li>
