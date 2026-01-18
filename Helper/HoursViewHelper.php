@@ -37,7 +37,7 @@ class HoursViewHelper extends Base
      *
      * @var TaskTimesPreparer
      **/
-    var $task_times_preparer;
+    var $task_times_preparer = null;
 
     /**
      * Constructor for HoursViewHelper
@@ -48,6 +48,13 @@ class HoursViewHelper extends Base
     public function __construct($container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Initialize the TaskTimesPreparer.
+     */
+    public function initTaskTimesPreparer()
+    {
         $config_task_times_preparer = [
             'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
             'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
@@ -100,7 +107,20 @@ class HoursViewHelper extends Base
      */
     public function getTasksPerLevel()
     {
-        return $this->task_times_preparer->getTasksPerLevel();
+        return $this->getTaskTimesPreparer()->getTasksPerLevel();
+    }
+
+    /**
+     * Get the TaskTimesPreparer and, if needed, initialize it first.
+     *
+     * @return TaskTimesPreparer
+     */
+    public function getTaskTimesPreparer()
+    {
+        if (is_null($this->task_times_preparer)) {
+            $this->initTaskTimesPreparer();
+        }
+        return $this->task_times_preparer;
     }
 
     /**
@@ -118,7 +138,7 @@ class HoursViewHelper extends Base
                 $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
             }
         }
-        return $this->task_times_preparer->getTimesFromTasks($tasks, $subtasks_by_task_id);
+        return $this->getTaskTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
     }
 
     /**
@@ -174,7 +194,7 @@ class HoursViewHelper extends Base
      */
     public function getNonTimeModeEnabled()
     {
-        return $this->task_times_preparer->getNonTimeModeEnabled();
+        return $this->getTaskTimesPreparer()->getNonTimeModeEnabled();
     }
 
     /**
@@ -320,7 +340,7 @@ class HoursViewHelper extends Base
      */
     public function getEstimatedTimeForTask(&$task)
     {
-        return $this->task_times_preparer->getEstimatedTimeForTask($task);
+        return $this->getTaskTimesPreparer()->getEstimatedTimeForTask($task);
     }
 
     /**
@@ -331,7 +351,7 @@ class HoursViewHelper extends Base
      */
     public function getSpentTimeForTask(&$task)
     {
-        return $this->task_times_preparer->getSpentTimeForTask(
+        return $this->getTaskTimesPreparer()->getSpentTimeForTask(
             $task,
             $this->getSubtasksByTaskId($task['id'])
         );
@@ -346,7 +366,7 @@ class HoursViewHelper extends Base
      */
     public function getRemainingTimeForTask(&$task)
     {
-        return $this->task_times_preparer->getRemainingTimeForTask(
+        return $this->getTaskTimesPreparer()->getRemainingTimeForTask(
             $task,
             $this->getSubtasksByTaskId($task['id'])
         );
@@ -361,7 +381,7 @@ class HoursViewHelper extends Base
      */
     public function getOvertimeForTask(&$task)
     {
-        return $this->task_times_preparer->getOvertimeForTask(
+        return $this->getTaskTimesPreparer()->getOvertimeForTask(
             $task,
             $this->getSubtasksByTaskId($task['id'])
         );
@@ -710,15 +730,15 @@ class HoursViewHelper extends Base
     public function calculateEstimatedSpentOvertimeForTask($task)
     {
         $task_tmp = $task;
-        $this->task_times_preparer->getEstimatedFromSubtasks(
+        $this->getTaskTimesPreparer()->getEstimatedFromSubtasks(
             $task_tmp,
             $this->getSubtasksByTaskId($task_tmp['id'])
         );
-        $this->task_times_preparer->getSpentFromSubtasks(
+        $this->getTaskTimesPreparer()->getSpentFromSubtasks(
             $task_tmp,
             $this->getSubtasksByTaskId($task_tmp['id'])
         );
-        $this->task_times_preparer->getOvertimeForTask(
+        $this->getTaskTimesPreparer()->getOvertimeForTask(
             $task_tmp,
             $this->getSubtasksByTaskId($task_tmp['id'])
         );
