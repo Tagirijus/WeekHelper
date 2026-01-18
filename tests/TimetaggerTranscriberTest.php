@@ -132,4 +132,34 @@ final class TimetaggerTranscriberTest extends TestCase
             'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
         );
     }
+
+    public function testTagsMatch()
+    {
+        $task_tags = 'kanboard-todo,code';
+        $tags_a = [
+            'kanboard-todo',
+            'code',
+            'additional'
+        ];
+        $tags_b = [
+            'code',
+            'kanboard-todo'
+        ];
+        $tags_c = [
+            'code',
+            'something-else'
+        ];
+        $this->assertTrue(
+            TimetaggerTranscriber::tagsMatch($task_tags, $tags_a),
+            'TimetaggerTranscriber::tagsMatch() not working as intended.'
+        );
+        $this->assertTrue(
+            TimetaggerTranscriber::tagsMatch($task_tags, $tags_b),
+            'TimetaggerTranscriber::tagsMatch() not working as intended.'
+        );
+        $this->assertFalse(
+            TimetaggerTranscriber::tagsMatch($task_tags, $tags_c),
+            'TimetaggerTranscriber::tagsMatch() not working as intended.'
+        );
+    }
 }
