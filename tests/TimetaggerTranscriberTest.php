@@ -161,5 +161,12 @@ final class TimetaggerTranscriberTest extends TestCase
             TimetaggerTranscriber::tagsMatch($task_tags, $tags_c),
             'TimetaggerTranscriber::tagsMatch() not working as intended.'
         );
+
+        $task_tags = '';
+        $tags_a = ['anything'];
+        $this->assertFalse(
+            TimetaggerTranscriber::tagsMatch($task_tags, $tags_a),
+            'TimetaggerTranscriber::tagsMatch() not working as intended.'
+        );
     }
 }

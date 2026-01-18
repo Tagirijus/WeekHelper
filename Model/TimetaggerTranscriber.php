@@ -38,7 +38,7 @@ class TimetaggerTranscriber
         });
 
         if (empty($required)) {
-            return true;
+            return false;
         }
 
         $required = array_map('mb_strtolower', $required);
@@ -119,7 +119,7 @@ class TimetaggerTranscriber
 
                     // change times from hours into seconds
                     // and reset time_spent
-                    if (!($task['_timetagger_transcribing'] ?? false)) {
+                    if (!isset($task['_timetagger_transcribing'])) {
                         $task['_timetagger_transcribing'] = true;
                         $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
                         $task['time_spent'] = 0;
