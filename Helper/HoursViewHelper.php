@@ -190,14 +190,6 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Get the bool if the non-time-mode is enabled or not.
-     */
-    public function getNonTimeModeEnabled()
-    {
-        return $this->getTaskTimesPreparer()->getNonTimeModeEnabled();
-    }
-
-    /**
      * Simply get all open tasks.
      *
      * @return array
