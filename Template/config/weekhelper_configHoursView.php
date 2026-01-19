@@ -207,31 +207,6 @@
 
 
 
-    <!-- BLOCK HOURS -->
-
-    <p>
-        <h3><?= t('Block hours') ?></h3>
-    </p>
-
-    <p>
-        <?= t('Configure the block calculations.') ?>
-    </p>
-    <div class="task-form-container">
-
-        <div class="task-form-main-column">
-            <?= $this->form->label(t('How many hours is one block? (0 disables the block feature)'), 'block_hours') ?>
-            <?= $this->form->text('block_hours', ['block_hours' => $block_hours], [], [
-                'autofocus'
-            ]) ?>
-        </div>
-
-    </div>
-
-    <br>
-    <br>
-
-
-
     <!-- TOOLTIP -->
 
     <p>

@@ -15,16 +15,6 @@ use Kanboard\Plugin\WeekHelper\Model\TaskTimesPreparer;
 class HoursViewHelper extends Base
 {
     /**
-     * Cache variable for the config so that
-     * it does not have to be fetched multiple
-     * times on every method call, which is
-     * using this config.
-     *
-     * @var integer
-     **/
-    var $block_hours = -1;
-
-    /**
      * Subtasks cache-variable:
      * [task_id => subtask_array]
      *
@@ -69,19 +59,6 @@ class HoursViewHelper extends Base
             'timetagger_start_fetch' => $this->configModel->get('timetagger_start_fetch', ''),
         ];
         $this->task_times_preparer = new TaskTimesPreparer($config_task_times_preparer);
-    }
-
-    /**
-     * Get config for block hours and maybe initialize it first.
-     *
-     * @return integer
-     */
-    public function getBlockHours()
-    {
-        if ($this->block_hours == -1) {
-            $this->block_hours = (int) $this->configModel->get('hoursview_block_hours', 0);
-        }
-        return $this->block_hours;
     }
 
     /**
@@ -315,7 +292,6 @@ class HoursViewHelper extends Base
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
             'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
             'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
-            'block_hours' => $this->configModel->get('hoursview_block_hours', 0),
             'dashboard_link_level_1' => $this->configModel->get('hoursview_dashboard_link_level_1', 0),
             'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
             'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
@@ -663,21 +639,6 @@ class HoursViewHelper extends Base
         } else {
             return false;
         }
-    }
-
-    /**
-     * Calculate the amount of blocks for the given time and respecting the
-     * set config for "hoursview_block_hours".
-     *
-     * @param  float  $time The time to be used for the simple calculation.
-     * @return integer
-     */
-    public function calcBlocksFromTime($time = 0.0)
-    {
-        if ($this->getBlockHours() == 0) {
-            return 0;
-        }
-        return (int) ceil($time / $this->getBlockHours());
     }
 
     /**

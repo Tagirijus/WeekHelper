@@ -12,12 +12,12 @@
     <div class="thv-board-column">
         &ndash;
 
-        <span class="thv-estimated-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['estimated']); ?> Blocks">
+        <span class="thv-estimated-color">
             <?= $this->hoursViewHelper->floatToHHMM($times['estimated']); ?>h
         </span>
         <span></span>
 
-        <span class="thv-spent-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['spent']); ?> Blocks">
+        <span class="thv-spent-color">
             <?= $this->hoursViewHelper->floatToHHMM($times['spent']); ?>h
             <?php if ($times['overtime'] != 0): ?>
                 <i class="thv-font-small">(<?= $this->hoursViewHelper->floatToHHMM($times['spent'] - $times['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($times['overtime']); ?>)</i>
@@ -25,7 +25,7 @@
         </span>
         <span></span>
 
-        <span class="thv-remaining-color" title="<?= $this->hoursViewHelper->calcBlocksFromTime($times['remaining']); ?> Blocks">
+        <span class="thv-remaining-color">
             <?= $this->hoursViewHelper->floatToHHMM($times['remaining']); ?>h
         </span>
         <span></span>
