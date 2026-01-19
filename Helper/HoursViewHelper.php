@@ -62,506 +62,6 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Check if subtasks for task exist and return
-     * the array, or otherwise fetch it from
-     * the DB.
-     *
-     * @param  integer $taskId
-     * @return array
-     */
-    public function getSubtasksByTaskId($taskId)
-    {
-        if (!array_key_exists($taskId, $this->subtasks)) {
-            $this->subtasks[$taskId] = $this->subtaskModel->getAll($taskId);
-        }
-        return $this->subtasks[$taskId];
-    }
-
-    /**
-     * Get the TaskTimesPreparer tasks_per_level array.
-     *
-     * @return array
-     */
-    public function getTasksPerLevel()
-    {
-        return $this->getTaskTimesPreparer()->getTasksPerLevel();
-    }
-
-    /**
-     * Get the TaskTimesPreparer and, if needed, initialize it first.
-     *
-     * @return TaskTimesPreparer
-     */
-    public function getTaskTimesPreparer()
-    {
-        if (is_null($this->task_times_preparer)) {
-            $this->initTaskTimesPreparer();
-        }
-        return $this->task_times_preparer;
-    }
-
-    /**
-     * Get the estimated and spent times in the columns for
-     * the total (all) and the levels (level_1, level_2, ...).
-     *
-     * @param  array &$tasks
-     * @return array
-     */
-    public function getTimesFromTasks(&$tasks)
-    {
-        $subtasks_by_task_id = [];
-        foreach ($tasks as $task) {
-            if (!isset($subtasks_by_task_id[$task['id']])) {
-                $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
-            }
-        }
-        return $this->getTaskTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
-    }
-
-    /**
-     * Get the estimated and spent times in the columns for
-     * all tasks with a given project id.
-     *
-     * This method wraps basically the getTimesFromTasks()
-     * method, but with a given project id to get the
-     * linked tasks.
-     *
-     * @param  integer $projectId
-     * @return array
-     */
-    public function getTimesByProjectId($projectId)
-    {
-        $tasks = $this->getOpenTasksByProjectId($projectId);
-
-        return $this->getTimesFromTasks($tasks);
-    }
-
-    /**
-     * Get an array with the calculated times for
-     * the given column array.
-     *
-     * Array output:
-     *
-     * [
-     *     'estimated' => 2,
-     *     'spent' => 1,
-     *     'remaining' => 1,
-     *     'overtime' => 0
-     * ]
-     *
-     * @param  array $column
-     * @return array
-     */
-    public function getTimesForColumn($column)
-    {
-        $out = ['estimated' => 0, 'spent' => 0, 'remaining' => 0, 'overtime' => 0];
-        if (isset($column['tasks'])) {
-            foreach ($column['tasks'] as $task) {
-                $out['estimated'] += $this->getEstimatedTimeForTask($task);
-                $out['spent'] += $this->getSpentTimeForTask($task);
-                $out['remaining'] += $this->getRemainingTimeForTask($task);
-                $out['overtime'] += $this->getOvertimeForTask($task);
-            }
-        }
-        return $out;
-    }
-
-    /**
-     * Simply get all open tasks.
-     *
-     * @return array
-     */
-    public function getOpenTasks()
-    {
-        $query = $this->taskFinderModel->getExtendedQuery();
-        $builder = $this->taskLexer;
-        $builder->withQuery($query);
-        return $builder->build('status:open')->toArray();
-    }
-
-    /**
-     * Basically some kind of wrapper function for getting
-     * the array with all the tasks for the project.
-     *
-     * @param  integer $projectId
-     * @return array
-     */
-    protected function getOpenTasksByProjectId($projectId)
-    {
-        // this is not needed anymore, since I just want to get open
-        // tasks anyway, which would get "status:open" here anyway.
-        // $search = $this->helper->projectHeader->getSearchQuery($project);
-
-        $query = $this->taskFinderModel->getExtendedQuery()
-            ->eq(TaskModel::TABLE.'.project_id', $projectId);
-
-        $builder = $this->taskLexer;
-        $builder->withQuery($query);
-        return $builder->build('status:open')->toArray();
-    }
-
-    /**
-     * This one gets all tasks for the user and their
-     * respecting times.
-     *
-     * Array output:
-     *
-     * [
-     *     'estimated' => 2,
-     *     'spent' => 1
-     * ]
-     *
-     * @param  integer $userId
-     * @return array
-     */
-    public function getTimesByUserId($userId)
-    {
-        $tasks = $this->taskFinderModel->getExtendedQuery()
-            ->beginOr()
-            ->eq(TaskModel::TABLE.'.owner_id', $userId)
-            ->addCondition(TaskModel::TABLE.".id IN (SELECT task_id FROM ".SubtaskModel::TABLE." WHERE ".SubtaskModel::TABLE.".user_id='$userId')")
-            ->closeOr()
-            ->eq(TaskModel::TABLE.'.is_active', TaskModel::STATUS_OPEN)
-            ->eq(ProjectModel::TABLE.'.is_active', ProjectModel::ACTIVE)
-            ->findAll();
-
-        return $this->getTimesFromTasks($tasks);
-    }
-
-    /**
-     * Get level captions from the config.
-     *
-     * @return array
-     */
-    public function getLevelCaptions()
-    {
-        $levels_captions = [
-            'level_1' => $this->configModel->get('hoursview_level_1_caption', ''),
-            'level_2' => $this->configModel->get('hoursview_level_2_caption', ''),
-            'level_3' => $this->configModel->get('hoursview_level_3_caption', ''),
-            'level_4' => $this->configModel->get('hoursview_level_4_caption', ''),
-            'all' => $this->configModel->get('hoursview_all_caption', '')
-        ];
-        return $levels_captions;
-    }
-
-    /**
-     * Represent the given float as a proper time string.
-     *
-     * @param  float $time
-     * @return string
-     */
-    public function floatToHHMM($time)
-    {
-        if ($time < 0) {
-            $time = $time * -1;
-            $negative = true;
-        } else {
-            $negative = false;
-        }
-        $hours = (int) $time;
-        $minutes = fmod((float) $time, 1) * 60;
-        if ($negative) {
-            return sprintf('-%01d:%02d', $hours, $minutes);
-        } else {
-            return sprintf('%01d:%02d', $hours, $minutes);
-        }
-    }
-
-    /**
-     * Get configuration for plugin as array.
-     *
-     * @return array
-     */
-    public function getConfig()
-    {
-        return [
-            'title' => t('HoursView') . ' &gt; ' . t('Settings'),
-            'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
-            'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
-            'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
-            'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),
-            'level_4_columns' => $this->configModel->get('hoursview_level_4_columns', ''),
-            'level_1_caption' => $this->configModel->get('hoursview_level_1_caption', ''),
-            'level_2_caption' => $this->configModel->get('hoursview_level_2_caption', ''),
-            'level_3_caption' => $this->configModel->get('hoursview_level_3_caption', ''),
-            'level_4_caption' => $this->configModel->get('hoursview_level_4_caption', ''),
-            'all_caption' => $this->configModel->get('hoursview_all_caption', ''),
-            'progressbar_enabled' => $this->configModel->get('hoursview_progressbar_enabled', 1),
-            'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
-            'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
-            'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
-            'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
-            'dashboard_link_level_1' => $this->configModel->get('hoursview_dashboard_link_level_1', 0),
-            'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
-            'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
-            'dashboard_link_level_4' => $this->configModel->get('hoursview_dashboard_link_level_4', 0),
-            'dashboard_link_level_all' => $this->configModel->get('hoursview_dashboard_link_level_all', 0),
-        ];
-    }
-
-    /**
-     * Get the estimated time of a given task according to internal settings.
-     *
-     * @param  array  &$task
-     * @return float
-     */
-    public function getEstimatedTimeForTask(&$task)
-    {
-        return $this->getTaskTimesPreparer()->getEstimatedTimeForTask($task);
-    }
-
-    /**
-     * Get the spent time of a given task according to internal settings.
-     *
-     * @param  array  &$task
-     * @return float
-     */
-    public function getSpentTimeForTask(&$task)
-    {
-        return $this->getTaskTimesPreparer()->getSpentTimeForTask(
-            $task,
-            $this->getSubtasksByTaskId($task['id'])
-        );
-    }
-
-    /**
-     * Init maybe and then return the remaining time
-     * for the given task.
-     *
-     * @param  array  &$task
-     * @return float
-     */
-    public function getRemainingTimeForTask(&$task)
-    {
-        return $this->getTaskTimesPreparer()->getRemainingTimeForTask(
-            $task,
-            $this->getSubtasksByTaskId($task['id'])
-        );
-    }
-
-    /**
-     * Init maybe and then return the overtime time
-     * for the given task.
-     *
-     * @param  array  &$task
-     * @return float
-     */
-    public function getOvertimeForTask(&$task)
-    {
-        return $this->getTaskTimesPreparer()->getOvertimeForTask(
-            $task,
-            $this->getSubtasksByTaskId($task['id'])
-        );
-    }
-
-    /**
-     * Get the overtime with the correct sign to
-     * show in the header.
-     *
-     * E.g. either there was overtime; then it will
-     * be shown as "time_estimated" + "overtime".
-     *
-     * If you worked faster it's "time_estimated" - "overtime".
-     *
-     * @param  float $overtime
-     * @return string
-     */
-    public function getOvertimeForTaskAsString($overtime)
-    {
-        if ($overtime > 0) {
-            $prefix = '+ ';
-        } else {
-            $prefix = '- ';
-        }
-        return $prefix . $this->floatToHHMM(abs($overtime)) . 'h';
-    }
-
-    /**
-     * With the consideration of the subtask status, a subtask
-     * might be done earlier than estimated. This way there might be
-     * an available overhead-time. Or even vice versa and there
-     * is less time left, since I mis-estimated the times.
-     *
-     * In either way this method is for calculating the difference.
-     *
-     * @param  array &$task
-     * @return float
-     */
-    public function getSlowerOrFasterThanEstimatedForTask(&$task)
-    {
-        $remaining = $this->getRemainingTimeForTask($task);
-        $estimated = $this->getEstimatedTimeForTask($task);
-        $spent = $this->getSpentTimeForTask($task);
-        return $estimated - $spent - $remaining;
-    }
-
-    /**
-     * Wrapper for the getSlowerOrFasterThanEstimatedForTask()
-     * method to render the ouput sign.
-     *
-     * @param  array &$task
-     * @return string
-     */
-    public function getSlowerOrFasterSign(&$task)
-    {
-        $slowerOrFaster = $this->getSlowerOrFasterThanEstimatedForTask($task);
-        if ($slowerOrFaster > 0) {
-            $out = '>>';
-        } else {
-            $out = '<<';
-        }
-        // how it was before:
-        // $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
-        return $out;
-    }
-
-    /**
-     * Calculate the percent with the given task.
-     * Use the times for this.
-     *
-     * Future idea:
-     *    Maybe use the amount of subtasks, if no
-     *    estimstd times exist at all.
-     *
-     * @param  array &$task
-     * @param  bool $overtime
-     * @return integer
-     */
-    public function getPercentForTask(&$task, $overtime = false)
-    {
-        $out = 0;
-
-        // Calculate percentage from given times, while considering
-        // the possible subtask times. These can vary, since
-        // done subtasks will use the spent time as their
-        // estimated time, if they are done already. This would
-        // mean less (or sometimes more!) estimated overall time
-        // after all. To do so I won't simply calculate
-        // "spent / estimated" for the percentage, but rather:
-        //      "(estimated - remaining) / estimated"
-        //
-        // Yet I can only do so, if the given $task is really a
-        // task array with an 'id'; otherwise just do the normal
-        // calculation instead ...
-        if ($this->getEstimatedTimeForTask($task) != 0) {
-            $estimated = $this->getEstimatedTimeForTask($task);
-            $remaining = $this->getRemainingTimeForTask($task);
-            $spent = $estimated - $remaining;
-
-            if ($estimated != 0) {
-                $out = round($spent / $estimated * 100, 0);
-            } else {
-                $out = 100;
-            }
-        }
-
-        // consider overtime
-        if ($overtime) {
-            if ($out > 100) {
-                $out = $out - 100;
-            } else {
-                $out = 0;
-            }
-        }
-
-        // prevent negative percentages, which
-        // might occur due to rounding issues,
-        // I guess? - monkey patch!
-        if ($out <= 0) {
-            $out = 0;
-        }
-
-        return $out;
-    }
-
-    /**
-     * Get percentage for a task according to its
-     * spent time and estimated time (or in the future
-     * maybe depending on the subtasks) and render
-     * it as a string with percentage symbol.
-     *
-     * Also there is the option to add additional info like
-     * the overtime.
-     *
-     * @param  array &$task
-     * @param  string $symbol
-     * @param  bool $overtime
-     * @return string
-     */
-    public function getPercentForTaskAsString(&$task, $symbol = '%', $overtime = false)
-    {
-        $percent_over = $this->getPercentForTask($task, true);
-
-        if ($overtime && $percent_over > 0) {
-            $out = '100' . $symbol . ' (+' . $this->getPercentForTask($task, true) . $symbol . ')';
-        } else {
-            $out = $this->getPercentForTask($task, false) . $symbol;
-        }
-
-        return $out;
-    }
-
-    /**
-     * Generate additional task progress bar CSS
-     * depending on the given percentage.
-     *
-     * Output will be the class in
-     *     week-helper.css
-     *
-     * @param  integer $percent
-     * @param  array   $task      To check if there are open subtasks or not
-     * @return string
-     */
-    public function getPercentCSSClass($percent = 0, $task = [])
-    {
-        if ($percent >= 50 && $percent < 75) {
-            return 'progress-color-50';
-        } elseif ($percent >= 75 && $percent < 100) {
-            return 'progress-color-75';
-        } elseif ($percent >= 100 && $task['open_subtasks'] == 0) {
-            return 'progress-color-100';
-        } elseif ($percent >= 100 && $task['open_subtasks'] != 0) {
-            return 'progress-color-100-undone';
-        } else {
-            return 'progress-color';
-        }
-    }
-
-    /**
-     * According to the wanted levels from the config,
-     * sum up all the respecting time values for e.g.
-     * the "project_times_summary_single.php".
-     *
-     * @param  array $times
-     * @return array
-     */
-    public function prepareProjectTimesWithConfig($times)
-    {
-        $out = [
-            'estimated' => 0,
-            'spent' => 0,
-            'remaining' => 0,
-            'overtime' => 0,
-        ];
-
-        // Get levels from config
-        $levels = explode(',', $this->configModel->get('hoursview_progress_home_project_level', 'all'));
-
-        // iter through levels, while checking if they exist in the $times as key
-        foreach ($levels as $level) {
-            if (array_key_exists($level, $times)) {
-                $out['estimated'] += $times[$level]['_total']['estimated'];
-                $out['spent'] += $times[$level]['_total']['spent'];
-                $out['remaining'] += $times[$level]['_total']['remaining'];
-                $out['overtime'] += $times[$level]['_total']['overtime'];
-            }
-        }
-
-        return $out;
-    }
-
-    /**
      * Get all tasks from the the search URI,
      * ignoring the pagination.
      *
@@ -605,88 +105,588 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Get an array with array of the getTimesByProjectId() method
-     * for each project, which is active.
+     * Get configuration for plugin as array.
      *
-     * @param integer $user
      * @return array
      */
-    public function getTimesForAllActiveProjects()
+    public function getConfig()
     {
-        $times = [];
-        $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
-        foreach ($projects as $projectId => $projectName) {
-            $times[$projectId] = [
-                'name' => $projectName,
-                'times' => $this->getTimesByProjectId($projectId)
-            ];
-        }
-
-        return $times;
+        return [
+            'title' => t('HoursView') . ' &gt; ' . t('Settings'),
+            'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
+            'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
+            'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
+            'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),
+            'level_4_columns' => $this->configModel->get('hoursview_level_4_columns', ''),
+            'level_1_caption' => $this->configModel->get('hoursview_level_1_caption', ''),
+            'level_2_caption' => $this->configModel->get('hoursview_level_2_caption', ''),
+            'level_3_caption' => $this->configModel->get('hoursview_level_3_caption', ''),
+            'level_4_caption' => $this->configModel->get('hoursview_level_4_caption', ''),
+            'all_caption' => $this->configModel->get('hoursview_all_caption', ''),
+            'progressbar_enabled' => $this->configModel->get('hoursview_progressbar_enabled', 1),
+            'progressbar_opacity' => $this->configModel->get('hoursview_progressbar_opacity', 1),
+            'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
+            'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
+            'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
+            'dashboard_link_level_1' => $this->configModel->get('hoursview_dashboard_link_level_1', 0),
+            'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
+            'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
+            'dashboard_link_level_4' => $this->configModel->get('hoursview_dashboard_link_level_4', 0),
+            'dashboard_link_level_all' => $this->configModel->get('hoursview_dashboard_link_level_all', 0),
+        ];
     }
 
     /**
-     * Check the given array, if it contains any times
-     * and returns a boolean accordingly.
+     * Get level captions from the config.
      *
-     * @param  array   $timesArray
-     * @return boolean
+     * @return array
      */
-    public function hasTimes($timesArray = [])
+    public function getLevelCaptions()
     {
-        if ($timesArray['estimated'] != 0.0 || $timesArray['spent'] != 0.0 || $timesArray['remaining'] != 0.0) {
-            return true;
+        $levels_captions = [
+            'level_1' => $this->configModel->get('hoursview_level_1_caption', ''),
+            'level_2' => $this->configModel->get('hoursview_level_2_caption', ''),
+            'level_3' => $this->configModel->get('hoursview_level_3_caption', ''),
+            'level_4' => $this->configModel->get('hoursview_level_4_caption', ''),
+            'all' => $this->configModel->get('hoursview_all_caption', '')
+        ];
+        return $levels_captions;
+    }
+
+    /**
+     * Simply get all open tasks.
+     *
+     * @return array
+     */
+    public function getOpenTasks()
+    {
+        $query = $this->taskFinderModel->getExtendedQuery();
+        $builder = $this->taskLexer;
+        $builder->withQuery($query);
+        return $builder->build('status:open')->toArray();
+    }
+
+    /**
+     * Generate additional task progress bar CSS
+     * depending on the given percentage.
+     *
+     * Output will be the class in
+     *     week-helper.css
+     *
+     * @param  integer $percent
+     * @param  array   $task      To check if there are open subtasks or not
+     * @return string
+     */
+    public function getPercentCSSClass($percent = 0, $task = [])
+    {
+        if ($percent >= 50 && $percent < 75) {
+            return 'progress-color-50';
+        } elseif ($percent >= 75 && $percent < 100) {
+            return 'progress-color-75';
+        } elseif ($percent >= 100 && $task['open_subtasks'] == 0) {
+            return 'progress-color-100';
+        } elseif ($percent >= 100 && $task['open_subtasks'] != 0) {
+            return 'progress-color-100-undone';
         } else {
-            return false;
+            return 'progress-color';
         }
     }
 
     /**
-     * A helper function to help sort the times array, when accessing the
-     * times array in tooltip_dashboard_times.
+     * Check if subtasks for task exist and return
+     * the array, or otherwise fetch it from
+     * the DB.
      *
-     * The function sorts the given level by the given key, which lays
-     * deep nested in the array, actually, and returns a new sorted array.
-     *
-     * The method automatically uses the config to know how to sort.
-     *
-     * @param  array  $times
-     * @param  string  $level
+     * @param  integer $taskId
      * @return array
      */
-    public function sortTimesArray($times, $level = 'level_1')
+    public function getSubtasksByTaskId($taskId)
     {
-        $tooltip_sorting = $this->configModel->get('hoursview_tooltip_sorting', 'id');
-        if ($tooltip_sorting == 'id') {
-            // by default the returned $times array should already
-            // be in the sorting of 'id', which is the key of the
-            // array.
-            return $times;
+        if (!array_key_exists($taskId, $this->subtasks)) {
+            $this->subtasks[$taskId] = $this->subtaskModel->getAll($taskId);
         }
-
-        // otherwise do the sorting thing now
-
-        // this part interpretes the tooltip_sorting config
-        if ($tooltip_sorting == 'remaining_hours_asc') {
-            $key = 'remaining';
-            $asc = true;
-        } elseif ($tooltip_sorting == 'remaining_hours_desc') {
-            $key = 'remaining';
-            $asc = false;
-        } else {
-            $key = 'all';
-            $asc = true;
-        }
-
-        // this one sorts with a custom function
-        uasort($times, function ($a, $b) use ($level, $key, $asc) {
-            if ($asc == true) {
-                return $a['times'][$level]['_total'][$key] <=> $b['times'][$level]['_total'][$key];
-            } else {
-                return $b['times'][$level]['_total'][$key] <=> $a['times'][$level]['_total'][$key];
-            }
-        });
-
-        return $times;
+        return $this->subtasks[$taskId];
     }
+
+    // /**
+    //  * Get the TaskTimesPreparer tasks_per_level array.
+    //  *
+    //  * @return array
+    //  */
+    // public function getTasksPerLevel()
+    // {
+    //     return $this->getTaskTimesPreparer()->getTasksPerLevel();
+    // }
+
+    /**
+     * Get the TaskTimesPreparer and, if needed, initialize it first.
+     *
+     * @return TaskTimesPreparer
+     */
+    public function getTaskTimesPreparer()
+    {
+        if (is_null($this->task_times_preparer)) {
+            $this->initTaskTimesPreparer();
+        }
+        return $this->task_times_preparer;
+    }
+
+    // /**
+    //  * Get the estimated and spent times in the columns for
+    //  * the total (all) and the levels (level_1, level_2, ...).
+    //  *
+    //  * @param  array &$tasks
+    //  * @return array
+    //  */
+    // public function getTimesFromTasks(&$tasks)
+    // {
+    //     $subtasks_by_task_id = [];
+    //     foreach ($tasks as $task) {
+    //         if (!isset($subtasks_by_task_id[$task['id']])) {
+    //             $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
+    //         }
+    //     }
+    //     return $this->getTaskTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
+    // }
+
+    // /**
+    //  * Get the estimated and spent times in the columns for
+    //  * all tasks with a given project id.
+    //  *
+    //  * This method wraps basically the getTimesFromTasks()
+    //  * method, but with a given project id to get the
+    //  * linked tasks.
+    //  *
+    //  * @param  integer $projectId
+    //  * @return array
+    //  */
+    // public function getTimesByProjectId($projectId)
+    // {
+    //     $tasks = $this->getOpenTasksByProjectId($projectId);
+
+    //     return $this->getTimesFromTasks($tasks);
+    // }
+
+    // /**
+    //  * Get an array with the calculated times for
+    //  * the given column array.
+    //  *
+    //  * Array output:
+    //  *
+    //  * [
+    //  *     'estimated' => 2,
+    //  *     'spent' => 1,
+    //  *     'remaining' => 1,
+    //  *     'overtime' => 0
+    //  * ]
+    //  *
+    //  * @param  array $column
+    //  * @return array
+    //  */
+    // public function getTimesForColumn($column)
+    // {
+    //     $out = ['estimated' => 0, 'spent' => 0, 'remaining' => 0, 'overtime' => 0];
+    //     if (isset($column['tasks'])) {
+    //         foreach ($column['tasks'] as $task) {
+    //             $out['estimated'] += $this->getEstimatedTimeForTask($task);
+    //             $out['spent'] += $this->getSpentTimeForTask($task);
+    //             $out['remaining'] += $this->getRemainingTimeForTask($task);
+    //             $out['overtime'] += $this->getOvertimeForTask($task);
+    //         }
+    //     }
+    //     return $out;
+    // }
+
+    // /**
+    //  * Basically some kind of wrapper function for getting
+    //  * the array with all the tasks for the project.
+    //  *
+    //  * @param  integer $projectId
+    //  * @return array
+    //  */
+    // protected function getOpenTasksByProjectId($projectId)
+    // {
+    //     // this is not needed anymore, since I just want to get open
+    //     // tasks anyway, which would get "status:open" here anyway.
+    //     // $search = $this->helper->projectHeader->getSearchQuery($project);
+
+    //     $query = $this->taskFinderModel->getExtendedQuery()
+    //         ->eq(TaskModel::TABLE.'.project_id', $projectId);
+
+    //     $builder = $this->taskLexer;
+    //     $builder->withQuery($query);
+    //     return $builder->build('status:open')->toArray();
+    // }
+
+    // /**
+    //  * This one gets all tasks for the user and their
+    //  * respecting times.
+    //  *
+    //  * Array output:
+    //  *
+    //  * [
+    //  *     'estimated' => 2,
+    //  *     'spent' => 1
+    //  * ]
+    //  *
+    //  * @param  integer $userId
+    //  * @return array
+    //  */
+    // public function getTimesByUserId($userId)
+    // {
+    //     $tasks = $this->taskFinderModel->getExtendedQuery()
+    //         ->beginOr()
+    //         ->eq(TaskModel::TABLE.'.owner_id', $userId)
+    //         ->addCondition(TaskModel::TABLE.".id IN (SELECT task_id FROM ".SubtaskModel::TABLE." WHERE ".SubtaskModel::TABLE.".user_id='$userId')")
+    //         ->closeOr()
+    //         ->eq(TaskModel::TABLE.'.is_active', TaskModel::STATUS_OPEN)
+    //         ->eq(ProjectModel::TABLE.'.is_active', ProjectModel::ACTIVE)
+    //         ->findAll();
+
+    //     return $this->getTimesFromTasks($tasks);
+    // }
+
+    // /**
+    //  * Represent the given float as a proper time string.
+    //  *
+    //  * @param  float $time
+    //  * @return string
+    //  */
+    // public function floatToHHMM($time)
+    // {
+    //     if ($time < 0) {
+    //         $time = $time * -1;
+    //         $negative = true;
+    //     } else {
+    //         $negative = false;
+    //     }
+    //     $hours = (int) $time;
+    //     $minutes = fmod((float) $time, 1) * 60;
+    //     if ($negative) {
+    //         return sprintf('-%01d:%02d', $hours, $minutes);
+    //     } else {
+    //         return sprintf('%01d:%02d', $hours, $minutes);
+    //     }
+    // }
+
+    // /**
+    //  * Get the estimated time of a given task according to internal settings.
+    //  *
+    //  * @param  array  &$task
+    //  * @return float
+    //  */
+    // public function getEstimatedTimeForTask(&$task)
+    // {
+    //     return $this->getTaskTimesPreparer()->getEstimatedTimeForTask($task);
+    // }
+
+    // /**
+    //  * Get the spent time of a given task according to internal settings.
+    //  *
+    //  * @param  array  &$task
+    //  * @return float
+    //  */
+    // public function getSpentTimeForTask(&$task)
+    // {
+    //     return $this->getTaskTimesPreparer()->getSpentTimeForTask(
+    //         $task,
+    //         $this->getSubtasksByTaskId($task['id'])
+    //     );
+    // }
+
+    // /**
+    //  * Init maybe and then return the remaining time
+    //  * for the given task.
+    //  *
+    //  * @param  array  &$task
+    //  * @return float
+    //  */
+    // public function getRemainingTimeForTask(&$task)
+    // {
+    //     return $this->getTaskTimesPreparer()->getRemainingTimeForTask(
+    //         $task,
+    //         $this->getSubtasksByTaskId($task['id'])
+    //     );
+    // }
+
+    // /**
+    //  * Init maybe and then return the overtime time
+    //  * for the given task.
+    //  *
+    //  * @param  array  &$task
+    //  * @return float
+    //  */
+    // public function getOvertimeForTask(&$task)
+    // {
+    //     return $this->getTaskTimesPreparer()->getOvertimeForTask(
+    //         $task,
+    //         $this->getSubtasksByTaskId($task['id'])
+    //     );
+    // }
+
+    // /**
+    //  * Get the overtime with the correct sign to
+    //  * show in the header.
+    //  *
+    //  * E.g. either there was overtime; then it will
+    //  * be shown as "time_estimated" + "overtime".
+    //  *
+    //  * If you worked faster it's "time_estimated" - "overtime".
+    //  *
+    //  * @param  float $overtime
+    //  * @return string
+    //  */
+    // public function getOvertimeForTaskAsString($overtime)
+    // {
+    //     if ($overtime > 0) {
+    //         $prefix = '+ ';
+    //     } else {
+    //         $prefix = '- ';
+    //     }
+    //     return $prefix . $this->floatToHHMM(abs($overtime)) . 'h';
+    // }
+
+    // /**
+    //  * With the consideration of the subtask status, a subtask
+    //  * might be done earlier than estimated. This way there might be
+    //  * an available overhead-time. Or even vice versa and there
+    //  * is less time left, since I mis-estimated the times.
+    //  *
+    //  * In either way this method is for calculating the difference.
+    //  *
+    //  * @param  array &$task
+    //  * @return float
+    //  */
+    // public function getSlowerOrFasterThanEstimatedForTask(&$task)
+    // {
+    //     $remaining = $this->getRemainingTimeForTask($task);
+    //     $estimated = $this->getEstimatedTimeForTask($task);
+    //     $spent = $this->getSpentTimeForTask($task);
+    //     return $estimated - $spent - $remaining;
+    // }
+
+    // /**
+    //  * Wrapper for the getSlowerOrFasterThanEstimatedForTask()
+    //  * method to render the ouput sign.
+    //  *
+    //  * @param  array &$task
+    //  * @return string
+    //  */
+    // public function getSlowerOrFasterSign(&$task)
+    // {
+    //     $slowerOrFaster = $this->getSlowerOrFasterThanEstimatedForTask($task);
+    //     if ($slowerOrFaster > 0) {
+    //         $out = '>>';
+    //     } else {
+    //         $out = '<<';
+    //     }
+    //     // how it was before:
+    //     // $out .= $this->floatToHHMM(abs($slowerOrFaster)) . ' h';
+    //     return $out;
+    // }
+
+    // /**
+    //  * Calculate the percent with the given task.
+    //  * Use the times for this.
+    //  *
+    //  * Future idea:
+    //  *    Maybe use the amount of subtasks, if no
+    //  *    estimstd times exist at all.
+    //  *
+    //  * @param  array &$task
+    //  * @param  bool $overtime
+    //  * @return integer
+    //  */
+    // public function getPercentForTask(&$task, $overtime = false)
+    // {
+    //     $out = 0;
+
+    //     // Calculate percentage from given times, while considering
+    //     // the possible subtask times. These can vary, since
+    //     // done subtasks will use the spent time as their
+    //     // estimated time, if they are done already. This would
+    //     // mean less (or sometimes more!) estimated overall time
+    //     // after all. To do so I won't simply calculate
+    //     // "spent / estimated" for the percentage, but rather:
+    //     //      "(estimated - remaining) / estimated"
+    //     //
+    //     // Yet I can only do so, if the given $task is really a
+    //     // task array with an 'id'; otherwise just do the normal
+    //     // calculation instead ...
+    //     if ($this->getEstimatedTimeForTask($task) != 0) {
+    //         $estimated = $this->getEstimatedTimeForTask($task);
+    //         $remaining = $this->getRemainingTimeForTask($task);
+    //         $spent = $estimated - $remaining;
+
+    //         if ($estimated != 0) {
+    //             $out = round($spent / $estimated * 100, 0);
+    //         } else {
+    //             $out = 100;
+    //         }
+    //     }
+
+    //     // consider overtime
+    //     if ($overtime) {
+    //         if ($out > 100) {
+    //             $out = $out - 100;
+    //         } else {
+    //             $out = 0;
+    //         }
+    //     }
+
+    //     // prevent negative percentages, which
+    //     // might occur due to rounding issues,
+    //     // I guess? - monkey patch!
+    //     if ($out <= 0) {
+    //         $out = 0;
+    //     }
+
+    //     return $out;
+    // }
+
+    // /**
+    //  * Get percentage for a task according to its
+    //  * spent time and estimated time (or in the future
+    //  * maybe depending on the subtasks) and render
+    //  * it as a string with percentage symbol.
+    //  *
+    //  * Also there is the option to add additional info like
+    //  * the overtime.
+    //  *
+    //  * @param  array &$task
+    //  * @param  string $symbol
+    //  * @param  bool $overtime
+    //  * @return string
+    //  */
+    // public function getPercentForTaskAsString(&$task, $symbol = '%', $overtime = false)
+    // {
+    //     $percent_over = $this->getPercentForTask($task, true);
+
+    //     if ($overtime && $percent_over > 0) {
+    //         $out = '100' . $symbol . ' (+' . $this->getPercentForTask($task, true) . $symbol . ')';
+    //     } else {
+    //         $out = $this->getPercentForTask($task, false) . $symbol;
+    //     }
+
+    //     return $out;
+    // }
+
+    // /**
+    //  * According to the wanted levels from the config,
+    //  * sum up all the respecting time values for e.g.
+    //  * the "project_times_summary_single.php".
+    //  *
+    //  * @param  array $times
+    //  * @return array
+    //  */
+    // public function prepareProjectTimesWithConfig($times)
+    // {
+    //     $out = [
+    //         'estimated' => 0,
+    //         'spent' => 0,
+    //         'remaining' => 0,
+    //         'overtime' => 0,
+    //     ];
+
+    //     // Get levels from config
+    //     $levels = explode(',', $this->configModel->get('hoursview_progress_home_project_level', 'all'));
+
+    //     // iter through levels, while checking if they exist in the $times as key
+    //     foreach ($levels as $level) {
+    //         if (array_key_exists($level, $times)) {
+    //             $out['estimated'] += $times[$level]['_total']['estimated'];
+    //             $out['spent'] += $times[$level]['_total']['spent'];
+    //             $out['remaining'] += $times[$level]['_total']['remaining'];
+    //             $out['overtime'] += $times[$level]['_total']['overtime'];
+    //         }
+    //     }
+
+    //     return $out;
+    // }
+
+    // /**
+    //  * Get an array with array of the getTimesByProjectId() method
+    //  * for each project, which is active.
+    //  *
+    //  * @param integer $user
+    //  * @return array
+    //  */
+    // public function getTimesForAllActiveProjects()
+    // {
+    //     $times = [];
+    //     $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
+    //     foreach ($projects as $projectId => $projectName) {
+    //         $times[$projectId] = [
+    //             'name' => $projectName,
+    //             'times' => $this->getTimesByProjectId($projectId)
+    //         ];
+    //     }
+
+    //     return $times;
+    // }
+
+    // /**
+    //  * Check the given array, if it contains any times
+    //  * and returns a boolean accordingly.
+    //  *
+    //  * @param  array   $timesArray
+    //  * @return boolean
+    //  */
+    // public function hasTimes($timesArray = [])
+    // {
+    //     if ($timesArray['estimated'] != 0.0 || $timesArray['spent'] != 0.0 || $timesArray['remaining'] != 0.0) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
+    // /**
+    //  * A helper function to help sort the times array, when accessing the
+    //  * times array in tooltip_dashboard_times.
+    //  *
+    //  * The function sorts the given level by the given key, which lays
+    //  * deep nested in the array, actually, and returns a new sorted array.
+    //  *
+    //  * The method automatically uses the config to know how to sort.
+    //  *
+    //  * @param  array  $times
+    //  * @param  string  $level
+    //  * @return array
+    //  */
+    // public function sortTimesArray($times, $level = 'level_1')
+    // {
+    //     $tooltip_sorting = $this->configModel->get('hoursview_tooltip_sorting', 'id');
+    //     if ($tooltip_sorting == 'id') {
+    //         // by default the returned $times array should already
+    //         // be in the sorting of 'id', which is the key of the
+    //         // array.
+    //         return $times;
+    //     }
+
+    //     // otherwise do the sorting thing now
+
+    //     // this part interpretes the tooltip_sorting config
+    //     if ($tooltip_sorting == 'remaining_hours_asc') {
+    //         $key = 'remaining';
+    //         $asc = true;
+    //     } elseif ($tooltip_sorting == 'remaining_hours_desc') {
+    //         $key = 'remaining';
+    //         $asc = false;
+    //     } else {
+    //         $key = 'all';
+    //         $asc = true;
+    //     }
+
+    //     // this one sorts with a custom function
+    //     uasort($times, function ($a, $b) use ($level, $key, $asc) {
+    //         if ($asc == true) {
+    //             return $a['times'][$level]['_total'][$key] <=> $b['times'][$level]['_total'][$key];
+    //         } else {
+    //             return $b['times'][$level]['_total'][$key] <=> $a['times'][$level]['_total'][$key];
+    //         }
+    //     });
+
+    //     return $times;
+    // }
 }
