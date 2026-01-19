@@ -4,6 +4,8 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TimesData;
+use Kanboard\Plugin\WeekHelper\Model\TimesDataPerEntity;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
@@ -65,76 +67,32 @@ class TaskTimesPreparer
     ];
 
     /**
-     * Simply all times.
+     * Simply all times as a TimesData instance.
      *
-     *  [
-     *      has_times = boolean,
-     *      estimated = float,
-     *      spent = float,
-     *      remaining = float,
-     *      overtime = float
-     *  ]
-     *
-     * @var array
+     * @var TimesData
      **/
-    var $times = [];
+    var $times;
 
     /**
      * Times for all levels individually.
      *
-     *  [
-     *      'level_1' =>
-     *      [
-     *          has_times = boolean,
-     *          estimated = float,
-     *          spent = float,
-     *          remaining = float,
-     *          overtime = float
-     *       ],
-     *       ...
-     *  ]
-     *
-     * @var array
+     * @var TimesDataPerEntity
      **/
-    var $times_per_level = [];
+    var $times_per_level;
 
     /**
      * Times per project.
      *
-     *  [
-     *      project_id =>
-     *      [
-     *          has_times = boolean,
-     *          estimated = float,
-     *          spent = float,
-     *          remaining = float,
-     *          overtime = float
-     *       ],
-     *       ...
-     *  ]
-     *
-     * @var array
+     * @var TimesDataPerEntity
      **/
-    var $times_per_project = [];
+    var $times_per_project;
 
     /**
      * Times per user.
      *
-     *  [
-     *      user_id =>
-     *      [
-     *          has_times = boolean,
-     *          estimated = float,
-     *          spent = float,
-     *          remaining = float,
-     *          overtime = float
-     *       ],
-     *       ...
-     *  ]
-     *
-     * @var array
+     * @var TimesDataPerEntity
      **/
-    var $times_per_user = [];
+    var $times_per_user;
 
     /**
      * The TimetaggerTranscriber, which can overwrite
@@ -152,112 +110,10 @@ class TaskTimesPreparer
     public function __construct($config = [])
     {
         $this->initConfig($config);
-    }
-
-    /**
-     * Function to add the calculation for each level in the
-     * getTimesFromTasks() method.
-     *
-     * @param array &$level
-     * @param string $level_key
-     * @param array $levels
-     * @param string $col_name
-     * @param string $swim_name
-     * @param array &$task
-     * @param array $subtasks
-     */
-    protected function addTimesForLevel(
-        &$level,
-        $level_key,
-        $levels,
-        $col_name,
-        $swim_name,
-        &$task,
-        $subtasks = []
-    )
-    {
-        // check if the actual column name and swimlane name
-        // are wanted for this level
-        $exists = false;
-        if (array_key_exists($level_key, $levels)) {
-            $config = $levels[$level_key];
-            foreach ($config as $col_swim) {
-                if (self::swimlaneColumnCheck($col_swim, $swim_name, $col_name)) {
-                    $exists = true;
-                    break;
-                }
-            }
-        }
-
-        if ($exists) {
-            // calculations
-            $estimated = $this->getEstimatedTimeForTask($task);
-            $spent = $this->getSpentTimeForTask($task, $subtasks);
-            $remaining = $this->getRemainingTimeForTask($task, $subtasks);
-            $overtime = $this->getOvertimeForTask($task, $subtasks);
-
-            // dashbord: column times
-            $level[$col_name]['estimated'] += $estimated;
-            $level[$col_name]['spent'] += $spent;
-            $level[$col_name]['remaining'] += $remaining;
-            $level[$col_name]['overtime'] += $overtime;
-
-            // level: total times
-            $level['_total']['estimated'] += $estimated;
-            $level['_total']['spent'] += $spent;
-            $level['_total']['remaining'] += $remaining;
-            $level['_total']['overtime'] += $overtime;
-            self::extendHasTimes($level);
-
-            // prepare native task and modify it, so that it has more data
-            // which I need later. Then add it to the internal array of tasks
-            // per level.
-            $task['time_estimated'] = $estimated;
-            $task['time_spent'] = $spent;
-            $task['time_remaining'] = $remaining;
-            $task['time_overtime'] = $overtime;
-            array_push($this->tasks_per_level[$level_key], $task);
-        }
-    }
-
-    /**
-     * Add the given floartrs ot the given array, which is supposed
-     * to be a times array in the structure:
-     *     [
-     *         'has_times' => true,
-     *         'estimated' => 0.0,
-     *         'spent' => 0.0,
-     *         'remaining' => 0.0,
-     *         'overtime' => 0.0,
-     *     ]
-     *
-     *
-     * @param array $times_array
-     * @param float $estimated
-     * @param float $spent
-     * @param float $remaining
-     * @param float $overtime
-     */
-    protected function addTimesToTimesArray(
-        &$times_array,
-        $estimated,
-        $spent,
-        $remaining,
-        $overtime
-    )
-    {
-        $times_array['estimated'] += $estimated;
-        $times_array['spent'] += $spent;
-        $times_array['remaining'] += $remaining;
-        $times_array['overtime'] += $overtime;
-
-        // also update the has_times boolean
-        $times_array['has_times'] = (
-            $times_array['estimated'] != 0.0
-            || $times_array['spent'] != 0.0
-            || $times_array['remaining'] != 0.0
-            || $times_array['overtime'] != 0.0
-        );
+        $this->times = new TimesData();
+        $this->times_per_level = new TimesDataPerEntity();
+        $this->times_per_project = new TimesDataPerEntity();
+        $this->times_per_user = new TimesDataPerEntity();
     }
 
     /**
@@ -272,49 +128,10 @@ class TaskTimesPreparer
             'level_3' => [],
             'level_4' => [],
         ];
-        $this->times = self::emptyTimesArray();
-        $this->times_per_level = [
-            'level_1' => self::emptyTimesArray(),
-            'level_2' => self::emptyTimesArray(),
-            'level_3' => self::emptyTimesArray(),
-            'level_4' => self::emptyTimesArray(),
-        ];
-        $this->times_per_project = [];
-        $this->times_per_user = [];
-    }
-
-    /**
-     * The default empty times attay.
-     *
-     * @return array
-     */
-    protected static function emptyTimesArray()
-    {
-        return [
-            'has_times' => false,
-            'estimated' => 0.0,
-            'spent' => 0.0,
-            'remaining' => 0.0,
-            'overtime' => 0.0,
-        ];
-    }
-
-    /**
-     * Check if the given array has any time above 0
-     * like estimated, spent or remaining and if so
-     * set the _has_times to true.
-     *
-     * @param  array &$arr
-     */
-    protected static function extendHasTimes(&$arr)
-    {
-        if (
-            $arr['_total']['estimated'] > 0
-            || $arr['_total']['spent'] > 0
-            || $arr['_total']['remaining'] > 0
-        ) {
-            $arr['_has_times'] = true;
-        }
+        $this->times->resetTimes();
+        $this->times_per_level->resetTimes();
+        $this->times_per_project->resetTimes();
+        $this->times_per_user->resetTimes();
     }
 
     /**
@@ -520,77 +337,41 @@ class TaskTimesPreparer
 
             // add the tasks to some internal variables (by reference)
             $this->tasks[$task['id']] = &$tasks[$i];
-            $this->tasks_per_level['level_1'][$task['id']] = &$tasks[$i];
-            $this->tasks_per_level['level_2'][$task['id']] = &$tasks[$i];
-            $this->tasks_per_level['level_3'][$task['id']] = &$tasks[$i];
-            $this->tasks_per_level['level_4'][$task['id']] = &$tasks[$i];
+            if ($this->inSwimlaneColumn($task, 'level_1')) {
+                $this->tasks_per_level['level_1'][$task['id']] = &$tasks[$i];
+            }
+            if ($this->inSwimlaneColumn($task, 'level_2')) {
+                $this->tasks_per_level['level_2'][$task['id']] = &$tasks[$i];
+            }
+            if ($this->inSwimlaneColumn($task, 'level_3')) {
+                $this->tasks_per_level['level_3'][$task['id']] = &$tasks[$i];
+            }
+            if ($this->inSwimlaneColumn($task, 'level_4')) {
+                $this->tasks_per_level['level_4'][$task['id']] = &$tasks[$i];
+            }
 
             // == == == == == == == ==
             // ADDING TIMES   -  START
             // == == == == == == == ==
 
-            // ADDING TO TIMES
-            $this->addTimesToTimesArray(
-                $this->times,
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
+            $this->times->addTimes($estimated, $spent, $remaining, $overtime);
 
-            // ADDING TO LEVELS
-            $this->addTimesToTimesArray(
-                $this->times_per_level['level_1'],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
-            $this->addTimesToTimesArray(
-                $this->times_per_level['level_2'],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
-            $this->addTimesToTimesArray(
-                $this->times_per_level['level_3'],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
-            $this->addTimesToTimesArray(
-                $this->times_per_level['level_4'],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
-
-            // ADDING TO PROJECTS
-            if (!array_key_exists($task['project_id'], $this->times_per_project)) {
-                $this->times_per_project[$task['project_id']] = self::emptyTimesArray();
+            if ($this->inSwimlaneColumn($task, 'level_1')) {
+                $this->times_per_level->addTimes($estimated, $spent, $remaining, $overtime, 'level_1');
             }
-            $this->addTimesToTimesArray(
-                $this->times_per_project[$task['project_id']],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
-
-            // ADDING TO USER
-            if (!array_key_exists($task['owner_id'], $this->times_per_user)) {
-                $this->times_per_user[$task['owner_id']] = self::emptyTimesArray();
+            if ($this->inSwimlaneColumn($task, 'level_2')) {
+                $this->times_per_level->addTimes($estimated, $spent, $remaining, $overtime, 'level_2');
             }
-            $this->addTimesToTimesArray(
-                $this->times_per_user[$task['owner_id']],
-                $estimated,
-                $spent,
-                $remaining,
-                $overtime
-            );
+            if ($this->inSwimlaneColumn($task, 'level_3')) {
+                $this->times_per_level->addTimes($estimated, $spent, $remaining, $overtime, 'level_3');
+            }
+            if ($this->inSwimlaneColumn($task, 'level_4')) {
+                $this->times_per_level->addTimes($estimated, $spent, $remaining, $overtime, 'level_4');
+            }
+
+            $this->times_per_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
+
+            $this->times_per_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
 
             // == == == == == == ==
             // ADDING TIMES  -  END
@@ -598,12 +379,6 @@ class TaskTimesPreparer
 
         }
         unset($task);
-
-        // update the tasks on the levels with correct sorting
-        // and TimetaggerTranscriber overwrite for the time_spent
-        // ATTENTION:
-        // This method won't work for now. See it's doc string.
-        $this->updateTasksPerLevel();
     }
 
     /**
@@ -623,6 +398,25 @@ class TaskTimesPreparer
     }
 
     /**
+     * Checks for the given level, if the task is in the correct
+     * swimlane and / or column.
+     *
+     * @param  array $task
+     * @param  string $level
+     * @return boolean
+     */
+    public function inSwimlaneColumn($task, $level)
+    {
+        if (!str_contains($level, '_columns')) {
+            $level .= '_columns';
+        }
+        $config = $this->config[$level] ?? '';
+        $swimlane = $task['swimlane_name'] ?? '';
+        $column = $task['column_name'] ?? '';
+        return self::swimlaneColumnCheck($config, $swimlane, $column);
+    }
+
+    /**
      * get the internal config for the given key.
      *
      * @param  string $key
@@ -631,6 +425,54 @@ class TaskTimesPreparer
     protected function getConfig($key)
     {
         return $this->config[$key] ?? null;
+    }
+
+    /**
+     * Get estimated for total.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedTotal($readable = false)
+    {
+        return $this->times->getEstimated($readable);
+    }
+
+    /**
+     * Get estimated per level.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedPerLevel($level = '', $readable = false)
+    {
+        return $this->times_per_level->getEstimated($level, $readable);
+    }
+
+    /**
+     * Get estimated per project.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedPerProject($project_id = -1, $readable = false)
+    {
+        return $this->times_per_project->getEstimated($project_id, $readable);
+    }
+
+    /**
+     * Get estimated per user.
+     *
+     * @param  integer $user_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedPerUser($user_id = -1, $readable = false)
+    {
+        return $this->times_per_user->getEstimated($user_id, $readable);
     }
 
     /**
@@ -718,6 +560,54 @@ class TaskTimesPreparer
     }
 
     /**
+     * Get overtime for total.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimeTotal($readable = false)
+    {
+        return $this->times->getOvertime($readable);
+    }
+
+    /**
+     * Get overtime per level.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimePerLevel($level = '', $readable = false)
+    {
+        return $this->times_per_level->getOvertime($level, $readable);
+    }
+
+    /**
+     * Get overtime per project.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimePerProject($project_id = -1, $readable = false)
+    {
+        return $this->times_per_project->getOvertime($project_id, $readable);
+    }
+
+    /**
+     * Get overtime per user.
+     *
+     * @param  integer $user_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimePerUser($user_id = -1, $readable = false)
+    {
+        return $this->times_per_user->getOvertime($user_id, $readable);
+    }
+
+    /**
      * Get a percentage float from the given string. E.g.
      * maybe it's a subtask with the title "30% todo".
      * In that case this function would return 0.3.
@@ -773,6 +663,54 @@ class TaskTimesPreparer
             }
         }
         return $out;
+    }
+
+    /**
+     * Get remaining for total.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingTotal($readable = false)
+    {
+        return $this->times->getRemaining($readable);
+    }
+
+    /**
+     * Get remaining per level.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingPerLevel($level = '', $readable = false)
+    {
+        return $this->times_per_level->getRemaining($level, $readable);
+    }
+
+    /**
+     * Get remaining per project.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingPerProject($project_id = -1, $readable = false)
+    {
+        return $this->times_per_project->getRemaining($project_id, $readable);
+    }
+
+    /**
+     * Get remaining per user.
+     *
+     * @param  integer $user_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingPerUser($user_id = -1, $readable = false)
+    {
+        return $this->times_per_user->getRemaining($user_id, $readable);
     }
 
     /**
@@ -859,6 +797,54 @@ class TaskTimesPreparer
         }
         $task['time_spent'] = round($spent_time, 2);
         return $task['time_spent'];
+    }
+
+    /**
+     * Get spent for total.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentTotal($readable = false)
+    {
+        return $this->times->getSpent($readable);
+    }
+
+    /**
+     * Get spent per level.
+     *
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentPerLevel($level = '', $readable = false)
+    {
+        return $this->times_per_level->getSpent($level, $readable);
+    }
+
+    /**
+     * Get spent per project.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentPerProject($project_id = -1, $readable = false)
+    {
+        return $this->times_per_project->getSpent($project_id, $readable);
+    }
+
+    /**
+     * Get spent per user.
+     *
+     * @param  integer $user_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentPerUser($user_id = -1, $readable = false)
+    {
+        return $this->times_per_user->getSpent($user_id, $readable);
     }
 
     /**
@@ -980,109 +966,6 @@ class TaskTimesPreparer
     }
 
     /**
-     * Returnes the times for all tasks summarized. Either
-     * as their float value or as a readable time string.
-     *
-     * @param  boolean $readable
-     * @return float|string
-     */
-    public function getTimes($readable = false)
-    {
-        if (!$readable) {
-            return $this->times;
-        } else {
-            return self::readableTimesArray($this->times);
-        }
-    }
-
-    /**
-     * Returnes the times for all tasks per level. Either
-     * as their float value or as a readable time string.
-     *
-     * @param string $level
-     * @param  boolean $readable
-     * @return float|string
-     */
-    public function getTimesPerLevel($level = '', $readable = false)
-    {
-        if (array_key_exists($level, $this->times_per_level)) {
-            if (!$readable) {
-                return $this->times_per_level[$level];
-            } else {
-                return self::readableTimesArray($this->times_per_level[$level]);
-            }
-        } else {
-            if (!$readable) {
-                return $this->times_per_level;
-            } else {
-                $out = [];
-                foreach ($this->times_per_level as $level => $times) {
-                    $out[$level] = self::readableTimesArray($times);
-                }
-                return $out;
-            }
-        }
-    }
-
-    /**
-     * Returnes the times for all tasks per project. Either
-     * as their float value or as a readable time string.
-     *
-     * @param integer $project_id
-     * @param  boolean $readable
-     * @return float|string
-     */
-    public function getTimesPerProject($project_id = -1, $readable = false)
-    {
-        if (array_key_exists($project_id, $this->times_per_project)) {
-            if (!$readable) {
-                return $this->times_per_project[$project_id];
-            } else {
-                return self::readableTimesArray($this->times_per_project[$project_id]);
-            }
-        } else {
-            if (!$readable) {
-                return $this->times_per_project;
-            } else {
-                $out = [];
-                foreach ($this->times_per_project as $project_id => $times) {
-                    $out[$project_id] = self::readableTimesArray($times);
-                }
-                return $out;
-            }
-        }
-    }
-
-    /**
-     * Returnes the times for all tasks per user. Either
-     * as their float value or as a readable time string.
-     *
-     * @param integer $user_id
-     * @param  boolean $readable
-     * @return float|string
-     */
-    public function getTimesPerUser($user_id = -1, $readable = false)
-    {
-        if (array_key_exists($user_id, $this->times_per_user)) {
-            if (!$readable) {
-                return $this->times_per_user[$user_id];
-            } else {
-                return self::readableTimesArray($this->times_per_user[$user_id]);
-            }
-        } else {
-            if (!$readable) {
-                return $this->times_per_user;
-            } else {
-                $out = [];
-                foreach ($this->times_per_user as $user_id => $times) {
-                    $out[$user_id] = self::readableTimesArray($times);
-                }
-                return $out;
-            }
-        }
-    }
-
-    /**
      * Get the internal TimetaggerTranscriber. Maybe initialize it
      * first and get the Timetagger events accordingly. So this way
      * only if it really is needed, the API call will be made.
@@ -1095,43 +978,6 @@ class TaskTimesPreparer
             $this->initTimetagger();
         }
         return $this->timetagger_transcriber;
-    }
-
-    /**
-     * Make the given times array readable.
-     * E.g. turns this array:
-     *
-     *  [
-     *      'has_times' => true,
-     *      'estimated' => 1.0,
-     *      'spent' => 0.75,
-     *      'remaining' => 0.25,
-     *      'overtime' => 0.0
-     *  ]
-     *
-     * ... into this array:
-     *
-     *  [
-     *      'has_times' => true,
-     *      'estimated' => "1:00",
-     *      'spent' => "0:45",
-     *      'remaining' => "0:15",
-     *      'overtime' => "0:00"
-     *  ]
-     *
-     * @param  array $times_array
-     * @param string $suffix
-     * @return array
-     */
-    protected static function readableTimesArray($times_array, $suffix = 'h')
-    {
-        return [
-            'has_times' => $times_array['has_times'],
-            'estimated' => self::floatToHHMM($times_array['estimated']) . $suffix,
-            'spent' => self::floatToHHMM($times_array['spent']) . $suffix,
-            'remaining' => self::floatToHHMM($times_array['remaining']) . $suffix,
-            'overtime' => self::floatToHHMM($times_array['overtime']) . $suffix,
-        ];
     }
 
     /**
@@ -1160,19 +1006,6 @@ class TaskTimesPreparer
             $tmp_estimated = $task_or_subtask['time_estimated'];
         }
         return $tmp_estimated - $task_or_subtask['time_spent'];
-    }
-
-    /**
-     * Check if the array key exists and add it, if not.
-     *
-     * @param array &$arr
-     * @param string $col_name
-     */
-    protected static function setTimeCalcKey(&$arr, $col_name)
-    {
-        if (!isset($arr[$col_name])) {
-            $arr[$col_name] = ['estimated' => 0, 'spent' => 0, 'remaining' => 0, 'overtime' => 0];
-        }
     }
 
     /**
@@ -1219,50 +1052,5 @@ class TaskTimesPreparer
             }
         }
         return false;
-    }
-
-    /**
-     * Update the internal tasks_per_level, which will contain:
-     *
-     * 1. The tasks there shall be sorted according to the wanted
-     * sortgin logic.
-     *
-     * 2. The level for which TimetaggerTranscriber should overwrite
-     * the times_spent values of the tasks should be updated.
-     *
-     * ATTENTION:
-     * This method won't really work as intended! The TimetaggerTranscriber
-     * will overwrite just the tasks time_spent key, but not this class
-     * attributes, which hold the times for several other things like
-     * "per_project" or "all summed up" or "per user", etc.
-     *
-     * I have to refactor the whole TimetaggerTranscriber class so that
-     * I could use it inside this class' initialize method for all
-     * the times!
-     */
-    protected function updateTasksPerLevel()
-    {
-        foreach ($this->tasks_per_level as &$tasks) {
-            $tasks = SortingLogic::sortTasks(
-                $tasks,
-                $this->getConfig('sorting_logic')
-            );
-        }
-        unset($tasks);
-
-        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_1')) {
-            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_1']);
-            // TODO
-            // after overwriting the tasks spent times, ALL other variables have to be updated as well ...
-        }
-        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_2')) {
-            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_2']);
-        }
-        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_3')) {
-            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_3']);
-        }
-        if (str_contains($this->getConfig('timetagger_overwrites_levels_spent'), 'level_4')) {
-            $this->getTimetaggerTranscriber()->overwriteSpentTimesForTasks($this->tasks_per_level['level_4']);
-        }
     }
 }

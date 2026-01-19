@@ -1,0 +1,191 @@
+<?php
+
+namespace Kanboard\Plugin\WeekHelper\Model;
+
+use Kanboard\Plugin\WeekHelper\Model\TimesData;
+
+/**
+ * A TimesData for storing the times per entity.
+ */
+class TimesDataPerEntity
+{
+    /**
+     * The internal enetities array, which holds
+     * a TimeData per entity.
+     *
+     * @var TimesData[]
+     */
+    protected $entities = [];
+
+    /**
+     * Add the given floats to the internal core times data attribute.
+     *
+     * @param float $estimated
+     * @param float $spent
+     * @param float $remaining
+     * @param float $overtime
+     * @param mixed $entity
+     */
+    public function addTimes(
+        $estimated,
+        $spent,
+        $remaining,
+        $overtime,
+        $entity
+    )
+    {
+        if (!array_key_exists($entity, $this->entities)) {
+            $this->entities[$entity] = new TimesData();
+        }
+        $this->entities[$entity]->addTimes(
+            $estimated,
+            $spent,
+            $remaining,
+            $overtime
+        );
+    }
+
+    /**
+     * Get the the estimated time for the entity. If the
+     * entity does not exist, return the times for all of
+     * the entities.
+     *
+     * @param mixed $entity
+     * @param boolean $readable
+     * @return float
+     */
+    public function getEstimated($entity = '', $readable = false)
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            return $this->entities[$entity]->getEstimated($readable);
+        } else {
+            $out = 0.0;
+            foreach ($this->entities as $entity) {
+                $out += $entity->getEstimated();
+            }
+            if ($readable) {
+                return TimesData::floatToHHMM($out);
+            } else {
+                return $out;
+            }
+        }
+    }
+
+    /**
+     * Get the the overtime time for the entity. If the
+     * entity does not exist, return the times for all of
+     * the entities.
+     *
+     * @param mixed $entity
+     * @param boolean $readable
+     * @return float
+     */
+    public function getOvertime($entity = '', $readable = false)
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            return $this->entities[$entity]->getOvertime($readable);
+        } else {
+            $out = 0.0;
+            foreach ($this->entities as $entity) {
+                $out += $entity->getOvertime();
+            }
+            if ($readable) {
+                return TimesData::floatToHHMM($out);
+            } else {
+                return $out;
+            }
+        }
+    }
+
+    /**
+     * Get the the remaining time for the entity. If the
+     * entity does not exist, return the times for all of
+     * the entities.
+     *
+     * @param mixed $entity
+     * @param boolean $readable
+     * @return float
+     */
+    public function getRemaining($entity = '', $readable = false)
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            return $this->entities[$entity]->getRemaining($readable);
+        } else {
+            $out = 0.0;
+            foreach ($this->entities as $entity) {
+                $out += $entity->getRemaining();
+            }
+            if ($readable) {
+                return TimesData::floatToHHMM($out);
+            } else {
+                return $out;
+            }
+        }
+    }
+
+    /**
+     * Get the the spent time for the entity. If the
+     * entity does not exist, return the times for all of
+     * the entities.
+     *
+     * @param mixed $entity
+     * @param boolean $readable
+     * @return float
+     */
+    public function getSpent($entity = '', $readable = false)
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            return $this->entities[$entity]->getSpent($readable);
+        } else {
+            $out = 0.0;
+            foreach ($this->entities as $entity) {
+                $out += $entity->getSpent();
+            }
+            if ($readable) {
+                return TimesData::floatToHHMM($out);
+            } else {
+                return $out;
+            }
+        }
+    }
+
+    /**
+     * Return, if there are times at all for the
+     * specified entity. If non specified: for at
+     * least one.
+     *
+     * @param string $entity
+     * @return boolean
+     */
+    public function hasTimes($entity = '')
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            return $this->entities[$entity]->hasTimes();
+        } else {
+            foreach ($this->entities as $value) {
+                if ($value->hasTimes()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Reset the times for the given entity. If it does
+     * not exist, reset it for all of the entities.
+     *
+     * @param  string $entity
+     */
+    public function resetTimes($entity = '')
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            $this->entities[$entity]->resetTimes();
+        } else {
+            foreach ($this->entities as &$value) {
+                $value->resetTimes();
+            }
+            unset($value);
+        }
+    }
+}
