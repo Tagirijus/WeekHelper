@@ -1,5 +1,5 @@
 <?php
-    $times = $tagiTimes($project['id']);
+    $times = $this->hoursViewHelper->getTimesByProjectId($project['id']);
     $times = $this->hoursViewHelper->prepareProjectTimesWithConfig($times);
     $hoursview_config = $this->hoursViewHelper->getConfig();
 ?>

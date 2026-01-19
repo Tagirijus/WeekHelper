@@ -1,6 +1,6 @@
 <?php
 
-$times = $tagiTimes($project['id']);
+$times = $this->hoursViewHelper->getTimesByProjectId($project['id']);
 $captions = $this->hoursViewHelper->getLevelCaptions();
 $projectSite = true;
 

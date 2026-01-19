@@ -65,32 +65,16 @@ class Plugin extends Base
                 'template:layout:bottom', 'WeekHelper:time_box');
         }
         $this->template->hook->attach(
-            'template:project:header:before', 'WeekHelper:board/project_head_hours', [
-                'tagiTimes' => function ($projectId) {
-                    return $this->helper->hoursViewHelper->getTimesByProjectId($projectId);
-                }
-            ]
+            'template:project:header:before', 'WeekHelper:board/project_head_hours'
         );
         $this->template->hook->attach(
-            'template:board:column:header', 'WeekHelper:board/column_hours', [
-                'tagiTimes' => function ($column) {
-                    return $this->helper->hoursViewHelper->getTimesForColumn($column);
-                }
-            ]
+            'template:board:column:header', 'WeekHelper:board/column_hours'
         );
         $this->template->hook->attach(
-            'template:dashboard:show:after-filter-box', 'WeekHelper:dashboard/project_times_summary_all', [
-                'tagiTimes' => function ($userId) {
-                    return $this->helper->hoursViewHelper->getTimesByUserId($userId);
-                }
-            ]
+            'template:dashboard:show:after-filter-box', 'WeekHelper:dashboard/project_times_summary_all'
         );
         $this->template->hook->attach(
-            'template:dashboard:project:after-title', 'WeekHelper:dashboard/project_times_summary_single', [
-                'tagiTimes' => function ($projectId) {
-                    return $this->helper->hoursViewHelper->getTimesByProjectId($projectId);
-                }
-            ]
+            'template:dashboard:project:after-title', 'WeekHelper:dashboard/project_times_summary_single'
         );
         // levels on dashboard sidebar
         if (

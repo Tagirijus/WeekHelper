@@ -1,6 +1,6 @@
 <?php
 
-$times = $tagiTimes($column);
+$times = $this->hoursViewHelper->getTimesForColumn($column);
 $hover_text = t('Estimated') . ': ' . $this->hoursViewHelper->floatToHHMM($times['estimated']) . 'h';
 $hover_text .= "\n";
 $hover_text .= t('Spent') . ': ' . $this->hoursViewHelper->floatToHHMM($times['spent']) . 'h';
