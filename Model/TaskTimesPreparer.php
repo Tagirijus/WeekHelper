@@ -21,7 +21,8 @@ class TaskTimesPreparer
     var $config = [
         'levels_config' => [],
         'non_time_mode_minutes' => 0,
-        // can be: 'id', 'remaining_hours_asc', 'remaining_hours_desc'
+        // tooltip_sorting can be:
+        //    'id', 'remaining_hours_asc', 'remaining_hours_desc'
         'tooltip_sorting' => 'id',
         'sorting_logic' => '',
         'timetagger_url' => '',
