@@ -128,6 +128,7 @@ class HoursViewHelper extends Base
             'progressbar_0_opacity' => $this->configModel->get('hoursview_progressbar_0_opacity', 0.15),
             'progress_home_project_level' => $this->configModel->get('hoursview_progress_home_project_level', 'all'),
             'hide_0hours_projects_enabled' => $this->configModel->get('hoursview_hide_0hours_projects_enabled', 0),
+            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
             'dashboard_link_level_1' => $this->configModel->get('hoursview_dashboard_link_level_1', 0),
             'dashboard_link_level_2' => $this->configModel->get('hoursview_dashboard_link_level_2', 0),
             'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
