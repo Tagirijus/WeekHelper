@@ -46,10 +46,12 @@ class HoursViewHelper extends Base
     public function initTaskTimesPreparer()
     {
         $config_task_times_preparer = [
-            'level_1_columns' => $this->configModel->get('hoursview_level_1_columns', ''),
-            'level_2_columns' => $this->configModel->get('hoursview_level_2_columns', ''),
-            'level_3_columns' => $this->configModel->get('hoursview_level_3_columns', ''),
-            'level_4_columns' => $this->configModel->get('hoursview_level_4_columns', ''),
+            'levels_config' => [
+                'level_1' => $this->configModel->get('hoursview_level_1_columns', ''),
+                'level_2' => $this->configModel->get('hoursview_level_2_columns', ''),
+                'level_3' => $this->configModel->get('hoursview_level_3_columns', ''),
+                'level_4' => $this->configModel->get('hoursview_level_4_columns', '')
+            ],
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
             'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
             'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),

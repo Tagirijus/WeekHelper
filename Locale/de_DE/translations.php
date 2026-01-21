@@ -18,7 +18,7 @@ return array(
     'Remaining' => 'Übrig',
     'Overtime' => 'Überstunden',
     'HoursView configuration' => 'HoursView Einstellungen',
-    'Each level can have comma seperated column names. This columns will be used for this levels time calculation. You can write swimlane in []-brackets to match these as well' => 'Jedes Level kann Komma getrennt Spaltennamen enthalten. Diese Spalten werden für das jeweilige Level zur Zeitberechnung genutzt. Swimlane in []-Klammern schreiben, um diese ebenfalls zu berücksichtigen',
+    'Each level can have comma seperated column names. This columns will be used for this levels time calculation. You can write swimlane in []-brackets to match these as well (or even only swimlane names in brackets without the column).' => 'Jedes Level kann Komma getrennt Spaltennamen enthalten. Diese Spalten werden für das jeweilige Level zur Zeitberechnung genutzt. Swimlane in []-Klammern schreiben, um diese ebenfalls zu berücksichtigen (oder auch nur die Swimlane in Klammern ohne Spalte, um eine ganze Swimlane zu matchen).',
     'Levels columns' => 'Level Spalten',
     'Levels captions' => 'Level Bezeichnungen',
     'The captions / titles for the columns for the frontend.' => 'Die Bezeichnungen / Titel für die Spalten für die Oberfläche.',

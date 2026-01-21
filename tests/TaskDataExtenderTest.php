@@ -129,4 +129,37 @@ final class TaskDataExtenderTest extends TestCase
             'TaskDataExtender should have a "i was parsed" state now!'
         );
     }
+
+    public function testLevelsExtend()
+    {
+        $task = [
+            'description' => '',
+            'swimlane_name' => 'lane_a',
+            'column_name' => 'col_a'
+        ];
+        $levels_config = [
+            'level_1' => '',
+            'level_2' => 'col_b, col_a',
+            'level_3' => 'col_a [lane_a], col_c',
+            'level_4' => 'col_c [lane_a]',
+            'level_5' => '[lane_a], col_b'
+        ];
+        $expected_levels = [
+            'level_2', 'level_3', 'level_5'
+        ];
+        $this->assertFalse(
+            isset($task['levels']),
+            'TaskDataExtender error during levels parsing.'
+        );
+        TaskDataExtender::extendTask($task, $levels_config);
+        $this->assertTrue(
+            isset($task['levels']),
+            'TaskDataExtender error during levels parsing.'
+        );
+        $this->assertSame(
+            $expected_levels,
+            $task['levels'],
+            'TaskDataExtender error during levels parsing.'
+        );
+    }
 }
