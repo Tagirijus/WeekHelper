@@ -48,11 +48,25 @@ class SortingLogic
             foreach ($sort_spec as $key => $dir) {
                 $va = $a[$key] ?? null;
                 $vb = $b[$key] ?? null;
-                // handle numeric vs string naturally; use strcmp for strings if desired
+                if (is_array($va)) {
+                    $va = !empty($va) ? $va[0] : null;
+                    $vb = !empty($vb) ? $vb[0] : null;
+                }
                 if ($va == $vb) continue;
-                $cmp = ($va < $vb) ? -1 : 1;
-                if (strtolower($dir) === 'desc') $cmp *= -1;
-                return $cmp;
+                // special treat for "null" values: they shall
+                // always be put to the end
+                $vaIsNull = $va === null;
+                $vbIsNull = $vb === null;
+                if ($vaIsNull || $vbIsNull) {
+                    // if va == null -> va to the end ("greater")
+                    $cmp = $vaIsNull ? 1 : -1;
+                    if (strtolower($dir) === 'desc') $cmp *= -1;
+                    return $cmp;
+                } else {
+                    $cmp = ($va < $vb) ? -1 : 1;
+                    if (strtolower($dir) === 'desc') $cmp *= -1;
+                    return $cmp;
+                }
             }
             return 0;
         };

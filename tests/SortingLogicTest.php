@@ -97,4 +97,25 @@ final class SortingLogicTest extends TestCase
             'SortingLogic could not sort case B correctly.'
         );
     }
+
+    public function testSortingByLevel()
+    {
+        $tasks = [
+            ['id' => 1, 'title' => 'one', 'levels' => ['level_2']],
+            ['id' => 2, 'title' => 'a two', 'levels' => ['level_1', 'level_2']],
+            ['id' => 3, 'title' => 'three', 'levels' => []],
+        ];
+        $tasks_sorted = [
+            ['id' => 2, 'title' => 'a two', 'levels' => ['level_1', 'level_2']],
+            ['id' => 1, 'title' => 'one', 'levels' => ['level_2']],
+            ['id' => 3, 'title' => 'three', 'levels' => []],
+        ];
+        $config = "levels asc";
+        $sorted = SortingLogic::sortTasks($tasks, $config);
+        $this->assertSame(
+            $tasks_sorted,
+            $sorted,
+            'SortingLogic failed on sorting by tasks level.'
+        );
+    }
 }
