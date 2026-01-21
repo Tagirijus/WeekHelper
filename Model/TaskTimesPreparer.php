@@ -24,6 +24,8 @@ class TaskTimesPreparer
         'level_3_columns' => [],
         'level_4_columns' => [],
         'non_time_mode_minutes' => 0,
+        // can be: 'id', 'remaining_hours_asc', 'remaining_hours_desc'
+        'tooltip_sorting' => 'id',
         'sorting_logic' => '',
         'timetagger_url' => '',
         'timetagger_authtoken' => '',
