@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Model/TaskInfoParser.php';
+require_once __DIR__ . '/../Model/TaskDataExtender.php';
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TaskDataExtender;
 
 
-final class TaskInfoParserTest extends TestCase
+final class TaskDataExtenderTest extends TestCase
 {
     public function testProjectTypeOverwriting()
     {
@@ -38,7 +38,7 @@ final class TaskInfoParserTest extends TestCase
             $task_overwrites['project_type'],
             'Task info was not parsed correctly.'
         );
-        TaskInfoParser::extendTask($task_overwrites);
+        TaskDataExtender::extendTask($task_overwrites);
         $this->assertSame(
             '',
             $task_overwrites['project_type'],
@@ -50,7 +50,7 @@ final class TaskInfoParserTest extends TestCase
             $task_left_type['project_type'],
             'Task info was not parsed correctly.'
         );
-        TaskInfoParser::extendTask($task_left_type);
+        TaskDataExtender::extendTask($task_left_type);
         $this->assertSame(
             'office',
             $task_left_type['project_type'],
@@ -61,7 +61,7 @@ final class TaskInfoParserTest extends TestCase
             array_key_exists('project_type', $task_new_set),
             '$task_new_set should not have the project_type key yet.'
         );
-        TaskInfoParser::extendTask($task_new_set);
+        TaskDataExtender::extendTask($task_new_set);
         $this->assertSame(
             'studio',
             $task_new_set['project_type'],
@@ -82,7 +82,7 @@ final class TaskInfoParserTest extends TestCase
             array_key_exists('plan_from', $task),
             '$task should not have the plan_from key yet.'
         );
-        TaskInfoParser::extendTask($task);
+        TaskDataExtender::extendTask($task);
         $this->assertSame(
             'wed 10:00',
             $task['plan_from'],
@@ -103,7 +103,7 @@ final class TaskInfoParserTest extends TestCase
             array_key_exists('timetagger_tags', $task),
             '$task should not have the timetagger_tags key yet.'
         );
-        TaskInfoParser::extendTask($task);
+        TaskDataExtender::extendTask($task);
         $this->assertSame(
             'client,project,task',
             $task['timetagger_tags'],
@@ -121,12 +121,12 @@ final class TaskInfoParserTest extends TestCase
         ];
         $this->assertFalse(
             isset($task['info_parsed']),
-            'TaskInfoParser was parsed already?'
+            'TaskDataExtender was parsed already?'
         );
-        TaskInfoParser::extendTask($task);
+        TaskDataExtender::extendTask($task);
         $this->assertTrue(
             isset($task['info_parsed']),
-            'TaskInfoParser should have a "i was parsed" state now!'
+            'TaskDataExtender should have a "i was parsed" state now!'
         );
     }
 }

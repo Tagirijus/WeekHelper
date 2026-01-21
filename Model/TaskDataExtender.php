@@ -3,7 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 
-class TaskInfoParser
+class TaskDataExtender
 {
 
     /**

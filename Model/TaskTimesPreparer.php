@@ -3,7 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
-use Kanboard\Plugin\WeekHelper\Model\TaskInfoParser;
+use Kanboard\Plugin\WeekHelper\Model\TaskDataExtender;
 use Kanboard\Plugin\WeekHelper\Model\TimesData;
 use Kanboard\Plugin\WeekHelper\Model\TimesDataPerEntity;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
@@ -203,7 +203,7 @@ class TaskTimesPreparer
     protected static function extendTasksInfo(&$tasks)
     {
         foreach ($tasks as &$task) {
-            TaskInfoParser::extendTask($task);
+            TaskDataExtender::extendTask($task);
         }
         unset($task);
     }
