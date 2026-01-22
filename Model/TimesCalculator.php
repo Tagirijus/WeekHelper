@@ -61,6 +61,13 @@ class TimesCalculator
     var $subtasks_estimated = 0.0;
 
     /**
+     * The subtasks remaining times in total.
+     *
+     * @var float
+     **/
+    var $subtasks_remaining = 0.0;
+
+    /**
      * The subtasks spent times in total.
      *
      * @var float
@@ -409,7 +416,11 @@ class TimesCalculator
      */
     protected function initRemaining()
     {
-        $remaining = $this->getEstimated() - $this->getSpent();
+        if (empty($this->subtasks) || $this->getNonTimeModeEnabled()) {
+            $remaining = $this->getEstimated() - $this->getSpent();
+        } else {
+            $remaining = $this->subtasks_remaining;
+        }
         $remaining = $remaining < 0 ? 0 : $remaining;
         $this->task['time_remaining'] = $remaining;
         $this->remaining = $remaining;
@@ -451,6 +462,16 @@ class TimesCalculator
             $this->task['open_subtasks'] += $subtask['status'] != 2 ? 1 : 0;
             $this->subtasks_estimated += $subtask['time_estimated'];
             $this->subtasks_spent += $subtask['time_spent'];
+
+            // logic for remaining is different: if the task is done, the
+            // difference betwen estimated and spent is not important
+            // anymore, since a subtask, which is "done", has no
+            // remaining time anymore!
+            $this->subtasks_remaining += (
+                $subtask['status'] != 2 ?
+                $subtask['time_estimated'] - $subtask['time_spent']
+                : 0
+            );
         }
     }
 

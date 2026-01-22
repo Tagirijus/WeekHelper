@@ -85,22 +85,22 @@ final class TimesCalculatorTest extends TestCase
         $this->assertSame(
             8.0,
             $tc->getEstimated(),
-            'TimesCalculator->getEstimated() return wrong result with subtasks test..'
+            'TimesCalculator->getEstimated() return wrong result with subtasks test.'
         );
         $this->assertSame(
             2.5,
             $tc->getSpent(),
-            'TimesCalculator->getSpent() return wrong result with subtasks test..'
+            'TimesCalculator->getSpent() return wrong result with subtasks test.'
         );
         $this->assertSame(
             5.5,
             $tc->getRemaining(),
-            'TimesCalculator->getRemaining() return wrong result with subtasks test..'
+            'TimesCalculator->getRemaining() return wrong result with subtasks test.'
         );
         $this->assertSame(
             0.0,
             $tc->getOvertime(),
-            'TimesCalculator->getOvertime() return wrong result with subtasks test..'
+            'TimesCalculator->getOvertime() return wrong result with subtasks test.'
         );
     }
 
@@ -373,6 +373,47 @@ final class TimesCalculatorTest extends TestCase
             0.0,
             $tc->getOvertime(),
             'TimesCalculator->getOvertime() is wrong.'
+        );
+    }
+
+    public function testSubtasksRemaining()
+    {
+        $task = TestTask::create();
+        $subtasks = [
+            TestTask::createSub(
+                status: 2,
+                time_estimated: 2,
+                time_spent: 0.5,
+            ),
+        ];
+        $tc = new TimesCalculator($task, $subtasks);
+
+        // initial times of the parent task should be "overwritten" with
+        // the subtasks times here.
+        //
+        // yet: normally in Kanboard the tasks times will get overwritten
+        // on adding, editing or deleting subtasks already anyway. still
+        // I coded that subtasks times will be used in the calculations,
+        // just in case.
+        $this->assertSame(
+            2.0,
+            $tc->getEstimated(),
+            'TimesCalculator->getEstimated() return wrong result with subtasks test..'
+        );
+        $this->assertSame(
+            0.5,
+            $tc->getSpent(),
+            'TimesCalculator->getSpent() return wrong result with subtasks test..'
+        );
+        $this->assertSame(
+            0.0,
+            $tc->getRemaining(),
+            'TimesCalculator->getRemaining() return wrong result with subtasks test..'
+        );
+        $this->assertSame(
+            -1.5,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() return wrong result with subtasks test..'
         );
     }
 }
