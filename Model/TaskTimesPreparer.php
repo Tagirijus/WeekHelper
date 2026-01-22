@@ -353,6 +353,7 @@ class TaskTimesPreparer
     {
         $this->extendTasksData($tasks);
         $this->emptyInternalValues();
+        SortingLogic::sortTasks($tasks, $this->getConfig('sorting_logic'));
 
         foreach ($tasks as $i => &$task) {
 
