@@ -1,0 +1,586 @@
+<?php
+
+namespace Kanboard\Plugin\WeekHelper\Model;
+
+
+/**
+ * This class will get a task and its subtasks and do some calculation
+ * to come up with estimated, spent, reamining and overtime values.
+ */
+class TimesCalculator
+{
+    /**
+     * The config array.
+     *
+     * @var array
+     **/
+    var $config = [
+        'non_time_mode_minutes' => 0
+    ];
+
+    /**
+     * The internal estimated value.
+     *
+     * @var float
+     **/
+    var $estimated = null;
+
+    /**
+     * The internal overtime value.
+     *
+     * @var float
+     **/
+    var $overtime = null;
+
+    /**
+     * The internal remaining value.
+     *
+     * @var float
+     **/
+    var $remaining = null;
+
+    /**
+     * The internal spent value.
+     *
+     * @var float
+     **/
+    var $spent = null;
+
+    /**
+     * The tasks subtasks.
+     *
+     * @var array
+     **/
+    var $subtasks;
+
+    /**
+     * The task array.
+     *
+     * @var array
+     **/
+    var $task;
+
+    /**
+     * The TimetaggerTranscriber, which can overwrite
+     * spent times for tasks.
+     *
+     * @var TimetaggerTranscriber
+     **/
+    var $timetagger_transcriber = null;
+
+    /**
+     * Instantiate the class with the given task and its subtasks.
+     *
+     * @param array  $task
+     * @param array  $subtasks
+     * @param array  $config
+     * @param  TimetaggerTranscriber $timetagger_transcriber
+     */
+    public function __construct($task, $subtasks = [], $config = [], $timetagger_transcriber = null) {
+        $this->initConfig($config);
+        $this->task = $task;
+        $this->subtasks = $subtasks;
+        $this->timetagger_transcriber = $timetagger_transcriber;
+    }
+
+    /**
+     * The calculation logic for a task or subtask.
+     * It varies on the state of the task / subtask.
+     *
+     * @param  array $task_or_subtask
+     * @return float
+     */
+    protected static function calculateRemaining($task_or_subtask)
+    {
+        $done = (
+            // it's a task
+            isset($task_or_subtask['is_active']) && $task_or_subtask['is_active'] == 0
+        ) || (
+            // it's a subtask
+            isset($task_or_subtask['status']) && $task_or_subtask['status'] == 2
+        );
+
+        // if the subtask is done or the tasks is closed,
+        // yet the spent time is below the estimated time,
+        // only use the lower spent time as the estimated time then
+        if ($done && $task_or_subtask['time_spent'] < $task_or_subtask['time_estimated']) {
+            $tmp_estimated = $task_or_subtask['time_spent'];
+        } else {
+            $tmp_estimated = $task_or_subtask['time_estimated'];
+        }
+        return $tmp_estimated - $task_or_subtask['time_spent'];
+    }
+
+    /**
+     * Get the remaining times from the given
+     * subtasks in the array.
+     *
+     * @return float
+     */
+    protected function calculateRemainingFromSubtasks()
+    {
+        $out = 0.0;
+        foreach ($this->subtasks as $subtask) {
+            // check if this subtask is open or not and add it, if it's open
+            if ($subtask['status'] != 2) {
+                $this->task['open_subtasks']++;
+            }
+
+            $tmp = self::calculateRemaining($subtask);
+
+            // only add time as spending, as long as the spent time of the subtask
+            // does not exceed the estimated time, so that in total
+            // the remaining time will always represent the actual estimated
+            // time throughout all subtasks
+            if ($tmp > 0) {
+                $out += $tmp;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * Extend the given subtasks array and add 'percentage'
+     * to their keys. The logic is basically that a subtasks
+     * title can contain a percentage string like "30 %" or "30%"
+     * which would tell the system how much this subtask occupies
+     * in time of the whole.
+     *
+     * exmaple 1:
+     * 5 subtasks with no percentages. this means that every subtask
+     * should have 20% automatically.
+     *
+     * example 2:
+     * 5 subtasks with 1 with 40% and 1 with 10%. this means that
+     * these two already occupy 50% of all subtasks. means that
+     * the remaining 3 subtasks have to share 50%, means that one
+     * subtask of them is 16,6% of the whole subtasks sum.
+     *
+     * @param  array &$subtasks
+     */
+    protected static function extendSubtasksWithPercentage(&$subtasks)
+    {
+        $countWithout = 0;
+        $percentRemaining = 1.0;
+
+        // first run: parse, set known percentages, count unknowns
+        foreach ($subtasks as $k => $s) {
+            $p = self::percentFromString($s['title']);
+            if ($p != -1) {
+                $subtasks[$k]['percentage'] = $p;
+                $percentRemaining -= $p;
+            } else {
+                // mark otherwise, assigning later, count increasing
+                $subtasks[$k]['percentage'] = null;
+                $countWithout++;
+            }
+        }
+
+        if ($countWithout === 0) {
+            return;
+        }
+
+        // rounding fixing
+        if ($percentRemaining <= 0.0) {
+            $fill = 0.0;
+        } else {
+            $fill = $percentRemaining / $countWithout;
+        }
+
+        // fill in subtasks without given percentage
+        foreach ($subtasks as $k => $s) {
+            if ($s['percentage'] === null) {
+                $subtasks[$k]['percentage'] = $fill;
+            }
+        }
+    }
+
+    /**
+     * Get the internal config for the given key.
+     *
+     * @param  string $key
+     * @return string|integer|null
+     */
+    protected function getConfig($key)
+    {
+        return $this->config[$key] ?? null;
+    }
+
+    /**
+     * Return the estimated value. Initialize it first,
+     * if needed.
+     *
+     * @return float
+     */
+    public function getEstimated()
+    {
+        if (is_null($this->estimated)) {
+            $this->initEstimated();
+        }
+        return $this->estimated;
+    }
+
+    /**
+     * Get the config value for the non-time-mode minutes,
+     * but just make a call once; while the original value
+     * is still -1.
+     */
+    protected function getNonTimeModeMinutes()
+    {
+        return $this->getConfig('non_time_mode_minutes');
+    }
+
+    /**
+     * Get the bool if the non-time-mode is enabled or not.
+     */
+    protected function getNonTimeModeEnabled()
+    {
+        return $this->getNonTimeModeMinutes() > 0;
+    }
+
+    /**
+     * Get overtime time, initialize it first, if needed.
+     *
+     * @return float
+     */
+    public function getOvertime()
+    {
+        if (is_null($this->overtime)) {
+            $this->initOvertime();
+        }
+        return $this->overtime;
+    }
+
+    /**
+     * Get remaining time, initialize it first, if needed.
+     *
+     * @return float
+     */
+    public function getRemaining()
+    {
+        if (is_null($this->remaining)) {
+            $this->initRemaining();
+        }
+        return $this->remaining;
+    }
+
+    /**
+     * Get spent time, initialize it first, if needed.
+     *
+     * @return float
+     */
+    public function getSpent()
+    {
+        if (is_null($this->spent)) {
+            $this->initSpent();
+        }
+        return $this->spent;
+    }
+
+    /**
+     * Init the inetrnal config with the given one.
+     *
+     * @param  array $config
+     */
+    public function initConfig($config)
+    {
+        $this->config = array_merge($this->config, $config);
+    }
+
+    /**
+     * Calculate the estimated time.
+     */
+    protected function initEstimated()
+    {
+        if ($this->getNonTimeModeEnabled()) {
+            if (!array_key_exists('score', $this->task)) {
+                $this->task['score'] = 0;
+            }
+            $this->estimated = (float) $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
+            $this->task['time_estimated'] = $this->estimated;
+        } else {
+            // also, just in case, cast the given estimated as a float
+            $this->task['time_estimated'] = (float) $this->task['time_estimated'];
+            // Maybe at some point I might want to respect subtasks as well.
+            // But at the point coding this part, Kanboard automatically updates
+            // the parent tasks estimated time on basis of all subtasks times anyway.
+            // So accessing "times_estimated" of the main task should be enough already.
+            $this->estimated = $this->task['time_estimated'];
+        }
+    }
+
+    /**
+     * Calculate the overtime.
+     *
+     * The logic is that this value depends on the state of the
+     * overall task. E.g. if the tasks is not done yet, the over
+     * time cannot be negative (which would mean that the task
+     * was done faster then estimated).
+     */
+    protected function initOvertime()
+    {
+        $overtime = $this->getSpent() - $this->getEstimated();
+        if ($overtime < 0.0 && !$this->isDone()) {
+            $overtime = 0.0;
+        }
+        $this->task['time_overtime'] = $overtime;
+        $this->overtime = $overtime;
+        // if ($this->getNonTimeModeEnabled()) {
+        //     $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
+        //     $new_spent = $this->getSpent();
+        //     $new_overtime = $new_spent - $full_hours;
+        //     if ($new_spent <= $full_hours) {
+        //         $new_overtime = 0;
+        //     }
+        //     $this->task['time_overtime'] = $new_overtime;
+        //     $this->overtime = $new_overtime;
+        // } else {
+        //     $over_time = 0.0;
+        //     // calculate remaining or overtime based on subtasks
+        //     if (!empty($subtasks)) {
+        //         $tmp = 0.0;
+        //         foreach ($subtasks as $subtask) {
+        //             $tmp_in_loop = $subtask['time_spent'] - $subtask['time_estimated'];
+        //             $tmp += $tmp_in_loop;
+        //         }
+
+        //     // calculate remaining or overtime based only on task itself
+        //     } else {
+        //         $tmp = $this->getSpent() - $this->getEstimated();
+        //     }
+
+        //     $over_time = $tmp;
+
+        //     // also add the remaining time, which otherwise
+        //     // would generate an overtime, which is not wanted
+        //     $over_time += $this->getRemaining();
+
+        //     $this->task['time_overtime'] = $over_time;
+        //     $this->overtime = $over_time;
+        // }
+    }
+
+    /**
+     * Calculate the remaining time.
+     */
+    protected function initRemaining()
+    {
+        $remaining = $this->getEstimated() - $this->getSpent();
+        $remaining = $remaining < 0 ? 0 : $remaining;
+        $this->task['time_remaining'] = $remaining;
+        $this->remaining = $remaining;
+
+        // BELOW IS THE PREVIOUS METHOD, but I guess it was way
+        // overcomplicated and also resulted in wrong outputs.
+
+        // if (
+        //     $this->getNonTimeModeEnabled()
+        //     && !empty($subtasks)
+        // ) {
+
+        //     // get data from the subtasks
+        //     $time_override = 0;
+        //     foreach ($subtasks as $subtask) {
+        //         if (is_numeric($subtask['title'])) {
+        //             if ($subtask['title'] > 0) {
+        //                 if ($subtask['status'] == 1) {
+        //                     $time_override = (float) $subtask['title'] / 2;
+        //                 } elseif ($subtask['status'] == 0) {
+        //                     $time_override = (float) $subtask['title'];
+        //                 } elseif ($subtask['status'] == 2) {
+        //                     $time_override = 0;
+        //                 }
+        //             } else {
+        //                 $time_override = (float) $subtask['title'];
+        //             }
+        //         }
+        //     }
+
+        //     // override is positive: it stands for remaining
+        //     if ($time_override > 0) {
+        //         $new_remaining = $time_override;
+
+        //     // override is negative: it stans for spent
+        //     } elseif ($time_override < 0) {
+        //         $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
+        //         $new_remaining = $full_hours - ($time_override * -1);
+        //         // i guess the first check was "enable non-time mode"
+        //         // and this check is now to correct the newly calculated new_remaining
+        //         // and cap it at 0 at least
+        //         if ($new_remaining <= 0) {
+        //             $new_remaining = 0;
+        //         }
+
+        //     // no override
+        //     } else {
+        //         $new_remaining = $this->getEstimated() - $this->getSpent();
+        //     }
+
+        //     // final set
+        //     $this->task['time_remaining'] = $new_remaining;
+        //     $this->remaining = $new_remaining;
+
+        // } else {
+        //     $remaining_time = (float) $this->task['time_remaining'];
+        //     if (!empty($this->subtasks)) {
+        //         $this->task['open_subtasks'] = 0;
+
+        //         // calculate remaining or overtime based on subtasks
+        //         if (!empty($this->subtasks)) {
+        //             $tmp = $this->calculateRemainingFromSubtasks();
+
+        //         // calculate remaining or overtime based only on task itself
+        //         } else {
+        //             $tmp = self::calculateRemaining($this->task);
+        //         }
+
+        //         // remaining time should be positive
+        //         if ($tmp > 0) {
+        //             $remaining_time = $tmp;
+        //         }
+        //     }
+        //     $this->task['time_remaining'] = $remaining_time;
+        //     $this->remaining = $remaining_time;
+        // }
+    }
+
+    /**
+     * Calculate the spent time.
+     */
+    protected function initSpent()
+    {
+        // this has to be initialized if not existend; it's needed
+        // at another point in the plugin. it counts the open subtasks
+        // which have not the status 2
+        if (!array_key_exists('open_subtasks', $this->task)) {
+            $this->task['open_subtasks'] = 0;
+        }
+        if (
+            $this->getNonTimeModeEnabled()
+            && !empty($this->subtasks)
+        ) {
+
+            // add 'percentage' to the subtasks keys
+            self::extendSubtasksWithPercentage($this->subtasks);
+
+            // now get the full hours and calculate how many subtasks
+            // did work on that already, while the status also means
+            // if 1 == half of its percentage is done on the full
+            // hours and 2 == its percentage is done fully.
+            $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
+            $worked = 0.0;
+            $time_override = 0.0;
+            $has_override = false;
+            foreach ($this->subtasks as $subtask) {
+                if (is_numeric($subtask['title'])) {
+                    $has_override = true;
+                    if ($subtask['title'] > 0) {
+                        if ($subtask['status'] == 1) {
+                            $time_override = (float) $subtask['title'] / 2;
+                        } elseif ($subtask['status'] == 0) {
+                            $time_override = (float) $subtask['title'];
+                        } elseif ($subtask['status'] == 2) {
+                            $time_override = 0.0;
+                        }
+                    } else {
+                        $time_override = (float) $subtask['title'];
+                    }
+                } else {
+                    // if this happens with the last subtask, it really should
+                    // not be overwritten.
+                    $has_override = false;
+                }
+
+                if ($subtask['status'] == 0) {
+                    $this->task['open_subtasks']++;
+                } elseif ($subtask['status'] == 1 ) {
+                    $this->task['open_subtasks']++;
+                    // a begun subtask should stand for 50% of its time already ...
+                    $worked += $full_hours * ($subtask['percentage'] / 2);
+                } elseif ($subtask['status'] == 2 ) {
+                    $worked += $full_hours * $subtask['percentage'];
+                }
+
+            }
+
+            if ($has_override) {
+                // override is positive: it stands for remaining
+                if ($time_override >= 0) {
+                    $worked = $full_hours - $time_override;
+                    if ($worked < 0) {
+                        $worked = 0;
+                    }
+
+                // override is negative: it stans for spent
+                } elseif ($time_override < 0) {
+                    $worked = $full_hours - ($full_hours - ($time_override * -1));
+                }
+            }
+
+            $this->task['time_spent'] = $worked;
+            $this->spent = $worked;
+        } else {
+            // just in case: cast the given value as float.
+            $this->task['time_spent'] = (float) $this->task['time_spent'];
+            $this->spent = $this->task['time_spent'];
+        }
+    }
+
+    /**
+     * The logic if a task is considered to be done or not.
+     *
+     * @return boolean
+     */
+    public function isDone()
+    {
+        // subtasks exist: none has to be open still
+        if (!empty($subtasks)) {
+            return $this->task['open_subtasks'] == 0;
+
+        // no subtasks exist: spent has to be >= estimated
+        } else {
+            return $this->getSpent() >= $this->getEstimated();
+        }
+    }
+
+    /**
+     * Get a percentage float from the given string. E.g.
+     * maybe it's a subtask with the title "30% todo".
+     * In that case this function would return 0.3.
+     * Otherwise it returns -1.
+     *
+     * @param  string $string
+     * @return float
+     */
+    protected static function percentFromString($string = '')
+    {
+        if (!is_string($string) || $string === '') {
+            return -1.0;
+        }
+
+        // search for a number followed by an optional whitespace and '%'
+        if (preg_match('/([+-]?\d+(?:[.,]\d+)?)\s*%/u', $string, $m)) {
+            // normalize decimal to a dot
+            $num = str_replace(',', '.', $m[1]);
+            // try to convert to a float
+            if (is_numeric($num)) {
+                $val = (float) $num;
+                return $val / 100.0;
+            }
+        }
+        return -1.0;
+    }
+
+    /**
+     * Update the given task with the internal task. This basically
+     * will just overwrite the given array with the internal array.
+     *
+     * @param  array &$task
+     * @return array
+     */
+    public function updateTask(&$task)
+    {
+        $task = $this->task;
+        return $this->task;
+    }
+}
