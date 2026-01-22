@@ -168,6 +168,9 @@ class TimesCalculator
         $time_override = 0.0;
         $has_override = false;
         foreach ($this->subtasks as $subtask) {
+            // the LAST subtasks title can be a numeric and overwrite
+            // the spent (negative value) or basically for the
+            // remaining (positive value)
             if (is_numeric($subtask['title'])) {
                 $has_override = true;
                 if ($subtask['title'] > 0) {
@@ -204,7 +207,7 @@ class TimesCalculator
                     $spent = 0;
                 }
 
-            // override is negative: it stans for spent
+            // override is negative: it stands for spent
             } elseif ($time_override < 0) {
                 $spent = $full_hours - ($full_hours - ($time_override * -1));
             }
