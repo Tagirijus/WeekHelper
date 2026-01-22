@@ -220,4 +220,22 @@ final class TimesCalculatorTest extends TestCase
             'TimesCalculator->getOvertime() in non time mode output is wrong.'
         );
     }
+
+    public function testOvertime()
+    {
+        $task = TestTask::create();
+        $subtasks = [
+            TestTask::createSub(
+                status: 1,
+                time_estimated: 2,
+                time_spent: 3,
+            ),
+        ];
+        $tc = new TimesCalculator($task, $subtasks);
+        $this->assertSame(
+            1.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() is wrong.'
+        );
+    }
 }
