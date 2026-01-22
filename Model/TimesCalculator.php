@@ -325,39 +325,6 @@ class TimesCalculator
         }
         $this->task['time_overtime'] = $overtime;
         $this->overtime = $overtime;
-        // if ($this->getNonTimeModeEnabled()) {
-        //     $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
-        //     $new_spent = $this->getSpent();
-        //     $new_overtime = $new_spent - $full_hours;
-        //     if ($new_spent <= $full_hours) {
-        //         $new_overtime = 0;
-        //     }
-        //     $this->task['time_overtime'] = $new_overtime;
-        //     $this->overtime = $new_overtime;
-        // } else {
-        //     $over_time = 0.0;
-        //     // calculate remaining or overtime based on subtasks
-        //     if (!empty($subtasks)) {
-        //         $tmp = 0.0;
-        //         foreach ($subtasks as $subtask) {
-        //             $tmp_in_loop = $subtask['time_spent'] - $subtask['time_estimated'];
-        //             $tmp += $tmp_in_loop;
-        //         }
-
-        //     // calculate remaining or overtime based only on task itself
-        //     } else {
-        //         $tmp = $this->getSpent() - $this->getEstimated();
-        //     }
-
-        //     $over_time = $tmp;
-
-        //     // also add the remaining time, which otherwise
-        //     // would generate an overtime, which is not wanted
-        //     $over_time += $this->getRemaining();
-
-        //     $this->task['time_overtime'] = $over_time;
-        //     $this->overtime = $over_time;
-        // }
     }
 
     /**
@@ -369,79 +336,6 @@ class TimesCalculator
         $remaining = $remaining < 0 ? 0 : $remaining;
         $this->task['time_remaining'] = $remaining;
         $this->remaining = $remaining;
-
-        // BELOW IS THE PREVIOUS METHOD, but I guess it was way
-        // overcomplicated and also resulted in wrong outputs.
-
-        // if (
-        //     $this->getNonTimeModeEnabled()
-        //     && !empty($subtasks)
-        // ) {
-
-        //     // get data from the subtasks
-        //     $time_override = 0;
-        //     foreach ($subtasks as $subtask) {
-        //         if (is_numeric($subtask['title'])) {
-        //             if ($subtask['title'] > 0) {
-        //                 if ($subtask['status'] == 1) {
-        //                     $time_override = (float) $subtask['title'] / 2;
-        //                 } elseif ($subtask['status'] == 0) {
-        //                     $time_override = (float) $subtask['title'];
-        //                 } elseif ($subtask['status'] == 2) {
-        //                     $time_override = 0;
-        //                 }
-        //             } else {
-        //                 $time_override = (float) $subtask['title'];
-        //             }
-        //         }
-        //     }
-
-        //     // override is positive: it stands for remaining
-        //     if ($time_override > 0) {
-        //         $new_remaining = $time_override;
-
-        //     // override is negative: it stans for spent
-        //     } elseif ($time_override < 0) {
-        //         $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
-        //         $new_remaining = $full_hours - ($time_override * -1);
-        //         // i guess the first check was "enable non-time mode"
-        //         // and this check is now to correct the newly calculated new_remaining
-        //         // and cap it at 0 at least
-        //         if ($new_remaining <= 0) {
-        //             $new_remaining = 0;
-        //         }
-
-        //     // no override
-        //     } else {
-        //         $new_remaining = $this->getEstimated() - $this->getSpent();
-        //     }
-
-        //     // final set
-        //     $this->task['time_remaining'] = $new_remaining;
-        //     $this->remaining = $new_remaining;
-
-        // } else {
-        //     $remaining_time = (float) $this->task['time_remaining'];
-        //     if (!empty($this->subtasks)) {
-        //         $this->task['open_subtasks'] = 0;
-
-        //         // calculate remaining or overtime based on subtasks
-        //         if (!empty($this->subtasks)) {
-        //             $tmp = $this->calculateRemainingFromSubtasks();
-
-        //         // calculate remaining or overtime based only on task itself
-        //         } else {
-        //             $tmp = self::calculateRemaining($this->task);
-        //         }
-
-        //         // remaining time should be positive
-        //         if ($tmp > 0) {
-        //             $remaining_time = $tmp;
-        //         }
-        //     }
-        //     $this->task['time_remaining'] = $remaining_time;
-        //     $this->remaining = $remaining_time;
-        // }
     }
 
     /**
