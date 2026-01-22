@@ -192,13 +192,15 @@ final class TimesCalculatorTest extends TestCase
 
     public function testNonTimeMode()
     {
+        // ---
+        // standard without overrides
+        // ---
         $task = TestTask::create(score: 6);
         $subtasks = [
             TestTask::createSub(status: 2),
             TestTask::createSub(status: 1),
         ];
         $tc = new TimesCalculator($task, $subtasks, ['non_time_mode_minutes' => 10]);
-
         $this->assertSame(
             1.0,
             $tc->getEstimated(),
@@ -211,6 +213,96 @@ final class TimesCalculatorTest extends TestCase
         );
         $this->assertSame(
             0.25,
+            $tc->getRemaining(),
+            'TimesCalculator->getRemaining() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() in non time mode output is wrong.'
+        );
+
+        // ---
+        // percentage definitions
+        // ---
+        $task = TestTask::create(score: 60);
+        $subtasks = [
+            TestTask::createSub(status: 2, title: '50% something'),
+            TestTask::createSub(status: 1, title: '20% less'),
+            TestTask::createSub(status: 0, title: '10% bit more'),
+        ];
+        $tc = new TimesCalculator($task, $subtasks, ['non_time_mode_minutes' => 10]);
+        $this->assertSame(
+            10.0,
+            $tc->getEstimated(),
+            'TimesCalculator->getEstimated() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            6.0,
+            $tc->getSpent(),
+            'TimesCalculator->getSpent() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            4.00,
+            $tc->getRemaining(),
+            'TimesCalculator->getRemaining() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() in non time mode output is wrong.'
+        );
+
+        // ---
+        // numeric override
+        // ---
+        $task = TestTask::create(score: 60);
+        $subtasks = [
+            TestTask::createSub(status: 2),
+            TestTask::createSub(status: 1),
+            TestTask::createSub(status: 0, title: '2'),
+        ];
+        $tc = new TimesCalculator($task, $subtasks, ['non_time_mode_minutes' => 10]);
+        $this->assertSame(
+            10.0,
+            $tc->getEstimated(),
+            'TimesCalculator->getEstimated() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            8.0,
+            $tc->getSpent(),
+            'TimesCalculator->getSpent() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            2.00,
+            $tc->getRemaining(),
+            'TimesCalculator->getRemaining() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() in non time mode output is wrong.'
+        );
+
+        $task = TestTask::create(score: 60);
+        $subtasks = [
+            TestTask::createSub(status: 2),
+            TestTask::createSub(status: 1),
+            TestTask::createSub(status: 0, title: '-7'),
+        ];
+        $tc = new TimesCalculator($task, $subtasks, ['non_time_mode_minutes' => 10]);
+        $this->assertSame(
+            10.0,
+            $tc->getEstimated(),
+            'TimesCalculator->getEstimated() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            7.0,
+            $tc->getSpent(),
+            'TimesCalculator->getSpent() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            3.00,
             $tc->getRemaining(),
             'TimesCalculator->getRemaining() in non time mode output is wrong.'
         );
