@@ -4,14 +4,19 @@ namespace Kanboard\Plugin\WeekHelper\tests;
 
 
 /**
- * This class can create simple tests tasks without the keys
- * of original Kanbaord tasks, I would not need inside the
- * tests.
+ * This class can create simple tests tasks as if they (almost)
+ * were original Kanboard task arrays.
  */
 class TestTask
 {
     private static int $nextId = 1;
 
+    /**
+     * The parameter should be used in a named mannor, since
+     * the order will change in the future, if I add new
+     * possible task data elements. I will use it in an
+     * alphabetically order.
+     */
     public static function create(
         $description = '',
         $project_id = -1,
