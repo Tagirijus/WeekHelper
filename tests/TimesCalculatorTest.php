@@ -189,4 +189,35 @@ final class TimesCalculatorTest extends TestCase
             'TimesCalculator->isDone() should be true in status tests with subtasks.'
         );
     }
+
+    public function testNonTimeMode()
+    {
+        $task = TestTask::create(score: 6);
+        $subtasks = [
+            TestTask::createSub(status: 2),
+            TestTask::createSub(status: 1),
+        ];
+        $tc = new TimesCalculator($task, $subtasks, ['non_time_mode_minutes' => 10]);
+
+        $this->assertSame(
+            1.0,
+            $tc->getEstimated(),
+            'TimesCalculator->getEstimated() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.75,
+            $tc->getSpent(),
+            'TimesCalculator->getSpent() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.25,
+            $tc->getRemaining(),
+            'TimesCalculator->getRemaining() in non time mode output is wrong.'
+        );
+        $this->assertSame(
+            0.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() in non time mode output is wrong.'
+        );
+    }
 }
