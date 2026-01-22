@@ -54,6 +54,20 @@ class TimesCalculator
     var $subtasks;
 
     /**
+     * The subtasks estimated times in total.
+     *
+     * @var float
+     **/
+    var $subtasks_estimated = 0.0;
+
+    /**
+     * The subtasks spent times in total.
+     *
+     * @var float
+     **/
+    var $subtasks_spent = 0.0;
+
+    /**
      * The task array.
      *
      * @var array
@@ -80,6 +94,7 @@ class TimesCalculator
         $this->initConfig($config);
         $this->task = $task;
         $this->subtasks = $subtasks;
+        $this->initSubtasks();
         $this->timetagger_transcriber = $timetagger_transcriber;
     }
 
@@ -121,11 +136,6 @@ class TimesCalculator
     {
         $out = 0.0;
         foreach ($this->subtasks as $subtask) {
-            // check if this subtask is open or not and add it, if it's open
-            if ($subtask['status'] != 2) {
-                $this->task['open_subtasks']++;
-            }
-
             $tmp = self::calculateRemaining($subtask);
 
             // only add time as spending, as long as the spent time of the subtask
@@ -137,6 +147,70 @@ class TimesCalculator
             }
         }
         return $out;
+    }
+
+    /**
+     * Calculate the spent from the subtasks IN non-time-mode.
+     *
+     * @return float
+     */
+    protected function calculateSpentNonTimeMode()
+    {
+        // add 'percentage' to the subtasks keys
+        self::extendSubtasksWithPercentage($this->subtasks);
+
+        // now get the full hours and calculate how many subtasks
+        // did work on that already, while the status also means
+        // if 1 == half of its percentage is done on the full
+        // hours and 2 == its percentage is done fully.
+        $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
+        $spent = 0.0;
+        $time_override = 0.0;
+        $has_override = false;
+        foreach ($this->subtasks as $subtask) {
+            if (is_numeric($subtask['title'])) {
+                $has_override = true;
+                if ($subtask['title'] > 0) {
+                    if ($subtask['status'] == 1) {
+                        $time_override = (float) $subtask['title'] / 2;
+                    } elseif ($subtask['status'] == 0) {
+                        $time_override = (float) $subtask['title'];
+                    } elseif ($subtask['status'] == 2) {
+                        $time_override = 0.0;
+                    }
+                } else {
+                    $time_override = (float) $subtask['title'];
+                }
+            } else {
+                // if this happens with the last subtask, it really should
+                // not be overwritten.
+                $has_override = false;
+            }
+
+            if ($subtask['status'] == 1 ) {
+                // a begun subtask should stand for 50% of its time already ...
+                $spent += $full_hours * ($subtask['percentage'] / 2);
+            } elseif ($subtask['status'] == 2 ) {
+                $spent += $full_hours * $subtask['percentage'];
+            }
+
+        }
+
+        if ($has_override) {
+            // override is positive: it stands for remaining
+            if ($time_override >= 0) {
+                $spent = $full_hours - $time_override;
+                if ($spent < 0) {
+                    $spent = 0;
+                }
+
+            // override is negative: it stans for spent
+            } elseif ($time_override < 0) {
+                $spent = $full_hours - ($full_hours - ($time_override * -1));
+            }
+        }
+
+        return $spent;
     }
 
     /**
@@ -299,13 +373,13 @@ class TimesCalculator
             $this->estimated = (float) $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
             $this->task['time_estimated'] = $this->estimated;
         } else {
-            // also, just in case, cast the given estimated as a float
-            $this->task['time_estimated'] = (float) $this->task['time_estimated'];
-            // Maybe at some point I might want to respect subtasks as well.
-            // But at the point coding this part, Kanboard automatically updates
-            // the parent tasks estimated time on basis of all subtasks times anyway.
-            // So accessing "times_estimated" of the main task should be enough already.
-            $this->estimated = $this->task['time_estimated'];
+            if (empty($this->subtasks)) {
+                $estimated = (float) $this->task['time_estimated'];
+            } else {
+                $estimated = $this->subtasks_estimated;
+            }
+            $this->task['time_estimated'] = $estimated;
+            $this->estimated = $estimated;
         }
     }
 
@@ -343,80 +417,37 @@ class TimesCalculator
      */
     protected function initSpent()
     {
-        // this has to be initialized if not existend; it's needed
-        // at another point in the plugin. it counts the open subtasks
-        // which have not the status 2
+        // non time mode
+        if ($this->getNonTimeModeEnabled()) {
+            $spent = $this->calculateSpentNonTimeMode();
+
+        // from subtasks
+        } elseif (!$this->getNonTimeModeEnabled() && !empty($this->subtasks)) {
+            $spent = $this->subtasks_spent;
+
+        // use the task times itself
+        } else {
+            // just in case: cast the given value as float.
+            $spent = (float) $this->task['time_spent'];
+        }
+
+        $this->task['time_spent'] = $spent;
+        $this->spent = $spent;
+    }
+
+    /**
+     * Init certain numbers form the subtasks, which might be used
+     * later.
+     */
+    protected function initSubtasks()
+    {
         if (!array_key_exists('open_subtasks', $this->task)) {
             $this->task['open_subtasks'] = 0;
         }
-        if (
-            $this->getNonTimeModeEnabled()
-            && !empty($this->subtasks)
-        ) {
-
-            // add 'percentage' to the subtasks keys
-            self::extendSubtasksWithPercentage($this->subtasks);
-
-            // now get the full hours and calculate how many subtasks
-            // did work on that already, while the status also means
-            // if 1 == half of its percentage is done on the full
-            // hours and 2 == its percentage is done fully.
-            $full_hours = $this->getNonTimeModeMinutes() * $this->task['score'] / 60;
-            $worked = 0.0;
-            $time_override = 0.0;
-            $has_override = false;
-            foreach ($this->subtasks as $subtask) {
-                if (is_numeric($subtask['title'])) {
-                    $has_override = true;
-                    if ($subtask['title'] > 0) {
-                        if ($subtask['status'] == 1) {
-                            $time_override = (float) $subtask['title'] / 2;
-                        } elseif ($subtask['status'] == 0) {
-                            $time_override = (float) $subtask['title'];
-                        } elseif ($subtask['status'] == 2) {
-                            $time_override = 0.0;
-                        }
-                    } else {
-                        $time_override = (float) $subtask['title'];
-                    }
-                } else {
-                    // if this happens with the last subtask, it really should
-                    // not be overwritten.
-                    $has_override = false;
-                }
-
-                if ($subtask['status'] == 0) {
-                    $this->task['open_subtasks']++;
-                } elseif ($subtask['status'] == 1 ) {
-                    $this->task['open_subtasks']++;
-                    // a begun subtask should stand for 50% of its time already ...
-                    $worked += $full_hours * ($subtask['percentage'] / 2);
-                } elseif ($subtask['status'] == 2 ) {
-                    $worked += $full_hours * $subtask['percentage'];
-                }
-
-            }
-
-            if ($has_override) {
-                // override is positive: it stands for remaining
-                if ($time_override >= 0) {
-                    $worked = $full_hours - $time_override;
-                    if ($worked < 0) {
-                        $worked = 0;
-                    }
-
-                // override is negative: it stans for spent
-                } elseif ($time_override < 0) {
-                    $worked = $full_hours - ($full_hours - ($time_override * -1));
-                }
-            }
-
-            $this->task['time_spent'] = $worked;
-            $this->spent = $worked;
-        } else {
-            // just in case: cast the given value as float.
-            $this->task['time_spent'] = (float) $this->task['time_spent'];
-            $this->spent = $this->task['time_spent'];
+        foreach ($this->subtasks as $subtask) {
+            $this->task['open_subtasks'] += $subtask['status'] != 2 ? 1 : 0;
+            $this->subtasks_estimated += $subtask['time_estimated'];
+            $this->subtasks_spent += $subtask['time_spent'];
         }
     }
 
@@ -428,7 +459,7 @@ class TimesCalculator
     public function isDone()
     {
         // subtasks exist: none has to be open still
-        if (!empty($subtasks)) {
+        if (!empty($this->subtasks)) {
             return $this->task['open_subtasks'] == 0;
 
         // no subtasks exist: spent has to be >= estimated

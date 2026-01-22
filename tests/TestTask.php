@@ -10,6 +10,7 @@ namespace Kanboard\Plugin\WeekHelper\tests;
 class TestTask
 {
     private static int $nextId = 1;
+    private static int $nextSubId = 1;
 
     /**
      * The parameter should be used in a named mannor, since
@@ -53,6 +54,31 @@ class TestTask
             'project_max_hours_wed' => $project_max_hours_wed,
             'project_type' => $project_type,
             'score' => $score,
+            'time_estimated' => $time_estimated,
+            'time_remaining' => $time_remaining,
+            'time_spent' => $time_spent,
+            'title' => $title,
+        ];
+    }
+
+    /**
+     * Create a subtask from scratch. As for the task ( create() )
+     * the parameters should be handed by naming them.
+     */
+    public static function createSub(
+        $status = 0,
+        $task_id = -1,
+        $time_estimated = 0.0,
+        $time_remaining = 0.0,
+        $time_spent = 0.0,
+        $title = '',
+    )
+    {
+        $id = self::$nextSubId++;
+        return [
+            'id' => $id,
+            'status' => $status,
+            'task_id' => $task_id,
             'time_estimated' => $time_estimated,
             'time_remaining' => $time_remaining,
             'time_spent' => $time_spent,
