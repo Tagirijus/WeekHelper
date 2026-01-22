@@ -10,7 +10,7 @@ use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
 
-class TaskTimesPreparer
+class TasksTimesPreparer
 {
     /**
      * The config values, which are outside stored

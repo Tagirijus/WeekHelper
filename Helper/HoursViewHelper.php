@@ -4,12 +4,12 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Pimple\Container;
 use Kanboard\Core\Base;
-use Kanboard\Model\TaskModel;
-use Kanboard\Model\ProjectModel;
-use Kanboard\Model\SubtaskModel;
+// use Kanboard\Model\TaskModel;
+// use Kanboard\Model\ProjectModel;
+// use Kanboard\Model\SubtaskModel;
 use Kanboard\Core\Paginator;
 use Kanboard\Filter\TaskProjectsFilter;
-use Kanboard\Plugin\WeekHelper\Model\TaskTimesPreparer;
+use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
 
 
 class HoursViewHelper extends Base
@@ -25,7 +25,7 @@ class HoursViewHelper extends Base
     /**
      * The internal master class: the task preparer!
      *
-     * @var TaskTimesPreparer
+     * @var TasksTimesPreparer
      **/
     var $task_times_preparer = null;
 
@@ -41,9 +41,9 @@ class HoursViewHelper extends Base
     }
 
     /**
-     * Initialize the TaskTimesPreparer.
+     * Initialize the TasksTimesPreparer.
      */
-    public function initTaskTimesPreparer()
+    public function initTasksTimesPreparer()
     {
         $config_task_times_preparer = [
             'levels_config' => [
@@ -61,7 +61,7 @@ class HoursViewHelper extends Base
             'timetagger_overwrites_levels_spent' => $this->configModel->get('timetagger_overwrites_levels_spent', ''),
             'timetagger_start_fetch' => $this->configModel->get('timetagger_start_fetch', ''),
         ];
-        $this->task_times_preparer = new TaskTimesPreparer($config_task_times_preparer);
+        $this->task_times_preparer = new TasksTimesPreparer($config_task_times_preparer);
     }
 
     /**
@@ -213,24 +213,24 @@ class HoursViewHelper extends Base
     }
 
     // /**
-    //  * Get the TaskTimesPreparer tasks_per_level array.
+    //  * Get the TasksTimesPreparer tasks_per_level array.
     //  *
     //  * @return array
     //  */
     // public function getTasksPerLevel()
     // {
-    //     return $this->getTaskTimesPreparer()->getTasksPerLevel();
+    //     return $this->getTasksTimesPreparer()->getTasksPerLevel();
     // }
 
     /**
-     * Get the TaskTimesPreparer and, if needed, initialize it first.
+     * Get the TasksTimesPreparer and, if needed, initialize it first.
      *
-     * @return TaskTimesPreparer
+     * @return TasksTimesPreparer
      */
-    public function getTaskTimesPreparer()
+    public function getTasksTimesPreparer()
     {
         if (is_null($this->task_times_preparer)) {
-            $this->initTaskTimesPreparer();
+            $this->initTasksTimesPreparer();
         }
         return $this->task_times_preparer;
     }
@@ -250,7 +250,7 @@ class HoursViewHelper extends Base
     //             $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
     //         }
     //     }
-    //     return $this->getTaskTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
+    //     return $this->getTasksTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
     // }
 
     // /**
@@ -381,7 +381,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getEstimatedTimeForTask(&$task)
     // {
-    //     return $this->getTaskTimesPreparer()->getEstimatedTimeForTask($task);
+    //     return $this->getTasksTimesPreparer()->getEstimatedTimeForTask($task);
     // }
 
     // /**
@@ -392,7 +392,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getSpentTimeForTask(&$task)
     // {
-    //     return $this->getTaskTimesPreparer()->getSpentTimeForTask(
+    //     return $this->getTasksTimesPreparer()->getSpentTimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
@@ -407,7 +407,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getRemainingTimeForTask(&$task)
     // {
-    //     return $this->getTaskTimesPreparer()->getRemainingTimeForTask(
+    //     return $this->getTasksTimesPreparer()->getRemainingTimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
@@ -422,7 +422,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getOvertimeForTask(&$task)
     // {
-    //     return $this->getTaskTimesPreparer()->getOvertimeForTask(
+    //     return $this->getTasksTimesPreparer()->getOvertimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
