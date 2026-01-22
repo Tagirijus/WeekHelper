@@ -1,0 +1,276 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Model/TasksTimesPreparer.php';
+require_once __DIR__ . '/../tests/TestTask.php';
+require_once __DIR__ . '/../Model/SortingLogic.php';
+require_once __DIR__ . '/../Model/TaskDataExtender.php';
+require_once __DIR__ . '/../Model/TimesCalculator.php';
+require_once __DIR__ . '/../Model/TimesData.php';
+require_once __DIR__ . '/../Model/TimesDataPerEntity.php';
+require_once __DIR__ . '/../Model/TimetaggerFetcher.php';
+require_once __DIR__ . '/../Model/TimetaggerTranscriber.php';
+
+
+use PHPUnit\Framework\TestCase;
+use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
+use Kanboard\Plugin\WeekHelper\tests\TestTask;
+
+
+final class TasksTimesPreparerTest extends TestCase
+{
+    public function testSimpleTasksTimes()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(
+                time_estimated: 3,
+                time_spent: 0.25,
+            ),
+            TestTask::create(
+                time_estimated: 6,
+                time_spent: 0.25,
+            )
+        ];
+        $ttp->initTasksAndTimes($tasks);
+
+        // total times
+        $this->assertSame(
+            9.0,
+            $ttp->getEstimatedTotal(),
+            'TaskTimesPreparer->getEstimatedTotal() returned wrong value.'
+        );
+        $this->assertSame(
+            0.5,
+            $ttp->getSpentTotal(),
+            'TaskTimesPreparer->getSpentTotal() returned wrong value.'
+        );
+        $this->assertSame(
+            8.5,
+            $ttp->getRemainingTotal(),
+            'TaskTimesPreparer->getRemainingTotal() returned wrong value.'
+        );
+        $this->assertSame(
+            0.0,
+            $ttp->getOvertimeTotal(),
+            'TaskTimesPreparer->getOvertimeTotal() returned wrong value.'
+        );
+    }
+
+    public function testNonTimeMode()
+    {
+        $config = [
+            'non_time_mode_minutes' => 10
+        ];
+        $ttp = new TasksTimesPreparer($config);
+
+        $tasks = [
+            TestTask::create(
+                score: 6,  // is 1 hour estimated
+            ),
+            TestTask::create(
+                score: 12,  // is 2 hours estimated
+            )
+        ];
+        $subtasks_by_task_ids = [
+            $tasks[0]['id'] => [
+                TestTask::createSub(status: 1)  // 50% of 1 hour spent: 0.5 spent
+            ],
+            $tasks[1]['id'] => [
+                TestTask::createSub(status: 2, title: '50%'),  // is 1 hour spent
+                TestTask::createSub(status: 1),  // is 50% of the remaining 25% spent: 0.25 hours
+                TestTask::createSub(status: 0),  // is 0 hours spent
+            ],
+        ];
+        $ttp->initTasksAndTimes($tasks, $subtasks_by_task_ids);
+
+        // total times
+        $this->assertSame(
+            3.0,
+            $ttp->getEstimatedTotal(),
+            'TaskTimesPreparer->getEstimatedTotal() returned wrong value with non-time-mode.'
+        );
+        $this->assertSame(
+            1.75,
+            $ttp->getSpentTotal(),
+            'TaskTimesPreparer->getSpentTotal() returned wrong value with non-time-mode.'
+        );
+        $this->assertSame(
+            1.25,
+            $ttp->getRemainingTotal(),
+            'TaskTimesPreparer->getRemainingTotal() returned wrong value with non-time-mode.'
+        );
+        $this->assertSame(
+            0.0,
+            $ttp->getOvertimeTotal(),
+            'TaskTimesPreparer->getOvertimeTotal() returned wrong value with non-time-mode.'
+        );
+    }
+
+    public function testSubtasksTimesA()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(
+                time_estimated: 3,
+                time_spent: 0.25,
+            ),
+            TestTask::create(
+                time_estimated: 6,
+                time_spent: 0.25,
+            )
+        ];
+        $subtasks_by_task_ids = [
+            $tasks[0]['id'] => [
+                TestTask::createSub(
+                    time_estimated: 5,
+                    time_spent: 1
+                )
+            ],
+            $tasks[1]['id'] => [
+                TestTask::createSub(
+                    time_estimated: 2.5,
+                    time_spent: 0.5
+                ),
+                TestTask::createSub(
+                    time_estimated: 3,
+                    time_spent: 3
+                ),
+            ],
+        ];
+        $ttp->initTasksAndTimes($tasks, $subtasks_by_task_ids);
+
+        // total times
+        $this->assertSame(
+            10.5,
+            $ttp->getEstimatedTotal(),
+            'TaskTimesPreparer->getEstimatedTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            4.5,
+            $ttp->getSpentTotal(),
+            'TaskTimesPreparer->getSpentTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            6.0,
+            $ttp->getRemainingTotal(),
+            'TaskTimesPreparer->getRemainingTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            0.0,
+            $ttp->getOvertimeTotal(),
+            'TaskTimesPreparer->getOvertimeTotal() returned wrong value with subtasks.'
+        );
+    }
+
+    public function testSubtasksTimesB()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(),
+            TestTask::create()
+        ];
+        $subtasks_by_task_ids = [
+            $tasks[0]['id'] => [
+                TestTask::createSub(
+                    status: 1,
+                    time_estimated: 5,
+                    time_spent: 6
+                )
+            ],
+            $tasks[1]['id'] => [
+                TestTask::createSub(
+                    status: 1,
+                    time_estimated: 2,
+                    time_spent: 1
+                ),
+                TestTask::createSub(
+                    status: 2,
+                    time_estimated: 3,
+                    time_spent: 3
+                ),
+            ],
+        ];
+        $ttp->initTasksAndTimes($tasks, $subtasks_by_task_ids);
+
+        // total times
+        $this->assertSame(
+            10.0,
+            $ttp->getEstimatedTotal(),
+            'TaskTimesPreparer->getEstimatedTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            10.0,
+            $ttp->getSpentTotal(),
+            'TaskTimesPreparer->getSpentTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            1.0,
+            $ttp->getRemainingTotal(),
+            'TaskTimesPreparer->getRemainingTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            1.0,
+            $ttp->getOvertimeTotal(),
+            'TaskTimesPreparer->getOvertimeTotal() returned wrong value with subtasks.'
+        );
+    }
+
+    public function testSubtasksTimesC()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(),
+            TestTask::create()
+        ];
+        $subtasks_by_task_ids = [
+            $tasks[0]['id'] => [
+                TestTask::createSub(
+                    status: 1,
+                    time_estimated: 5,
+                    time_spent: 6
+                )
+            ],
+            $tasks[1]['id'] => [
+                TestTask::createSub(
+                    status: 2,
+                    time_estimated: 2,
+                    time_spent: 0.5
+                ),
+                TestTask::createSub(
+                    status: 2,
+                    time_estimated: 3,
+                    time_spent: 3
+                ),
+            ],
+        ];
+        $ttp->initTasksAndTimes($tasks, $subtasks_by_task_ids);
+
+        // total times
+        $this->assertSame(
+            10.0,
+            $ttp->getEstimatedTotal(),
+            'TaskTimesPreparer->getEstimatedTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            9.5,
+            $ttp->getSpentTotal(),
+            'TaskTimesPreparer->getSpentTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            0.0,
+            $ttp->getRemainingTotal(),
+            'TaskTimesPreparer->getRemainingTotal() returned wrong value with subtasks.'
+        );
+        $this->assertSame(
+            -0.5,
+            $ttp->getOvertimeTotal(),
+            'TaskTimesPreparer->getOvertimeTotal() returned wrong value with subtasks.'
+        );
+    }
+}
