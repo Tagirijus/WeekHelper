@@ -25,13 +25,49 @@ final class DistributionLogicTest extends TestCase
         // by SortingLogic (virtually), by the way.
         // I have a set of tasks for project 1 and 2
         // project 1
-        $task_1_a = TestTask::create('1a', 1, 'office', 3, 0.5, 0);
-        $task_1_b = TestTask::create('1b', 1, 'office', 3, 1, 0);
-        $task_1_c = TestTask::create('1c', 1, 'office', 3, 2, 0);
+        $task_1_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 3,
+            project_type: 'office',
+            time_remaining: 0.5,
+            title: '1a',
+        );
+        $task_1_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 3,
+            project_type: 'office',
+            time_remaining: 1,
+            title: '1b',
+        );
+        $task_1_c = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 3,
+            project_type: 'office',
+            time_remaining: 2,
+            title: '1c',
+        );
         // project 2
-        $task_2_a = TestTask::create('2a', 2, 'studio', 3, 0.5, 0);
-        $task_2_b = TestTask::create('2b', 2, 'studio', 3, 2, 0);
-        $task_2_c = TestTask::create('2c', 2, 'studio', 3, 1, 0);
+        $task_2_a = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 3,
+            project_type: 'studio',
+            time_remaining: 0.5,
+            title: '2a',
+        );
+        $task_2_b = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 3,
+            project_type: 'studio',
+            time_remaining: 2,
+            title: '2b',
+        );
+        $task_2_c = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 3,
+            project_type: 'studio',
+            time_remaining: 1,
+            title: '2c',
+        );
         $init_tasks = [
             $task_1_a,
             $task_1_b,
@@ -476,9 +512,27 @@ final class DistributionLogicTest extends TestCase
 
     public function testMinSlotLength(): void
     {
-        $task_a = TestTask::create('1a', 1, 'office', 4, 0.5, 0);
-        $task_b = TestTask::create('1b', 1, 'office', 4, 1, 0);
-        $task_c = TestTask::create('1c', 1, 'office', 4, 2, 0);
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            project_type: 'office',
+            time_remaining: 0.5,
+            title: '1a',
+        );
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            project_type: 'office',
+            time_remaining: 1,
+            title: '1b',
+        );
+        $task_c = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            project_type: 'office',
+            time_remaining: 2,
+            title: '1c',
+        );
         $init_tasks = [
             $task_a,
             $task_b,
@@ -555,7 +609,10 @@ final class DistributionLogicTest extends TestCase
 
         $blocking_config = "mon 9:00-17:00";
 
-        $task = TestTask::create('a', 1, '', 4, 1, 0);
+        $task = TestTask::create(
+            project_max_hours_day: 4,
+            time_remaining: 1,
+        );
         $init_tasks = [
             $task
         ];

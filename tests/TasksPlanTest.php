@@ -21,8 +21,11 @@ final class TasksPlanTest extends TestCase
     {
         $tasks_plan = new TasksPlan();
 
-        //                         title, project_id, type,     max_hours, remain, spent
-        $task = TestTask::create('a',   1,          'studio', 2,         2,      0);
+        $task = TestTask::create(
+            project_max_hours_day: 2,
+            project_type: 'studio',
+            time_remaining: 2,
+        );
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
         $this->assertSame(
             120,
@@ -45,9 +48,18 @@ final class TasksPlanTest extends TestCase
     {
         $tasks_plan = new TasksPlan();
 
-        //                         title, project_id, type,     max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          'studio', 2,         2,      0);
-        $task   = TestTask::create('b',   1,          'studio', 2,         3,      0);
+        $task_a = TestTask::create(
+            project_max_hours_day: 2,
+            project_type: 'studio',
+            time_remaining: 2,
+            title: 'a',
+        );
+        $task   = TestTask::create(
+            project_max_hours_day: 2,
+            project_type: 'studio',
+            time_remaining: 3,
+            title: 'b',
+        );
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
 
         // plan the task to deplete the projects daily limit for this day
@@ -99,7 +111,11 @@ final class TasksPlanTest extends TestCase
 
         // this makes the default project_max_hours_day to 2,
         // but the Wednesday should be 4
-        $task   = TestTask::create('a', 1, '', 2, 13, 0, -1, -1, 4);
+        $task   = TestTask::create(
+            project_max_hours_day: 2,
+            project_max_hours_wed: 4,
+            time_remaining: 13,
+        );
 
         // Monday should get 2 hours, Tuesday 2 hours, but Wednesday 4 hours,
         // Thursday 2 hours again, and the rest goes to overflow: 3 hours
@@ -187,7 +203,11 @@ final class TasksPlanTest extends TestCase
     {
         $tasks_plan = new TasksPlan();
 
-        $task = TestTask::create('c', 3, '', 4, 0.5, 0.5);
+        $task = TestTask::create(
+            project_max_hours_day: 4,
+            time_remaining: 0.5,
+            time_spent: 0.5,
+        );
         $time_slots_day = new TimeSlotsDay("6:00-9:00", 'mon');
 
         // initially the whole task, but nothing more should be
@@ -203,8 +223,18 @@ final class TasksPlanTest extends TestCase
     {
         $tasks_plan = new TasksPlan(15);
 
-        $task_a = TestTask::create('a', 4, '', 4, 2.75, 0);
-        $task_b = TestTask::create('b', 5, '', 4, 0.5, 0);
+        $task_a = TestTask::create(
+            project_id: 4,
+            project_max_hours_day: 4,
+            time_remaining: 2.75,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_id: 5,
+            project_max_hours_day: 4,
+            time_remaining: 0.5,
+            title: 'b',
+        );
         $time_slots_day = new TimeSlotsDay("6:00-9:00", 'mon');
 
         // task A should fill up 2:45 hours, making the remaining
@@ -242,10 +272,18 @@ final class TasksPlanTest extends TestCase
 
         // for Monday only task A should be planned
         $time_slots_day_mon = new TimeSlotsDay("6:00-9:00 office\n11:00-13:00 studio", 'mon');
-        //                         title, project_id, type,     max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          'studio', 2,         2,      0);
-        //                         title, project_id, type,     max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          'studio', 2,         3,      0);
+        $task_a = TestTask::create(
+            project_max_hours_day: 2,
+            project_type: 'studio',
+            time_remaining: 2,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_max_hours_day: 2,
+            project_type: 'studio',
+            time_remaining: 3,
+            title: 'b',
+        );
 
         // should be planned
         $tasks_plan->planTask(
@@ -331,10 +369,19 @@ final class TasksPlanTest extends TestCase
         // for Monday only task A should be planned
         $time_slots_day_mon = new TimeSlotsDay("6:00-8:00", 'mon');
         $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         1.75,   0);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
+
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 1.75,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            title: 'b',
+        );
 
         // should be planned
         $tasks_plan->planTask(
@@ -389,9 +436,21 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_mon = new TimeSlotsDay("6:00-6:20\n10:00-12:00", 'mon');
         $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
         //                          title, project_id, type, max_hours, remain, spent
-        $task_a1 = TestTask::create('a1',  1,          '',   4,         0.5,   0);
-        $task_a2 = TestTask::create('a2',  1,          '',   4,         1.5,   0);
-        $task_b  = TestTask::create('b',   1,          '',   4,         2,      0);
+        $task_a1 = TestTask::create(
+            project_max_hours_day: 4,
+            time_remaining: 0.5,
+            title: 'a1',
+        );
+        $task_a2 = TestTask::create(
+            project_max_hours_day: 4,
+            time_remaining: 1.5,
+            title: 'a2',
+        );
+        $task_b  = TestTask::create(
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            title: 'b',
+        );
 
         // should be planned on Monday both
         $tasks_plan->planTask(
@@ -467,12 +526,24 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
         $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
 
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         4,      0);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 4,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            title: 'b',
+        );
+        $task_c = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 2,
+            time_remaining: 2,
+            title: 'c',
+        );
 
         $tasks_plan->planTask(
             $task_a,
@@ -543,12 +614,25 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
         $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
 
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         2,      2);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          '',   4,         2,      0);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            time_spent: 2,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            title: 'b',
+        );
+        $task_c = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 2,
+            time_remaining: 2,
+            title: 'c',
+        );
 
         // create a plan for worked tasks and thus create a correct project
         // daily limits array internally ...
@@ -641,12 +725,27 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_tue = new TimeSlotsDay("10:00-13:00", 'tue');
         $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
 
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         2,      1.5);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          '',   4,         4,      1);
-        //                         title, project_id, type, max_hours, remain, spent
-        $task_c = TestTask::create('c',   2,          '',   2,         2,      0.5);
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            time_spent: 1.5,
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 4,
+            time_spent: 1,
+            title: 'b',
+        );
+        $task_c = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 2,
+            time_remaining: 2,
+            time_spent: 0.5,
+            title: 'c',
+        );
 
         $tasks_plan->planTask(
             $task_a,
@@ -699,15 +798,30 @@ final class TasksPlanTest extends TestCase
         $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
 
         //                         title, project_id, type, max_hours, remain, spent
-        $task_a = TestTask::create('a',   1,          '',   4,         2,      0);
+        $task_a = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 2,
+            title: 'a',
+        );
         // also task A should have a "plan_from" value set; which will be
         // parsed normally later in the whole automatic planning process; only for
-        // the tets I will set this value by hand
+        // the tests I will set this value by hand
         $task_a['plan_from'] = 'tue 11:00';
         //                         title, project_id, type, max_hours, remain, spent
-        $task_b = TestTask::create('b',   1,          '',   4,         4,      0);
+        $task_b = TestTask::create(
+            project_id: 1,
+            project_max_hours_day: 4,
+            time_remaining: 4,
+            title: 'b',
+        );
         //                         title, project_id, type, max_hours, remain, spent
-        $task_c = TestTask::create('c',   2,          '',   2,         2,      0);
+        $task_c = TestTask::create(
+            project_id: 2,
+            project_max_hours_day: 2,
+            time_remaining: 2,
+            title: 'c',
+        );
 
         // now I plan manually like the sorting was set already and how I know how
         // the tasks should be planned across the days; at least how it is supposed
