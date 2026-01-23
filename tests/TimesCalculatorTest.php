@@ -424,12 +424,10 @@ final class TimesCalculatorTest extends TestCase
         $task = TestTask::create(time_estimated: 10.0, time_spent: 5.0);
         $tc = new TimesCalculator($task);
         $this->assertSame(0.5, $tc->getPercent(), $msg);
-        $this->assertSame('50%', $tc->getPercent(true), $msg);
 
         $task = TestTask::create(time_estimated: 10.0, time_spent: 5.452837);
         $tc = new TimesCalculator($task);
         $this->assertSame(5.452837 / 10.0, $tc->getPercent(), $msg);
-        $this->assertSame('55%', $tc->getPercent(true), $msg);
 
         $task = TestTask::create(time_estimated: 10.0, time_spent: 10.0);
         $tc = new TimesCalculator($task);

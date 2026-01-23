@@ -352,20 +352,14 @@ class TimesCalculator
      * Get how much this task is done already as a
      * float percentage representation.
      *
-     * @param boolean  $readable
-     * @param string   $suffix
      * @return float
      */
-    public function getPercent($readable = false, $suffix = '%')
+    public function getPercent()
     {
         if (is_null($this->percent)) {
             $this->initPercent();
         }
-        if ($readable) {
-            return (string) round($this->percent * 100) . $suffix;
-        } else {
-            return $this->percent;
-        }
+        return $this->percent;
     }
 
     /**
