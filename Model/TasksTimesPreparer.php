@@ -22,9 +22,9 @@ class TasksTimesPreparer
     var $config = [
         'levels_config' => [],
         'non_time_mode_minutes' => 0,
-        // tooltip_sorting can be:
+        // project_sorting can be:
         //    'id', 'remaining_hours_asc', 'remaining_hours_desc'
-        'tooltip_sorting' => 'id',
+        'project_sorting' => 'id',
         'sorting_logic' => '',
         'timetagger_url' => '',
         'timetagger_authtoken' => '',
@@ -284,6 +284,8 @@ class TasksTimesPreparer
 
         }
         unset($task);
+
+        $this->sortProjects();
     }
 
     /**
@@ -555,5 +557,22 @@ class TasksTimesPreparer
             $this->initTimetagger();
         }
         return $this->timetagger_transcriber;
+    }
+
+    /**
+     * Sort the projects with the wanted sorting logic.
+     * This is, by now, only used for output in tooltips.
+     */
+    protected function sortProjects()
+    {
+        $project_sorting = $this->getConfig('project_sorting');
+
+        if ($project_sorting == 'id') {
+            $this->times_per_project->sort();
+        } elseif ($project_sorting == 'remaining_hours_asc') {
+            $this->times_per_project->sort('remaining', 'asc');
+        } elseif ($project_sorting == 'remaining_hours_desc') {
+            $this->times_per_project->sort('remaining', 'desc');
+        }
     }
 }

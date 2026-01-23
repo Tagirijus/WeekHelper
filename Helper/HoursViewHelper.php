@@ -202,7 +202,7 @@ class HoursViewHelper extends Base
                 'level_4' => $this->configModel->get('hoursview_level_4_columns', '')
             ],
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
-            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
+            'project_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
             'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),
             'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
             'timetagger_authtoken' =>  $this->configModel->get('timetagger_authtoken', ''),
