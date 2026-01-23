@@ -5,7 +5,12 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 
 /**
  * This class will get a task and its subtasks and do some calculation
- * to come up with estimated, spent, reamining and overtime values.
+ * to come up with estimated, spent, remaining and overtime values.
+ *
+ * This class will only be used for the calculation. It will return
+ * values, which will be used in the TasksTimesPreparer. After that
+ * the instance won't be used anymore. So this class basically
+ * is rather some kind of "one-time-use" for each task.
  */
 class TimesCalculator
 {
