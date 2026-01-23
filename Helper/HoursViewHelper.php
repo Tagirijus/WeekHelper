@@ -15,12 +15,28 @@ use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
 class HoursViewHelper extends Base
 {
     /**
+     * Projects cache-variable:
+     * [project_id => project_array]
+     *
+     * @var array
+     **/
+    var $projects = null;
+
+    /**
      * Subtasks cache-variable:
      * [task_id => subtask_array]
      *
      * @var array
      **/
-    var $subtasks = [];
+    var $subtasks = null;
+
+    /**
+     * Tasks cache-variable:
+     * [task_id => task_array]
+     *
+     * @var array
+     **/
+    var $tasks = null;
 
     /**
      * The internal master class: the task preparer!
@@ -28,6 +44,19 @@ class HoursViewHelper extends Base
      * @var TasksTimesPreparer
      **/
     var $task_times_preparer = null;
+
+    /**
+     * Defines whether the internal tasks and subtasks
+     * should be fetched by "all open tasks" or by the
+     * search query of Kanboard. This value has to be
+     * set before geting tasks or subtasks! So also
+     * before getting any time calculation related,
+     * which internally will also initialize the tasks
+     * and subtasks.
+     *
+     * @var boolean
+     **/
+    var $with_search_query = false;
 
     /**
      * Constructor for HoursViewHelper
@@ -38,6 +67,60 @@ class HoursViewHelper extends Base
     public function __construct($container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Initialize the internal subtasks cache variable.
+     */
+    protected function initSubtasks()
+    {
+        $subtasks = $this->subtasksModel->getAllByTaskIds($this->getTasks());
+        $this->subtasks = [];
+        foreach ($subtasks as $subtask) {
+            if (array_key_exists($subtask['task_id'], $this->subtasks)) {
+                $this->subtasks[$subtask['task_id']] = [];
+            }
+            $this->subtasks[$subtask['task_id']][] = $subtask;
+        }
+    }
+
+    /**
+     * Initialize the internal tasks cache variable.
+     */
+    protected function initTasks()
+    {
+        // query tasks from the search params
+        if ($this->with_search_query) {
+            $tasks = [];
+            $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
+            $search = urldecode($this->request->getStringParam('search'));
+            if ($search !== '' && ! empty($projects)) {
+                $paginator = new Paginator($this->container);
+                $paginator
+                    ->setMax(999999)
+                    ->setFormatter($this->taskListFormatter)
+                    ->setQuery($this->taskLexer
+                        ->build($search)
+                        ->withFilter(new TaskProjectsFilter(array_keys($projects)))
+                        ->getQuery()
+                    );
+                $tasks = $paginator->getCollection();
+            }
+
+        // simply fetch all open tasks
+        } else {
+            $query = $this->taskFinderModel->getExtendedQuery();
+            $builder = $this->taskLexer;
+            $builder->withQuery($query);
+            $tasks = $builder->build('status:open')->toArray();
+        }
+
+        // rearrange the array to have the tasks id as key
+        $this->tasks = [];
+        foreach ($tasks as $task) {
+            $this->tasks[$task['id']] = $task;
+        }
+        unset($task);
     }
 
     /**
@@ -64,48 +147,48 @@ class HoursViewHelper extends Base
         $this->task_times_preparer = new TasksTimesPreparer($config_task_times_preparer);
     }
 
-    /**
-     * Get all tasks from the the search URI,
-     * ignoring the pagination.
-     *
-     * ATTENTION:
-     *     This method might be overcomplicated, since
-     *     it uses the Paginator() class to get the
-     *     tasks. There might be a smarter way to
-     *     query the tasks with the given search string,
-     *     but I had no time to dive deeper into the
-     *     Kanboard framework to find out how. Yet
-     *     the PicoDB thing seems quite nice, though.
-     *     So maybe some day I might improve this
-     *     method or make it more logical, since it
-     *     is not that clever (to me) to use the
-     *     paginator for such a query. I do not
-     *     need "other pages" after all.
-     *
-     *     This method is only for getting ALL tasks
-     *     with the given search string.
-     *
-     * @return array
-     */
-    public function getAllTasksFromSearch()
-    {
-        $out = [];
-        $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
-        $search = urldecode($this->request->getStringParam('search'));
-        if ($search !== '' && ! empty($projects)) {
-            $paginator = new Paginator($this->container);
-            $paginator
-                ->setMax(999999)
-                ->setFormatter($this->taskListFormatter)
-                ->setQuery($this->taskLexer
-                    ->build($search)
-                    ->withFilter(new TaskProjectsFilter(array_keys($projects)))
-                    ->getQuery()
-                );
-            $out = $paginator->getCollection();
-        }
-        return $out;
-    }
+    // /**
+    //  * Get all tasks from the the search URI,
+    //  * ignoring the pagination.
+    //  *
+    //  * ATTENTION:
+    //  *     This method might be overcomplicated, since
+    //  *     it uses the Paginator() class to get the
+    //  *     tasks. There might be a smarter way to
+    //  *     query the tasks with the given search string,
+    //  *     but I had no time to dive deeper into the
+    //  *     Kanboard framework to find out how. Yet
+    //  *     the PicoDB thing seems quite nice, though.
+    //  *     So maybe some day I might improve this
+    //  *     method or make it more logical, since it
+    //  *     is not that clever (to me) to use the
+    //  *     paginator for such a query. I do not
+    //  *     need "other pages" after all.
+    //  *
+    //  *     This method is only for getting ALL tasks
+    //  *     with the given search string.
+    //  *
+    //  * @return array
+    //  */
+    // public function getAllTasksFromSearch()
+    // {
+    //     $out = [];
+    //     $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
+    //     $search = urldecode($this->request->getStringParam('search'));
+    //     if ($search !== '' && ! empty($projects)) {
+    //         $paginator = new Paginator($this->container);
+    //         $paginator
+    //             ->setMax(999999)
+    //             ->setFormatter($this->taskListFormatter)
+    //             ->setQuery($this->taskLexer
+    //                 ->build($search)
+    //                 ->withFilter(new TaskProjectsFilter(array_keys($projects)))
+    //                 ->getQuery()
+    //             );
+    //         $out = $paginator->getCollection();
+    //     }
+    //     return $out;
+    // }
 
     /**
      * Get configuration for plugin as array.
@@ -157,18 +240,18 @@ class HoursViewHelper extends Base
         return $levels_captions;
     }
 
-    /**
-     * Simply get all open tasks.
-     *
-     * @return array
-     */
-    public function getOpenTasks()
-    {
-        $query = $this->taskFinderModel->getExtendedQuery();
-        $builder = $this->taskLexer;
-        $builder->withQuery($query);
-        return $builder->build('status:open')->toArray();
-    }
+    // /**
+    //  * Simply get all open tasks.
+    //  *
+    //  * @return array
+    //  */
+    // protected function getOpenTasks()
+    // {
+    //     $query = $this->taskFinderModel->getExtendedQuery();
+    //     $builder = $this->taskLexer;
+    //     $builder->withQuery($query);
+    //     return $builder->build('status:open')->toArray();
+    // }
 
     /**
      * Generate additional task progress bar CSS
@@ -197,6 +280,25 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get all subtasks of open tasks, or all subtasks
+     * defined through the search query of tasks. Will
+     * initialize the subtasks first accordingly and
+     * then just return the internal cache variable.
+     *
+     * So set the internal value with setWithSearchQuery()
+     * first, before using this getter!
+     *
+     * @return array
+     */
+    public function getSubtasks()
+    {
+        if (is_null($this->subtasks)) {
+            $this->initSubtasks();
+        }
+        return $this->subtasks;
+    }
+
+    /**
      * Check if subtasks for task exist and return
      * the array, or otherwise fetch it from
      * the DB.
@@ -210,6 +312,25 @@ class HoursViewHelper extends Base
             $this->subtasks[$taskId] = $this->subtaskModel->getAll($taskId);
         }
         return $this->subtasks[$taskId];
+    }
+
+    /**
+     * Get all open task, or all tasks defined
+     * by the search query. Will initialize the
+     * tasks first accordingly and then just
+     * return the internal cache variable.
+     *
+     * So set the internal value with setWithSearchQuery()
+     * first, before using this getter!
+     *
+     * @return array
+     */
+    public function getTasks()
+    {
+        if (is_null($this->tasks)) {
+            $this->initTasks();
+        }
+        return $this->tasks;
     }
 
     // /**
@@ -693,4 +814,20 @@ class HoursViewHelper extends Base
 
     //     return $times;
     // }
+
+    /**
+     * Sets whether the first initial fetch of tasks or subtasks
+     * should depend on the Kanbaords search query or not. By
+     * default it won't and thus simply will fetch all open
+     * tasks and their subtasks internally.
+     *
+     * This value should be set before getting any tasks, subtasks
+     * or times calculation related things!
+     *
+     * @param boolean $value
+     */
+    public function setWithSearchQuery($value = false)
+    {
+        $this->with_search_query = $value;
+    }
 }
