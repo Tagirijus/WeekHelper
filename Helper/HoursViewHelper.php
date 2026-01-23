@@ -4,7 +4,7 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 
 use Pimple\Container;
 use Kanboard\Core\Base;
-// use Kanboard\Model\TaskModel;
+use Kanboard\Model\TaskModel;
 // use Kanboard\Model\ProjectModel;
 // use Kanboard\Model\SubtaskModel;
 use Kanboard\Core\Paginator;
@@ -46,17 +46,29 @@ class HoursViewHelper extends Base
     var $task_times_preparer = null;
 
     /**
-     * Defines whether the internal tasks and subtasks
-     * should be fetched by "all open tasks" or by the
-     * search query of Kanboard. This value has to be
-     * set before geting tasks or subtasks! So also
-     * before getting any time calculation related,
-     * which internally will also initialize the tasks
-     * and subtasks.
+     * Defines which tasks will be used for internal
+     * initialization and thus also calculation.
      *
-     * @var boolean
+     * Options are (as a string):
+     * - open: all open tasks will be fetcht.
+     * - project: all open tasks from a project will
+     *   be fetcht. $this->task_init_project_id has
+     *   to be set then as well!
+     * - search: the search query will be used, as if
+     *   the user is searching for tasks.
+     *
+     * @var string
      **/
-    var $with_search_query = false;
+    var $task_init_method = 'open';
+
+    /**
+     * The project id for the tasks initialization,
+     * of $this->task_init_method is set to
+     * 'project'.
+     *
+     * @var integer
+     **/
+    var $task_init_project_id = -1;
 
     /**
      * Constructor for HoursViewHelper
@@ -92,7 +104,7 @@ class HoursViewHelper extends Base
     protected function initTasks()
     {
         // query tasks from the search params
-        if ($this->with_search_query) {
+        if ($this->task_init_method == 'search') {
             $tasks = [];
             $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
             $search = urldecode($this->request->getStringParam('search'));
@@ -109,7 +121,21 @@ class HoursViewHelper extends Base
                 $tasks = $paginator->getCollection();
             }
 
+        // use project id to fetch tasks
+        } elseif ($this->task_init_method == 'project') {
+            $query = $this->taskFinderModel->getExtendedQuery()
+                ->eq(TaskModel::TABLE.'.project_id', $this->task_init_project_id);
+
+            $builder = $this->taskLexer;
+            $builder->withQuery($query);
+            $tasks = $builder->build('status:open')->toArray();
+
         // simply fetch all open tasks
+        // todo: maybe at some point this should be split into
+        //       "all" and "all by user id". but at the moment
+        //       I am the only person using my Kanboard, thus
+        //       there is no need for me to separate between
+        //       "open tasks" and "open tasks by user".
         } else {
             $query = $this->taskFinderModel->getExtendedQuery();
             $builder = $this->taskLexer;
@@ -822,18 +848,26 @@ class HoursViewHelper extends Base
     // }
 
     /**
-     * Sets whether the first initial fetch of tasks or subtasks
-     * should depend on the Kanbaords search query or not. By
-     * default it won't and thus simply will fetch all open
-     * tasks and their subtasks internally.
+     * Defines which tasks will be used for internal
+     * initialization and thus also calculation.
+     *
+     * Options are (as a string):
+     * - open: all open tasks will be fetcht.
+     * - project: all open tasks from a project will
+     *   be fetcht. $this->task_init_project_id has
+     *   to be set then as well!
+     * - search: the search query will be used, as if
+     *   the user is searching for tasks.
      *
      * This value should be set before getting any tasks, subtasks
      * or times calculation related things!
      *
-     * @param boolean $value
+     * @param string $method
+     * @param integer $peoject_id
      */
-    public function setWithSearchQuery($value = false)
+    public function setTaskInitMethod($method = 'open', $project_id = -1)
     {
-        $this->with_search_query = $value;
+        $this->task_init_method = $method;
+        $this->task_init_project_id = $project_id;
     }
 }
