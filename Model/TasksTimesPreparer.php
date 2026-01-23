@@ -75,6 +75,13 @@ class TasksTimesPreparer
     var $times;
 
     /**
+     * Times for all columns individually.
+     *
+     * @var TimesDataPerEntity
+     **/
+    var $times_per_column;
+
+    /**
      * Times for all levels individually.
      *
      * @var TimesDataPerEntity
@@ -112,6 +119,7 @@ class TasksTimesPreparer
     {
         $this->initConfig($config);
         $this->times = new TimesData();
+        $this->times_per_column = new TimesDataPerEntity();
         $this->times_per_level = new TimesDataPerEntity();
         $this->times_per_project = new TimesDataPerEntity();
         $this->times_per_user = new TimesDataPerEntity();
@@ -274,6 +282,7 @@ class TasksTimesPreparer
             // == == == == == == == ==
 
             $this->times->addTimes($estimated, $spent, $remaining, $overtime);
+            $this->times_per_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
             $this->addTimesToLevel($estimated, $spent, $remaining, $overtime, $task);
             $this->times_per_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
             $this->times_per_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
@@ -328,6 +337,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get estimated per column.
+     *
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedPerColumn($column = '', $readable = false)
+    {
+        return $this->times_per_column->getEstimated($column, $readable);
+    }
+
+    /**
      * Get estimated per level.
      *
      * @param  string $level
@@ -373,6 +394,18 @@ class TasksTimesPreparer
     public function getOvertimeTotal($readable = false)
     {
         return $this->times->getOvertime($readable);
+    }
+
+    /**
+     * Get overtime per column.
+     *
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimePerColumn($column = '', $readable = false)
+    {
+        return $this->times_per_column->getOvertime($column, $readable);
     }
 
     /**
@@ -436,6 +469,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get remaining per column.
+     *
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingPerColumn($column = '', $readable = false)
+    {
+        return $this->times_per_column->getRemaining($column, $readable);
+    }
+
+    /**
      * Get remaining per level.
      *
      * @param  string $level
@@ -481,6 +526,18 @@ class TasksTimesPreparer
     public function getSpentTotal($readable = false)
     {
         return $this->times->getSpent($readable);
+    }
+
+    /**
+     * Get spent per column.
+     *
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentPerColumn($column = '', $readable = false)
+    {
+        return $this->times_per_column->getSpent($column, $readable);
     }
 
     /**

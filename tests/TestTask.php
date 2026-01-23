@@ -19,6 +19,7 @@ class TestTask
      * alphabetically order.
      */
     public static function create(
+        $column_name = '',
         $description = '',
         $project_id = -1,
         $project_max_hours_day = 0,
@@ -40,6 +41,7 @@ class TestTask
     {
         $id = self::$nextId++;
         return [
+            'column_name' => $column_name,
             'description' => $description,
             'id' => $id,
             'owner_id' => $user_id,

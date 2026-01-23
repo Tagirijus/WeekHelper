@@ -285,4 +285,20 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame('0:15', $ttp->floatToHHMM(0.25), $msg);
         $this->assertSame('12:48', $ttp->floatToHHMM(12.80), $msg);
     }
+
+    public function testTimesPerColumns()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(column_name: 'backlog', time_estimated: 10.0),
+            TestTask::create(column_name: 'backlog', time_estimated: 2.0),
+            TestTask::create(column_name: 'started', time_estimated: 5.0),
+            TestTask::create(column_name: 'started', time_estimated: 2.0),
+        ];
+        $ttp->initTasksAndTimes($tasks);
+        $msg = 'TasksTimesPreparer times column calculation went wrong.';
+        $this->assertSame(12.0, $ttp->getEstimatedPerColumn('backlog'), $msg);
+        $this->assertSame(7.0, $ttp->getEstimatedPerColumn('started'), $msg);
+    }
 }
