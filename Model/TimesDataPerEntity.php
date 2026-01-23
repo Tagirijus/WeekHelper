@@ -114,6 +114,38 @@ class TimesDataPerEntity
     }
 
     /**
+     * Get the the done percentage for the entity. If the
+     * entity does not exist, return the average percentage
+     * of all the entities.
+     *
+     * @param mixed $entity
+     * @param boolean $readable
+     * @param string $suffix
+     * @return float
+     */
+    public function getPercent($entity = '', $readable = false, $suffix = '%')
+    {
+        if (array_key_exists($entity, $this->entities)) {
+            if ($readable) {
+                return $this->entities[$entity]->getPercentAsString($suffix);
+            } else {
+                return $this->entities[$entity]->getPercent();
+            }
+        } else {
+            $out = 0.0;
+            foreach ($this->entities as $entity) {
+                $out += $entity->getPercent();
+                $out = $out / 2;
+            }
+            if ($readable) {
+                return (string) round($out * 100) . $suffix;
+            } else {
+                return $out;
+            }
+        }
+    }
+
+    /**
      * Get the the remaining time for the entity. If the
      * entity does not exist, return the times for all of
      * the entities.
