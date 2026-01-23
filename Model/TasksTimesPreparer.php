@@ -193,26 +193,26 @@ class TasksTimesPreparer
     }
 
     /**
-     * Represent the given float as a proper time string.
+     * Wrapper for TimesData::flotToHHMM, which can be used in templates
+     * later then.
      *
      * @param  float $time
      * @return string
      */
-    protected static function floatToHHMM($time)
+    public function floatToHHMM($time)
     {
-        if ($time < 0) {
-            $time = $time * -1;
-            $negative = true;
-        } else {
-            $negative = false;
-        }
-        $hours = (int) $time;
-        $minutes = fmod((float) $time, 1) * 60;
-        if ($negative) {
-            return sprintf('-%01d:%02d', $hours, $minutes);
-        } else {
-            return sprintf('%01d:%02d', $hours, $minutes);
-        }
+        return TimesData::floatToHHMM($time);
+    }
+
+    /**
+     * Get has_times per project.
+     *
+     * @param  integer $project_id
+     * @return boolean
+     */
+    public function hasTimesPerProject($project_id = -1)
+    {
+        return $this->times_per_project->hasTimes($project_id);
     }
 
     /**
@@ -409,6 +409,18 @@ class TasksTimesPreparer
     public function getOvertimePerUser($user_id = -1, $readable = false)
     {
         return $this->times_per_user->getOvertime($user_id, $readable);
+    }
+
+    /**
+     * Get the project ids from the internal times_per_project
+     * attribute, which also should cover the correct sorting,
+     * liek defined in the config.
+     *
+     * @return array
+     */
+    public function getProjectIds()
+    {
+        return $this->times_per_level->getEntities();
     }
 
     /**

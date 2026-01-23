@@ -273,4 +273,16 @@ final class TasksTimesPreparerTest extends TestCase
             'TaskTimesPreparer->getOvertimeTotal() returned wrong value with subtasks.'
         );
     }
+
+    public function testFloatToHHMMWrapper()
+    {
+        // this basically also will test TimesData::floatHHMM()
+        $msg = 'TasksTimesPreparer->floatToHHMM() and probably TimesData::floatToHHMM() output is wrong.';
+        $ttp = new TasksTimesPreparer();
+        $this->assertSame('0:14', $ttp->floatToHHMM(0.234765), $msg);
+        $this->assertSame('0:14', $ttp->floatToHHMM(0.235), $msg);
+        $this->assertSame('0:14', $ttp->floatToHHMM(0.249), $msg);
+        $this->assertSame('0:15', $ttp->floatToHHMM(0.25), $msg);
+        $this->assertSame('12:48', $ttp->floatToHHMM(12.80), $msg);
+    }
 }
