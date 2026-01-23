@@ -28,7 +28,7 @@ class HoursViewHelper extends Base
      *
      * @var array
      **/
-    var $subtasks = null;
+    var $subtasks = [];
 
     /**
      * Tasks cache-variable:
@@ -36,7 +36,7 @@ class HoursViewHelper extends Base
      *
      * @var array
      **/
-    var $tasks = null;
+    var $tasks = [];
 
     /**
      * The internal master class: the task preparer!
@@ -100,11 +100,21 @@ class HoursViewHelper extends Base
 
     /**
      * Initialize the internal tasks cache variable.
+     *
+     * Options for $method are (as a string):
+     * - open: all open tasks will be fetcht.
+     * - project: all open tasks from a project will
+     *   be fetcht. $project_id has to be set then as well!
+     * - search: the search query will be used, as if
+     *   the user is searching for tasks.
+     *
+     * @param string  $method
+     * @param integer $project_id
      */
-    protected function initTasks()
+    public function initTasks($method = 'open', $project_id = -1)
     {
         // query tasks from the search params
-        if ($this->task_init_method == 'search') {
+        if ($method == 'search') {
             $tasks = [];
             $projects = $this->projectUserRoleModel->getActiveProjectsByUser($this->userSession->getId());
             $search = urldecode($this->request->getStringParam('search'));
@@ -122,9 +132,9 @@ class HoursViewHelper extends Base
             }
 
         // use project id to fetch tasks
-        } elseif ($this->task_init_method == 'project') {
+        } elseif ($method == 'project') {
             $query = $this->taskFinderModel->getExtendedQuery()
-                ->eq(TaskModel::TABLE.'.project_id', $this->task_init_project_id);
+                ->eq(TaskModel::TABLE.'.project_id', $project_id);
 
             $builder = $this->taskLexer;
             $builder->withQuery($query);
@@ -149,6 +159,9 @@ class HoursViewHelper extends Base
             $this->tasks[$task['id']] = $task;
         }
         unset($task);
+
+        // also call initSubtasks() automatically now
+        $this->initSubtasks();
     }
 
     /**
@@ -313,20 +326,16 @@ class HoursViewHelper extends Base
 
     /**
      * Get all subtasks of open tasks, or all subtasks
-     * defined through the search query of tasks. Will
-     * initialize the subtasks first accordingly and
-     * then just return the internal cache variable.
+     * defined through the search query of tasks.
      *
-     * So set the internal value with setWithSearchQuery()
-     * first, before using this getter!
+     * initTasks() with the needed options should
+     * be called first. Otherwise no tasks will be
+     * fetcht.
      *
      * @return array
      */
     public function getSubtasks()
     {
-        if (is_null($this->subtasks)) {
-            $this->initSubtasks();
-        }
         return $this->subtasks;
     }
 
@@ -348,20 +357,16 @@ class HoursViewHelper extends Base
 
     /**
      * Get all open task, or all tasks defined
-     * by the search query. Will initialize the
-     * tasks first accordingly and then just
-     * return the internal cache variable.
+     * by the search query.
      *
-     * So set the internal value with setWithSearchQuery()
-     * first, before using this getter!
+     * initTasks() with the needed options should
+     * be called first. Otherwise no tasks will be
+     * fetcht.
      *
      * @return array
      */
     public function getTasks()
     {
-        if (is_null($this->tasks)) {
-            $this->initTasks();
-        }
         return $this->tasks;
     }
 
@@ -846,28 +851,4 @@ class HoursViewHelper extends Base
 
     //     return $times;
     // }
-
-    /**
-     * Defines which tasks will be used for internal
-     * initialization and thus also calculation.
-     *
-     * Options are (as a string):
-     * - open: all open tasks will be fetcht.
-     * - project: all open tasks from a project will
-     *   be fetcht. $this->task_init_project_id has
-     *   to be set then as well!
-     * - search: the search query will be used, as if
-     *   the user is searching for tasks.
-     *
-     * This value should be set before getting any tasks, subtasks
-     * or times calculation related things!
-     *
-     * @param string $method
-     * @param integer $peoject_id
-     */
-    public function setTaskInitMethod($method = 'open', $project_id = -1)
-    {
-        $this->task_init_method = $method;
-        $this->task_init_project_id = $project_id;
-    }
 }
