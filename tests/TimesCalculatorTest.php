@@ -416,4 +416,27 @@ final class TimesCalculatorTest extends TestCase
             'TimesCalculator->getOvertime() return wrong result with subtasks test..'
         );
     }
+
+    public function testPercent()
+    {
+        $msg = 'TimesCalculator calculated percentage wrong.';
+
+        $task = TestTask::create(time_estimated: 10.0, time_spent: 5.0);
+        $tc = new TimesCalculator($task);
+        $this->assertSame(0.5, $tc->getPercent(), $msg);
+        $this->assertSame('50%', $tc->getPercent(true), $msg);
+
+        $task = TestTask::create(time_estimated: 10.0, time_spent: 5.452837);
+        $tc = new TimesCalculator($task);
+        $this->assertSame(5.452837 / 10.0, $tc->getPercent(), $msg);
+        $this->assertSame('55%', $tc->getPercent(true), $msg);
+
+        $task = TestTask::create(time_estimated: 10.0, time_spent: 10.0);
+        $tc = new TimesCalculator($task);
+        $this->assertSame(1.0, $tc->getPercent(), $msg);
+
+        $task = TestTask::create(time_estimated: 10.0, time_spent: 20.0);
+        $tc = new TimesCalculator($task);
+        $this->assertSame(2.0, $tc->getPercent(), $msg);
+    }
 }
