@@ -20,7 +20,7 @@ class HoursViewHelper extends Base
      *
      * @var array
      **/
-    var $projects = null;
+    var $projects = [];
 
     /**
      * Subtasks cache-variable:
@@ -79,6 +79,21 @@ class HoursViewHelper extends Base
     public function __construct($container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Initialize the internal projects array with the
+     * given project ids array.
+     *
+     * @param  array  $project_ids
+     */
+    protected function initProjects($project_ids = [])
+    {
+        $projects = $this->projectModel->getAllByIds($project_ids);
+        $this->projects = [];
+        foreach ($projects as $project) {
+            $this->projects[$project['id']] = $project;
+        }
     }
 
     /**
@@ -154,14 +169,24 @@ class HoursViewHelper extends Base
         }
 
         // rearrange the array to have the tasks id as key
+        // and also fill the temp array, which will store
+        // all needed project ids, for the later project
+        // initialization
         $this->tasks = [];
+        $project_ids = [];
         foreach ($tasks as $task) {
             $this->tasks[$task['id']] = $task;
+            if (!in_array($task['project_id'], $project_ids)) {
+                $project_ids[] = $task['project_id'];
+            }
         }
         unset($task);
 
         // also call initSubtasks() automatically now
         $this->initSubtasks();
+
+        // and initialize the projects as well
+        $this->initProjects($project_ids);
     }
 
     /**
@@ -325,6 +350,18 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Get a project array with the given id, if it
+     * exists in the internal cache variable.
+     *
+     * @param  integer $project_id
+     * @return array
+     */
+    public function getProject($project_id)
+    {
+        return $this->projects[$project_id] ?? [];
+    }
+
+    /**
      * Get all subtasks of open tasks, or all subtasks
      * defined through the search query of tasks.
      *
@@ -377,7 +414,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getTasksPerLevel()
     // {
-    //     return $this->getTasksTimesPreparer()->getTasksPerLevel();
+    //     return $this->getTimes()->getTasksPerLevel();
     // }
 
     /**
@@ -385,7 +422,7 @@ class HoursViewHelper extends Base
      *
      * @return TasksTimesPreparer
      */
-    public function getTasksTimesPreparer()
+    public function getTimes()
     {
         if (is_null($this->task_times_preparer)) {
             $this->initTasksTimesPreparer();
@@ -408,7 +445,7 @@ class HoursViewHelper extends Base
     //             $subtasks_by_task_id[$task['id']] = $this->getSubtasksByTaskId($task['id']);
     //         }
     //     }
-    //     return $this->getTasksTimesPreparer()->getTimesFromTasks($tasks, $subtasks_by_task_id);
+    //     return $this->getTimes()->getTimesFromTasks($tasks, $subtasks_by_task_id);
     // }
 
     // /**
@@ -539,7 +576,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getEstimatedTimeForTask(&$task)
     // {
-    //     return $this->getTasksTimesPreparer()->getEstimatedTimeForTask($task);
+    //     return $this->getTimes()->getEstimatedTimeForTask($task);
     // }
 
     // /**
@@ -550,7 +587,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getSpentTimeForTask(&$task)
     // {
-    //     return $this->getTasksTimesPreparer()->getSpentTimeForTask(
+    //     return $this->getTimes()->getSpentTimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
@@ -565,7 +602,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getRemainingTimeForTask(&$task)
     // {
-    //     return $this->getTasksTimesPreparer()->getRemainingTimeForTask(
+    //     return $this->getTimes()->getRemainingTimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
@@ -580,7 +617,7 @@ class HoursViewHelper extends Base
     //  */
     // public function getOvertimeForTask(&$task)
     // {
-    //     return $this->getTasksTimesPreparer()->getOvertimeForTask(
+    //     return $this->getTimes()->getOvertimeForTask(
     //         $task,
     //         $this->getSubtasksByTaskId($task['id'])
     //     );
