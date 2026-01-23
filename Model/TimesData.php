@@ -82,10 +82,10 @@ class TimesData
         $overtime
     )
     {
-        $arr['estimated'] += $estimated;
-        $arr['spent'] += $spent;
-        $arr['remaining'] += $remaining;
-        $arr['overtime'] += $overtime;
+        $arr['estimated'] += (float) $estimated;
+        $arr['spent'] += (float) $spent;
+        $arr['remaining'] += (float) $remaining;
+        $arr['overtime'] += (float) $overtime;
 
         // also update the has_times boolean
         $arr['has_times'] = (
