@@ -38,14 +38,6 @@ class TimesCalculator
     var $overtime = null;
 
     /**
-     * The float representation of the "done percentage"
-     * value.
-     *
-     * @var float
-     **/
-    var $percent = null;
-
-    /**
      * The internal remaining value.
      *
      * @var float
@@ -349,20 +341,6 @@ class TimesCalculator
     }
 
     /**
-     * Get how much this task is done already as a
-     * float percentage representation.
-     *
-     * @return float
-     */
-    public function getPercent()
-    {
-        if (is_null($this->percent)) {
-            $this->initPercent();
-        }
-        return $this->percent;
-    }
-
-    /**
      * Get remaining time, initialize it first, if needed.
      *
      * @return float
@@ -436,30 +414,6 @@ class TimesCalculator
         }
         $this->task['time_overtime'] = $overtime;
         $this->overtime = $overtime;
-    }
-
-    /**
-     * Initialize the done percent of the task.
-     */
-    protected function initPercent()
-    {
-        $percent = 0.0;
-        if ($this->getEstimated() != 0) {
-            if ($this->getEstimated() != 0) {
-                $percent = $this->getSpent() / $this->getEstimated();
-            } else {
-                $percent = 1.0;
-            }
-        }
-
-        // prevent negative percentages, which
-        // might occur due to rounding issues,
-        // I guess? - monkey patch!
-        if ($percent <= 0.0) {
-            $percent = 0.0;
-        }
-
-        $this->percent = $percent;
     }
 
     /**

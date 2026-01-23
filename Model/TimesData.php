@@ -14,6 +14,13 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 class TimesData
 {
     /**
+     * The done percentage of the task.
+     *
+     * @var float
+     **/
+    var $percent = 0.0;
+
+    /**
      * The basic times array. Classes, which will inherit
      * from this class can overwrite this core attribute,
      * but should also adjust the methods, below, which
@@ -63,6 +70,7 @@ class TimesData
             $overtime
         );
         $this->times_readable = self::toReadable($this->times);
+        $this->updatePercent();
     }
 
     /**
@@ -166,6 +174,27 @@ class TimesData
     }
 
     /**
+     * Return the internal done percentage.
+     *
+     * @return float
+     */
+    public function getPercent()
+    {
+        return $this->percent;
+    }
+
+    /**
+     * Return the internal done percentage
+     * as a readable string.
+     *
+     * @return string
+     */
+    public function getPercentAsString($suffix = '%')
+    {
+        return (string) round($this->getPercent() * 100) . $suffix;
+    }
+
+    /**
      * Get the the remaining time.
      *
      * @param boolean $readable
@@ -238,5 +267,30 @@ class TimesData
     protected function resetTimesForArray(&$arr)
     {
         $arr = self::emptyTimesArray();
+    }
+
+    /**
+     * The done percentage caclulation logic and updater
+     * method for the internal attribute.
+     */
+    protected function updatePercent()
+    {
+        $percent = 0.0;
+        if ($this->getEstimated() != 0) {
+            if ($this->getEstimated() != 0) {
+                $percent = $this->getSpent() / $this->getEstimated();
+            } else {
+                $percent = 1.0;
+            }
+        }
+
+        // prevent negative percentages, which
+        // might occur due to rounding issues,
+        // I guess? - monkey patch!
+        if ($percent <= 0.0) {
+            $percent = 0.0;
+        }
+
+        $this->percent = $percent;
     }
 }
