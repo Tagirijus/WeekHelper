@@ -74,7 +74,9 @@ class HoursViewHelper extends Base
      */
     protected function initSubtasks()
     {
-        $subtasks = $this->subtasksModel->getAllByTaskIds($this->getTasks());
+        $subtasks = $this->subtasksModel->getAllByTaskIds(
+            array_keys($this->getTasks())
+        );
         $this->subtasks = [];
         foreach ($subtasks as $subtask) {
             if (array_key_exists($subtask['task_id'], $this->subtasks)) {
