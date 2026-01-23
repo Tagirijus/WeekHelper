@@ -147,6 +147,10 @@ class HoursViewHelper extends Base
             'timetagger_start_fetch' => $this->configModel->get('timetagger_start_fetch', ''),
         ];
         $this->task_times_preparer = new TasksTimesPreparer($config_task_times_preparer);
+        $this->task_times_preparer->initTasksAndTimes(
+            $this->getTasks(),
+            $this->getSubtasks()
+        );
     }
 
     // /**
