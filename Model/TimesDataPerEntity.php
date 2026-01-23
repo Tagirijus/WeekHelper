@@ -46,6 +46,22 @@ class TimesDataPerEntity
     }
 
     /**
+     * Returns the entities, which are basically just the
+     * internal arrays keys.
+     *
+     * At some point I will store project IDs as keys here
+     * and also have some unique sorting logic internally.
+     * So then I might want to get the project IDs in the
+     * correct order.
+     *
+     * @return array
+     */
+    public function getEntities()
+    {
+        return array_keys($this->entities);
+    }
+
+    /**
      * Get the the estimated time for the entity. If the
      * entity does not exist, return the times for all of
      * the entities.
@@ -187,5 +203,54 @@ class TimesDataPerEntity
             }
             unset($value);
         }
+    }
+
+    /**
+     * Sort the internal array according to the wanted method.
+     *
+     * Methods are:
+     *     - entity
+     *     - estimated
+     *     - spent
+     *     - remaining
+     *     - overtime
+     *
+     * @param  string $method
+     * @param  string $direction
+     */
+    public function sort($method = 'entity', $direction = 'asc')
+    {
+        if ($method == 'entity') {
+            if ($direction == 'desc') {
+                krsort($this->entities);
+            } else {
+                ksort($this->entities);
+            }
+        } elseif ($method == 'estimated') {
+            self::sortByGetter($this->entities, 'getEstimated', $direction);
+        } elseif ($method == 'spent') {
+            self::sortByGetter($this->entities, 'getSpent', $direction);
+        } elseif ($method == 'remaining') {
+            self::sortByGetter($this->entities, 'getRemaining', $direction);
+        } elseif ($method == 'overtime') {
+            self::sortByGetter($this->entities, 'getOvertime', $direction);
+        }
+
+    }
+
+    /**
+     * Sort the given array with a getter method on its values.
+     *
+     * @param  array &$arr
+     * @param  string $getter
+     * @param  string $direction
+     */
+    protected static function sortByGetter(&$arr, $getter, $direction)
+    {
+        uasort($arr, function ($a, $b) use ($getter, $direction) {
+            $va = $a->{$getter}();
+            $vb = $b->{$getter}();
+            return $direction === 'asc' ? ($va <=> $vb) : ($vb <=> $va);
+        });
     }
 }

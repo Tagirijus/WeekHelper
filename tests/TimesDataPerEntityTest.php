@@ -110,4 +110,37 @@ final class TimesDataPerEntityTest extends TestCase
             'TimesDataPerEntity->hasTimes() should return false after resetting everything.'
         );
     }
+
+    public function testSorting()
+    {
+        $tdpe = new TimesDataPerEntity();
+
+        $tdpe->addTimes(6, 3, 2, 0, 2);
+        $tdpe->addTimes(2, 0, 5, 0, 2);
+        $tdpe->addTimes(5, 3, 2, 0, 1);
+        $tdpe->addTimes(8, 2, 5, 1, 1);
+
+        $msg = 'TimesDataPerEntity sorting went wrong.';
+
+        $tdpe->sort();
+        $this->assertSame(1, $tdpe->getEntities()[0], $msg);
+        $this->assertSame(2, $tdpe->getEntities()[1], $msg);
+
+        $tdpe->sort(direction: 'desc');
+        $this->assertSame(2, $tdpe->getEntities()[0], $msg);
+        $this->assertSame(1, $tdpe->getEntities()[1], $msg);
+
+        $tdpe->sort('estimated', 'asc');
+        $this->assertSame(2, $tdpe->getEntities()[0], $msg);
+        $this->assertSame(1, $tdpe->getEntities()[1], $msg);
+
+        // quick check, if the entity on that internal arrays position
+        // really is the one with the expected estimated time
+        $this->assertSame(13.0, $tdpe->getEstimated($tdpe->getEntities()[1]), $msg);
+
+        // I won't test all sortin methods, but just one more
+        $tdpe->sort('overtime', 'desc');
+        $this->assertSame(5.0, $tdpe->getSpent($tdpe->getEntities()[0]), $msg);
+        $this->assertSame(3.0, $tdpe->getSpent($tdpe->getEntities()[1]), $msg);
+    }
 }
