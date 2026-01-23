@@ -229,10 +229,10 @@ class TasksTimesPreparer
      * Initialize all the important internal cache variables
      * with the given tasks and subtasks.
      *
-     * @param  array  &$tasks
+     * @param  array  $tasks
      * @param  array  $subtasks_by_task_id Key is task id and values are the subtasks
      */
-    public function initTasksAndTimes(&$tasks = [], $subtasks_by_task_id = [])
+    public function initTasksAndTimes($tasks = [], $subtasks_by_task_id = [])
     {
         $this->extendTasksData($tasks);
         $this->emptyInternalValues();

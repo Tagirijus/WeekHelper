@@ -101,7 +101,7 @@ class HoursViewHelper extends Base
      */
     protected function initSubtasks()
     {
-        $subtasks = $this->subtasksModel->getAllByTaskIds(
+        $subtasks = $this->subtaskModel->getAllByTaskIds(
             array_keys($this->getTasks())
         );
         $this->subtasks = [];
@@ -322,6 +322,32 @@ class HoursViewHelper extends Base
     //     $builder->withQuery($query);
     //     return $builder->build('status:open')->toArray();
     // }
+
+    /**
+     * This method will create a string based on the logic
+     * with spent and overtime. It basically will "split"
+     * the value apart and output some kind of calculation
+     * to better visualize, whether I was quicker or
+     * slower.
+     *
+     * This is used in the tooltip_dashboard_times template.
+     *
+     * @param  float $spent
+     * @param  float $overtime
+     * @return string
+     */
+    public function getOvertimeInfo($spent, $overtime)
+    {
+        $out = $this->getTimes()->floatToHHMM($spent - $overtime) . 'h ';
+
+        if ($overtime > 0) {
+            $prefix = '+ ';
+        } else {
+            $prefix = '- ';
+        }
+
+        return $out . $prefix . $this->getTimes()->floatToHHMM(abs($overtime)) . 'h';
+    }
 
     /**
      * Generate additional task progress bar CSS

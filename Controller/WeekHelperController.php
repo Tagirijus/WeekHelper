@@ -98,15 +98,10 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         } else {
             $label = $this->configModel->get('hoursview_all_caption', 'all');
         }
-        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
 
         $this->response->html($this->helper->layout->dashboard('WeekHelper:tooltips/tooltip_dashboard_times', [
             'title' => 'Level: ' . $label,
-            'user' => $user,
             'label' => $label,
-            'level' => $level,
-            'times' => $times,
-            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id')
         ]));
     }
 
@@ -302,12 +297,9 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         } else {
             $label = $this->configModel->get('hoursview_all_caption', 'all');
         }
-        $times = $this->helper->hoursViewHelper->getTimesForAllActiveProjects();
+
         $this->response->html($this->template->render('WeekHelper:tooltips/tooltip_dashboard_times', [
             'label' => $label,
-            'level' => $level,
-            'times' => $times,
-            'tooltip_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id')
         ]));
     }
 

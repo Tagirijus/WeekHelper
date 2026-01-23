@@ -1,6 +1,6 @@
 <?php
 
-$times = $this->hoursViewHelper->getTimesByUserId($user['id']);
+$this->hoursViewHelper->initTasks();
 $captions = $this->hoursViewHelper->getLevelCaptions();
 $projectSite = false;
 

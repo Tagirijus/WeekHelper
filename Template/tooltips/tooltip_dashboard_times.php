@@ -1,6 +1,7 @@
 <?php
 
-    $timesTotal = $this->helper->hoursViewHelper->getTimesByUserId($this->user->getId());
+    $this->helper->hoursViewHelper->initTasks();
+    $times = $this->hoursViewHelper->getTimes();
 
     function percentFromTotal($this_times, $total_times)
     {
@@ -34,42 +35,48 @@
                 <?= t('Remaining') ?>
             </th>
         </tr>
-        <?php foreach ($this->hoursViewHelper->sortTimesArray($times, $level) as $projectId => $project): ?>
-            <?php $time = $project['times']; ?>
-            <?php if (!$time[$level]['_has_times']): continue ?>
+
+        <?php foreach ($times->getProjectIds() as $project_id): ?>
+
+            <?php $project = $this->hoursViewHelper->getProject($project_id); ?>
+
+            <?php if (!$times->hasTimesPerProject($project_id)): continue ?>
             <?php endif ?>
+
             <tr>
                 <td>
-                    <a href="/board/<?= $projectId ?>"><?= $project['name'] ?></a>
+                    <a href="/board/<?= $project_id ?>"><?= $project['name'] ?></a>
                 </td>
                 <td>
                     <span class="thv-estimated-color">
-                        <?= $this->hoursViewHelper->floatToHHMM($time[$level]['_total']['estimated']) ?>h
+                        <?= $times->getEstimatedPerProject($project_id, true) ?>h
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($time[$level]['_total']['estimated'], $timesTotal[$level]['_total']['estimated']) ?>
+                        <?= percentFromTotal($times->getEstimatedPerProject($project_id), $times->getEstimatedTotal()) ?>
                     </span>
                 </td>
                 <td>
                     <span class="thv-spent-color">
-                        <?= $this->hoursViewHelper->floatToHHMM($time[$level]['_total']['spent']) ?>h
-                        <?php if ($time[$level]['_total']['overtime'] != 0.0): ?>
-                            <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($time[$level]['_total']['spent'] - $time[$level]['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($time[$level]['_total']['overtime']); ?>)</i>
+                        <?= $times->getSpentPerProject($project_id, true) ?>h
+                        <?php if ($times->getOvertimePerProject($project_id) != 0.0): ?>
+                            <i class="thv-font-weak">
+                                (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentPerProject($project_id), $times->getOvertimePerProject($project_id)); ?>)
+                            </i>
                         <?php endif ?>
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($time[$level]['_total']['spent'], $timesTotal[$level]['_total']['spent']) ?>
+                        <?= percentFromTotal($times->getSpentPerProject($project_id), $times->getSpentTotal()) ?>
                     </span>
                 </td>
                 <td>
                     <span class="thv-remaining-color">
-                        <?= $this->hoursViewHelper->floatToHHMM($time[$level]['_total']['remaining']) ?>h
+                        <?= $times->getRemainingPerProject($project_id, true) ?>h
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($time[$level]['_total']['remaining'], $timesTotal[$level]['_total']['remaining']) ?>
+                        <?= percentFromTotal($times->getRemainingPerProject($project_id), $times->getRemainingTotal()) ?>
                     </span>
                 </td>
             </tr>
@@ -80,20 +87,22 @@
             </td>
             <td>
                 <span class="thv-estimated-color">
-                    <?= $this->hoursViewHelper->floatToHHMM($timesTotal[$level]['_total']['estimated']) ?>h
+                    <?= $times->getEstimatedTotal(true) ?>h
                 </span>
             </td>
             <td>
                 <span class="thv-spent-color">
-                    <?= $this->hoursViewHelper->floatToHHMM($timesTotal[$level]['_total']['spent']) ?>h
-                    <?php if ($timesTotal[$level]['_total']['overtime'] != 0.0): ?>
-                        <i class="thv-font-weak">(<?= $this->hoursViewHelper->floatToHHMM($timesTotal[$level]['_total']['spent'] - $timesTotal[$level]['_total']['overtime']); ?>h <?= $this->hoursViewHelper->getOvertimeForTaskAsString($timesTotal[$level]['_total']['overtime']); ?>)</i>
+                    <?= $times->getSpentTotal(true) ?>h
+                    <?php if ($times->getOvertimeTotal() != 0.0): ?>
+                        <i class="thv-font-weak">
+                            (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentTotal(), $times->getOvertimeTotal()); ?>)
+                        </i>
                     <?php endif ?>
                 </span>
             </td>
             <td>
                 <span class="thv-remaining-color">
-                    <?= $this->hoursViewHelper->floatToHHMM($timesTotal[$level]['_total']['remaining']) ?>h
+                    <?= $times->getRemainingTotal(true) ?>h
                 </span>
             </td>
         </tr>
