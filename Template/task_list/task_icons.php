@@ -6,6 +6,10 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
 
 -->
 
+<?php
+    $this->hoursViewHelper->initTasks('project', $task['project_id']);
+    $times = $this->hoursViewHelper->getTimes();
+?>
 
 <div class="task-list-icons">
     <!-- HARD CODED HIDE -->
@@ -29,10 +33,10 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
         </span>
     <?php endif ?>
 
-    <?php if (! empty($this->hoursViewHelper->getEstimatedTimeForTask($task)) || ! empty($this->hoursViewHelper->getSpentTimeForTask($task))): ?>
+    <?php if (! empty($times->getEstimatedPerTask($task['id'])) || ! empty($times->getSpentPerTask($task['id']))): ?>
         <span class="task-time-estimated" title="<?= t('Time spent and estimated') ?>">
-            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
-                    - <?= $this->hoursViewHelper->getPercentForTaskAsString($task, '%', true) ?>
+            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'])) ?>h
+                    - <?= $times->getPercentPerTask($task['id'], true) ?>
         </span>
     <?php endif ?>
 
