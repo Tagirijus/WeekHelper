@@ -512,7 +512,7 @@ class TasksTimesPreparer
      */
     public function getProjectIds()
     {
-        return $this->times_per_level->getEntities();
+        return $this->times_per_project->getEntities();
     }
 
     /**
