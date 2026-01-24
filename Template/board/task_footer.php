@@ -9,6 +9,7 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
 <?php
 
 $hoursview_config = $this->hoursViewHelper->getConfig();
+$this->hoursViewHelper->initTasks('project', $project['id']);
 
 ?>
 
@@ -77,9 +78,9 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
             </span>
         <?php endif ?>
 
-        <?php if (! empty($this->hoursViewHelper->getEstimatedTimeForTask($task)) || ! empty($this->hoursViewHelper->getSpentTimeForTask($task))): ?>
+        <?php if (! empty($times->getEstimatedPerTask($task['id']) || ! empty($times->getSpentPerTask($task['id'])))): ?>
             <span class="task-time-estimated" title="<?= t('Time remaining') ?>">
-                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?>h
+                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'])) ?>h
             </span>
         <?php endif ?>
 
@@ -146,10 +147,10 @@ $hoursview_config = $this->hoursViewHelper->getConfig();
 
         <!-- Task Progress Bar -->
 
-        <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+        <?php if ($times->getEstimatedPerTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
             <?php
-                $percent = $this->hoursViewHelper->getPercentForTask($task);
+                $percent = (int) $times->getPercentPerTask($task['id'], true, '');
                 $percent_txt = $percent . '%';
                 $percent_opacity = $hoursview_config['progressbar_opacity'];
                 if ($percent > 100) {

@@ -96,6 +96,13 @@ class TasksTimesPreparer
     var $times_per_project;
 
     /**
+     * Times per task.
+     *
+     * @var TimesDataPerEntity
+     **/
+    var $times_per_task;
+
+    /**
      * Times per user.
      *
      * @var TimesDataPerEntity
@@ -122,6 +129,7 @@ class TasksTimesPreparer
         $this->times_per_column = new TimesDataPerEntity();
         $this->times_per_level = new TimesDataPerEntity();
         $this->times_per_project = new TimesDataPerEntity();
+        $this->times_per_task = new TimesDataPerEntity();
         $this->times_per_user = new TimesDataPerEntity();
     }
 
@@ -285,6 +293,7 @@ class TasksTimesPreparer
             $this->times_per_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
             $this->addTimesToLevel($estimated, $spent, $remaining, $overtime, $task);
             $this->times_per_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
+            $this->times_per_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
             $this->times_per_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
 
             // == == == == == == ==
@@ -373,6 +382,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get estimated per task.
+     *
+     * @param  integer $task_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedPerTask($task_id = -1, $readable = false)
+    {
+        return $this->times_per_task->getEstimated($task_id, $readable);
+    }
+
+    /**
      * Get estimated per user.
      *
      * @param  integer $user_id
@@ -430,6 +451,18 @@ class TasksTimesPreparer
     public function getOvertimePerProject($project_id = -1, $readable = false)
     {
         return $this->times_per_project->getOvertime($project_id, $readable);
+    }
+
+    /**
+     * Get overtime per task.
+     *
+     * @param  integer $task_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimePerTask($task_id = -1, $readable = false)
+    {
+        return $this->times_per_task->getOvertime($task_id, $readable);
     }
 
     /**
@@ -518,6 +551,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get remaining per task.
+     *
+     * @param  integer $task_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingPerTask($task_id = -1, $readable = false)
+    {
+        return $this->times_per_task->getRemaining($task_id, $readable);
+    }
+
+    /**
      * Get remaining per user.
      *
      * @param  integer $user_id
@@ -575,6 +620,18 @@ class TasksTimesPreparer
     public function getSpentPerProject($project_id = -1, $readable = false)
     {
         return $this->times_per_project->getSpent($project_id, $readable);
+    }
+
+    /**
+     * Get spent per task.
+     *
+     * @param  integer $task_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentPerTask($task_id = -1, $readable = false)
+    {
+        return $this->times_per_task->getSpent($task_id, $readable);
     }
 
     /**

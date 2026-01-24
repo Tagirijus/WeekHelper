@@ -301,4 +301,25 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(12.0, $ttp->getEstimatedPerColumn('backlog'), $msg);
         $this->assertSame(7.0, $ttp->getEstimatedPerColumn('started'), $msg);
     }
+
+    public function testTimesPerTask()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(time_estimated: 10.0, time_spent: 8.5),
+            TestTask::create(time_estimated: 2.0, time_spent: 3.0),
+            TestTask::create(time_estimated: 5.0, time_spent: 1.0, time_remaining: 0.0),
+        ];
+        $subtasks = [
+            $tasks[2]['id'] => [
+                TestTask::createSub(2, $tasks[2]['id'], 5.0, 0.0, 1.0)
+            ]
+        ];
+        $ttp->initTasksAndTimes($tasks, $subtasks);
+        $msg = 'TasksTimesPreparer times per task went wrong.';
+        $this->assertSame(1.5, $ttp->getRemainingPerTask($tasks[0]['id']), $msg);
+        $this->assertSame(1.0, $ttp->getOvertimePerTask($tasks[1]['id']), $msg);
+        $this->assertSame(-4.0, $ttp->getOvertimePerTask($tasks[2]['id']), $msg);
+    }
 }
