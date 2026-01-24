@@ -1,4 +1,8 @@
 <?php if (! empty($links)): ?>
+<?php
+    $this->hoursViewHelper->initTasks();
+    $times = $this->hoursViewHelper->getTimes();
+?>
 <table class="task-links-table table-striped table-scrolling">
     <?php foreach ($links as $label => $grouped_links): ?>
         <?php $hide_td = false ?>
@@ -63,12 +67,12 @@
                 <?php endif ?>
             </td>
             <td>
-                <?php if (! empty($link['task_time_spent'])): ?>
-                    <?= $this->hoursViewHelper->floatToHHMM($link['task_time_spent']) . 'h ' . t('spent') ?>
+                <?php if (! empty($times->getSpentPerTask($link['task_id']))): ?>
+                    <?= $times->getSpentPerTask($link['task_id'], true) . 'h ' . t('spent') ?>
                 <?php endif ?>
-                <?php if (! empty($link['task_time_spent']) && ! empty($link['task_time_estimated'])): ?>/<?php endif ?>
-                <?php if (! empty($link['task_time_estimated'])): ?>
-                    <?= $this->hoursViewHelper->floatToHHMM($link['task_time_estimated']) . 'h ' . t('estimated') ?>
+                <?php if (! empty($times->getSpentPerTask($link['task_id'])) && ! empty($times->getEstimatedPerTask($link['task_id']))): ?>/<?php endif ?>
+                <?php if (! empty($times->getEstimatedPerTask($link['task_id']))): ?>
+                    <?= $times->getEstimatedPerTask($link['task_id'], true) . 'h ' . t('estimated') ?>
                 <?php endif ?>
             </td>
         </tr>
