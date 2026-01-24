@@ -81,7 +81,7 @@ $times = $this->hoursViewHelper->getTimes();
 
         <?php if (! empty($times->getEstimatedPerTask($task['id']) || ! empty($times->getSpentPerTask($task['id'])))): ?>
             <span class="task-time-estimated" title="<?= t('Time remaining') ?>">
-                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'])) ?>h
+                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'], true)) ?>h
             </span>
         <?php endif ?>
 
