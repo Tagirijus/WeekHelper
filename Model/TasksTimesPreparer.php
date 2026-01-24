@@ -491,6 +491,19 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get percent of times per task.
+     *
+     * @param  integer $task_id
+     * @param  boolean $readable
+     * @param  string  $suffix
+     * @return float|string
+     */
+    public function getPercentPerTask($task_id = -1, $readable = false, $suffix = '%')
+    {
+        return $this->times_per_task->getPercent($task_id, $readable, $suffix);
+    }
+
+    /**
      * Get the project ids from the internal times_per_project
      * attribute, which also should cover the correct sorting,
      * liek defined in the config.

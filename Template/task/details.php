@@ -1,6 +1,8 @@
 <section id="task-summary">
     <?php
         $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
+        $this->hoursViewHelper->initTasks('project', $task['project_id']);
+        $times = $this->hoursViewHelper->getTimes();
     ?>
     <h2><?= $title_prepared ?></h2>
 
@@ -96,28 +98,51 @@
                     <?= $this->hook->render('template:task:details:second-column', array('task' => $task)) ?>
                 </ul>
             </div>
+
+
+            <!-- TIMES HERE -->
+
             <div class="task-summary-column">
                 <ul class="no-bullet">
                     <li>
                         <strong><?= t('Time estimated:') ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getEstimatedTimeForTask($task))) ?></span>
+                        <span>
+                            <?= $times->getEstimatedPerTask($task['id'], true); ?>h
+                        </span>
                     </li>
                     <li>
                         <strong><?= t('Time spent:') ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getSpentTimeForTask($task))) ?></span>
+                        <span>
+                            <?= $times->getSpentPerTask($task['id'], true); ?>h
+                        </span>
                     </li>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getOvertimeForTask($task))) ?> <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">(<?= $this->hoursViewHelper->getSlowerOrFasterSign($task) ?>)</i></span>
+                        <span>
+                            <?= $times->getOvertimePerTask($task['id'], true); ?>h
+                            <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">
+                                <?php if ($times->getOvertimePerTask($task['id']) < 0): ?>
+                                    (>>)
+                                <?php else: ?>
+                                    (<<)
+                                <?php endif ?>
+                            </i>
+                        </span>
                     </li>
                     <li>
                         <strong><?= t('Time remaining:') ?></strong>
-                        <span><?= t('%s h', $this->hoursViewHelper->floatToHHMM($this->hoursViewHelper->getRemainingTimeForTask($task))) ?></span>
+                        <span>
+                            <?= $times->getRemainingPerTask($task['id'], true); ?>h
+                        </span>
                     </li>
 
                     <?= $this->hook->render('template:task:details:third-column', array('task' => $task)) ?>
                 </ul>
             </div>
+
+            <!-- TIMES END -->
+
+
             <div class="task-summary-column">
                 <ul class="no-bullet">
                     <?php if ($task['date_due']): ?>
@@ -184,10 +209,10 @@
         $hoursview_config = $this->hoursViewHelper->getConfig();
     ?>
 
-    <?php if ($this->hoursViewHelper->getEstimatedTimeForTask($task) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+    <?php if ($times->getEstimatedPerTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
         <?php
-            $percent = $this->hoursViewHelper->getPercentForTask($task);
+            $percent = $times->getPercentPerTask($task['id'], true, '');
             $percent_txt = $percent . '%';
             $percent_opacity = 1;
             if ($percent > 100) {
@@ -196,7 +221,7 @@
         ?>
 
         <div class="container-task-progress-bar task-summary-progress-bar" style="opacity: <?= $percent_opacity; ?>;">
-            <div class="task-progress-bar <?= $this->hoursViewHelper->getPercentCSSClass($percent, $task); ?>" style="width:<?= $percent . '%'; ?>;">
+            <div class="task-progress-bar <?= $this->hoursViewHelper->getPercentCSSClass($percent, $times->getTasks($task['id'])); ?>" style="width:<?= $percent . '%'; ?>;">
                 <?= $percent_txt ?>
             </div>
         </div>
