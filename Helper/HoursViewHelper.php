@@ -15,6 +15,18 @@ use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
 class HoursViewHelper extends Base
 {
     /**
+     * Defines the used init method. There is some
+     * priority logic. E.g. 'search' can be higher
+     * than 'open', which can be higher than
+     * 'project'. Higher means: it can re-initialize
+     * internally. Otherwise no new initialization will
+     * be made.
+     *
+     * @var string
+     **/
+    var $init_method = '';
+
+    /**
      * Projects cache-variable:
      * [project_id => project_array]
      *
@@ -82,6 +94,35 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Will check the given init method with the
+     * internally already set one and return whether
+     * the init process should be done again or not.
+     *
+     * E.g.: maybe I initialized the tasks with 'project'.
+     * Now at another point I want to initialize with
+     * 'open'. This should be able to re-initialize
+     * the whole tasks, since there I need "more".
+     * 'search' is even higher.
+     *
+     * @param  string $method
+     * @return boolean
+     */
+    protected function initLogic($method)
+    {
+        $priorities = [
+            '' => -1,
+            'project' => 0,
+            'open' => 1,
+            'search' => 2,
+        ];
+        if (array_key_exists($method, $priorities)) {
+            return $priorities[$method] > $priorities[$this->init_method];
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Initialize the internal projects array with the
      * given project ids array.
      *
@@ -128,6 +169,10 @@ class HoursViewHelper extends Base
      */
     public function initTasks($method = 'open', $project_id = -1)
     {
+        if (!$this->initLogic($method)) {
+            return;
+        }
+
         // query tasks from the search params
         if ($method == 'search') {
             $tasks = [];
@@ -187,6 +232,10 @@ class HoursViewHelper extends Base
 
         // and initialize the projects as well
         $this->initProjects($project_ids);
+
+        // finally tell the instance, that it was initialized already,
+        // basically
+        $this->init_method = $method;
     }
 
     /**
