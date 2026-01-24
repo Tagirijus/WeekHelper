@@ -1,5 +1,6 @@
 <?php
-    $times = $this->hoursViewHelper->getTimesFromTasks($this->hoursViewHelper->getAllTasksFromSearch());
+    $this->hoursViewHelper->initTasks('search');
+    $times = $this->hoursViewHelper->getTimes();
 ?>
 
 <table>
@@ -13,7 +14,7 @@
                 <?= t('Estimated'); ?>:
             </span>
             <span class="thv-estimated-color">
-                <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['estimated']); ?>h
+                <?= $times->getEstimatedTotal(true) ?>h
             </span>
         </td>
 
@@ -22,8 +23,10 @@
                 <?= t('Spent'); ?>:
             </span>
             <span class="thv-spent-color">
-                <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent']); ?>h
-                <i class="thv-font-small">(<?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['spent'] - $times['all']['_total']['overtime']); ?>h + <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['overtime']); ?>h)</i>
+                <?= $times->getSpentTotal(true) ?>h
+                <i class="thv-font-small">
+                    (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentTotal(), $times->getOvertimeTotal()); ?>)
+                </i>
             </span>
         </td>
 
@@ -32,7 +35,7 @@
                 <?= t('Remaining'); ?>:
             </span>
             <span class="thv-remaining-color">
-                <?= $this->hoursViewHelper->floatToHHMM($times['all']['_total']['remaining']); ?>h
+                <?= $times->getRemainingTotal(true) ?>h
             </span>
         </td>
     </tr>
