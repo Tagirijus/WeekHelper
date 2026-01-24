@@ -10,6 +10,7 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
 
 $hoursview_config = $this->hoursViewHelper->getConfig();
 $this->hoursViewHelper->initTasks('project', $project['id']);
+$times = $this->hoursViewHelper->getTimes();
 
 ?>
 
