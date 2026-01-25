@@ -270,13 +270,23 @@ class TimesDataPerEntity
         if (array_key_exists($entity, $this->entities)) {
             return $this->entities[$entity]->hasTimes();
         } else {
-            foreach ($this->entities as $value) {
-                if ($value->hasTimes()) {
-                    return true;
-                }
-            }
             return false;
         }
+    }
+
+    /**
+     * Return, if any entity has times.
+     *
+     * @return boolean
+     */
+    public function hasTimesAny()
+    {
+        foreach ($this->entities as $value) {
+            if ($value->hasTimes()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

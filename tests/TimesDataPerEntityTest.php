@@ -97,8 +97,13 @@ final class TimesDataPerEntityTest extends TestCase
         $this->assertSame('0:00', $tdpe->getOvertime(-1, true), $msg);
 
         $this->assertTrue(
+            $tdpe->hasTimesAny(),
+            'TimesDataPerEntity->hasTimesAny() should return true after adding times.'
+        );
+
+        $this->assertFalse(
             $tdpe->hasTimes(),
-            'TimesDataPerEntity->hasTimes() should return true after adding times.'
+            'TimesDataPerEntity->hasTimes() should return false without a fitting entity.'
         );
 
         // resetting only one project should make it not have times anymore
@@ -108,17 +113,17 @@ final class TimesDataPerEntityTest extends TestCase
             'TimesDataPerEntity->hasTimes() should return false after resetting times.'
         );
 
-        // yet in generall gthe whole TimesDataPerEntity wrapper should still
+        // yet in generall the whole TimesDataPerEntity wrapper should still
         // have times
         $this->assertTrue(
-            $tdpe->hasTimes(),
+            $tdpe->hasTimesAny(),
             'TimesDataPerEntity->hasTimes() should still return true after resetting only one project.'
         );
 
         // but after resetting this as well, nothing should have times anymore
         $tdpe->resetTimes();
         $this->assertFalse(
-            $tdpe->hasTimes(),
+            $tdpe->hasTimesAny(),
             'TimesDataPerEntity->hasTimes() should return false after resetting everything.'
         );
     }
