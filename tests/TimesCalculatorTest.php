@@ -374,6 +374,26 @@ final class TimesCalculatorTest extends TestCase
             $tc->getOvertime(),
             'TimesCalculator->getOvertime() is wrong.'
         );
+
+        $task = TestTask::create();
+        $subtasks = [
+            TestTask::createSub(
+                status: 2,
+                time_estimated: 2,
+                time_spent: 1,
+            ),
+            TestTask::createSub(
+                status: 1,
+                time_estimated: 3,
+                time_spent: 2,
+            ),
+        ];
+        $tc = new TimesCalculator($task, $subtasks);
+        $this->assertSame(
+            -1.0,
+            $tc->getOvertime(),
+            'TimesCalculator->getOvertime() is wrong.'
+        );
     }
 
     public function testSubtasksRemaining()

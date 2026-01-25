@@ -66,6 +66,13 @@ class TimesCalculator
     var $subtasks_estimated = 0.0;
 
     /**
+     * The subtasks overtime times in total.
+     *
+     * @var float
+     **/
+    var $subtasks_overtime = 0.0;
+
+    /**
      * The subtasks remaining times in total.
      *
      * @var float
@@ -108,6 +115,24 @@ class TimesCalculator
         $this->subtasks = $subtasks;
         $this->initSubtasks();
         $this->timetagger_transcriber = $timetagger_transcriber;
+    }
+
+    /**
+     * Calculate the overtime depending on the estimated and spent time
+     * and the done status.
+     *
+     * @param  float $estimated
+     * @param  float $spent
+     * @param  boolean $done
+     * @return float
+     */
+    protected static function calculateOvertime($estimated, $spent, $done)
+    {
+        $overtime = $spent - $estimated;
+        if ($overtime < 0.0 && !$done) {
+            $overtime = 0.0;
+        }
+        return $overtime;
     }
 
     /**
@@ -408,9 +433,14 @@ class TimesCalculator
      */
     protected function initOvertime()
     {
-        $overtime = $this->getSpent() - $this->getEstimated();
-        if ($overtime < 0.0 && !$this->isDone()) {
-            $overtime = 0.0;
+        if (empty($this->subtasks)) {
+            $overtime = self::calculateOvertime(
+                $this->getEstimated(),
+                $this->getSpent(),
+                $this->isDone()
+            );
+        } else {
+            $overtime = $this->subtasks_overtime;
         }
         $this->task['time_overtime'] = $overtime;
         $this->overtime = $overtime;
@@ -467,6 +497,11 @@ class TimesCalculator
             $this->task['open_subtasks'] += $subtask['status'] != 2 ? 1 : 0;
             $this->subtasks_estimated += $subtask['time_estimated'];
             $this->subtasks_spent += $subtask['time_spent'];
+            $this->subtasks_overtime += self::calculateOvertime(
+                $subtask['time_estimated'],
+                $subtask['time_spent'],
+                $subtask['status'] == 2
+            );
 
             // logic for remaining is different: if the task is done, the
             // difference betwen estimated and spent is not important
