@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Model/SortingLogic.php';
 require_once __DIR__ . '/../Model/TaskDataExtender.php';
 require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimesData.php';
-require_once __DIR__ . '/../Model/TimesDataPerEntity.php';
+require_once __DIR__ . '/../Model/TimesDataByEntity.php';
 require_once __DIR__ . '/../Model/TimetaggerFetcher.php';
 require_once __DIR__ . '/../Model/TimetaggerTranscriber.php';
 

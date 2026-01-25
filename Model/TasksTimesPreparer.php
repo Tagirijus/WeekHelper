@@ -6,7 +6,7 @@ use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Model\TaskDataExtender;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
 use Kanboard\Plugin\WeekHelper\Model\TimesData;
-use Kanboard\Plugin\WeekHelper\Model\TimesDataPerEntity;
+use Kanboard\Plugin\WeekHelper\Model\TimesDataByEntity;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerFetcher;
 use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
@@ -79,35 +79,35 @@ class TasksTimesPreparer
     /**
      * Times for all columns individually.
      *
-     * @var TimesDataPerEntity
+     * @var TimesDataByEntity
      **/
     var $times_per_column;
 
     /**
      * Times for all levels individually.
      *
-     * @var TimesDataPerEntity
+     * @var TimesDataByEntity
      **/
     var $times_per_level;
 
     /**
      * Times per project.
      *
-     * @var TimesDataPerEntity
+     * @var TimesDataByEntity
      **/
     var $times_per_project;
 
     /**
      * Times per task.
      *
-     * @var TimesDataPerEntity
+     * @var TimesDataByEntity
      **/
     var $times_per_task;
 
     /**
      * Times per user.
      *
-     * @var TimesDataPerEntity
+     * @var TimesDataByEntity
      **/
     var $times_per_user;
 
@@ -128,11 +128,11 @@ class TasksTimesPreparer
     {
         $this->initConfig($config);
         $this->times = new TimesData();
-        $this->times_per_column = new TimesDataPerEntity();
-        $this->times_per_level = new TimesDataPerEntity();
-        $this->times_per_project = new TimesDataPerEntity();
-        $this->times_per_task = new TimesDataPerEntity();
-        $this->times_per_user = new TimesDataPerEntity();
+        $this->times_per_column = new TimesDataByEntity();
+        $this->times_per_level = new TimesDataByEntity();
+        $this->times_per_project = new TimesDataByEntity();
+        $this->times_per_task = new TimesDataByEntity();
+        $this->times_per_user = new TimesDataByEntity();
     }
 
     /**
@@ -755,7 +755,7 @@ class TasksTimesPreparer
      */
     protected function sortProjects()
     {
-        // first sort the TimesDataPerEntity instance
+        // first sort the TimesDataByEntity instance
         // for times_per_project, which will manage to
         // sort the projects by their time
         $project_sorting = $this->getConfig('project_sorting');

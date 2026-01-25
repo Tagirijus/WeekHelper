@@ -7,7 +7,7 @@ use Kanboard\Plugin\WeekHelper\Model\TimesData;
 /**
  * A TimesData for storing the times per entity.
  */
-class TimesDataPerEntity
+class TimesDataByEntity
 {
     /**
      * The internal enetities array, which holds

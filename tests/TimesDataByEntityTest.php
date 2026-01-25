@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Model/TimesDataPerEntity.php';
+require_once __DIR__ . '/../Model/TimesDataByEntity.php';
 require_once __DIR__ . '/../Model/TimesData.php';
 
 
 use PHPUnit\Framework\TestCase;
-use Kanboard\Plugin\WeekHelper\Model\TimesDataPerEntity;
+use Kanboard\Plugin\WeekHelper\Model\TimesDataByEntity;
 
 
-final class TimesDataPerEntityTest extends TestCase
+final class TimesDataByEntityTest extends TestCase
 {
     public function testBasicFunctionality()
     {
-        $tdpe = new TimesDataPerEntity();
+        $tdpe = new TimesDataByEntity();
         $this->assertFalse(
             $tdpe->hasTimes(),
-            'TimesDataPerEntity->hasTimes() should return false directly after init.'
+            'TimesDataByEntity->hasTimes() should return false directly after init.'
         );
 
         // project 1 would have now
@@ -30,7 +30,7 @@ final class TimesDataPerEntityTest extends TestCase
 
         $this->assertTrue(
             $tdpe->hasTimes(1),
-            'TimesDataPerEntity->hasTimes() should return true after adding times.'
+            'TimesDataByEntity->hasTimes() should return true after adding times.'
         );
 
         // project 2 would have now
@@ -46,7 +46,7 @@ final class TimesDataPerEntityTest extends TestCase
         //      11.5  spent
         //      7    remaining
         //      0.5  overtime
-        $msg = 'TimesDataPerEntity basic calculations not as intended.';
+        $msg = 'TimesDataByEntity basic calculations not as intended.';
 
         // project 1 - float
         $this->assertSame(10.0, $tdpe->getEstimated(1), $msg);
@@ -98,46 +98,46 @@ final class TimesDataPerEntityTest extends TestCase
 
         $this->assertTrue(
             $tdpe->hasTimesAny(),
-            'TimesDataPerEntity->hasTimesAny() should return true after adding times.'
+            'TimesDataByEntity->hasTimesAny() should return true after adding times.'
         );
 
         $this->assertFalse(
             $tdpe->hasTimes(),
-            'TimesDataPerEntity->hasTimes() should return false without a fitting entity.'
+            'TimesDataByEntity->hasTimes() should return false without a fitting entity.'
         );
 
         // resetting only one project should make it not have times anymore
         $tdpe->resetTimes(1);
         $this->assertFalse(
             $tdpe->hasTimes(1),
-            'TimesDataPerEntity->hasTimes() should return false after resetting times.'
+            'TimesDataByEntity->hasTimes() should return false after resetting times.'
         );
 
-        // yet in generall the whole TimesDataPerEntity wrapper should still
+        // yet in generall the whole TimesDataByEntity wrapper should still
         // have times
         $this->assertTrue(
             $tdpe->hasTimesAny(),
-            'TimesDataPerEntity->hasTimes() should still return true after resetting only one project.'
+            'TimesDataByEntity->hasTimes() should still return true after resetting only one project.'
         );
 
         // but after resetting this as well, nothing should have times anymore
         $tdpe->resetTimes();
         $this->assertFalse(
             $tdpe->hasTimesAny(),
-            'TimesDataPerEntity->hasTimes() should return false after resetting everything.'
+            'TimesDataByEntity->hasTimes() should return false after resetting everything.'
         );
     }
 
     public function testSorting()
     {
-        $tdpe = new TimesDataPerEntity();
+        $tdpe = new TimesDataByEntity();
 
         $tdpe->addTimes(6, 3, 2, 0, 2);
         $tdpe->addTimes(2, 0, 5, 0, 2);
         $tdpe->addTimes(5, 3, 2, 0, 1);
         $tdpe->addTimes(8, 2, 5, 1, 1);
 
-        $msg = 'TimesDataPerEntity sorting went wrong.';
+        $msg = 'TimesDataByEntity sorting went wrong.';
 
         $tdpe->sort();
         $this->assertSame(1, $tdpe->getEntities()[0], $msg);
