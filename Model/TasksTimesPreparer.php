@@ -245,6 +245,12 @@ class TasksTimesPreparer
      * Initialize all the important internal cache variables
      * with the given tasks and subtasks.
      *
+     * Technically this method iters through all given tasks,
+     * calculates their times and adds their times (and the
+     * tasks themself) into the internal variables, if some
+     * logic applies and the tasks / times should be in that
+     * variable.
+     *
      * @param  array  $tasks
      * @param  array  $subtasks_by_task_id Key is task id and values are the subtasks
      */
