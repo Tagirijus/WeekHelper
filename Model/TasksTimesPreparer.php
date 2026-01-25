@@ -151,7 +151,7 @@ class TasksTimesPreparer
      * already be parsed be the TaskDataExtender, thus the key
      * 'levels' should exist.
      *
-     * @param float $estimated]
+     * @param float $estimated
      * @param float $spent
      * @param float $remaining
      * @param float $overtime
