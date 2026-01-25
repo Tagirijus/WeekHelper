@@ -147,8 +147,14 @@ class TasksTimesPreparer
             if (!array_key_exists($level, $this->project_ids_per_level)) {
                 $this->project_ids_per_level[$level] = [];
             }
+            if (!array_key_exists('all', $this->project_ids_per_level)) {
+                $this->project_ids_per_level['all'] = [];
+            }
             if (!in_array($task['project_id'], $this->project_ids_per_level[$level])) {
                 $this->project_ids_per_level[$level][] = $task['project_id'];
+            }
+            if (!in_array($task['project_id'], $this->project_ids_per_level['all'])) {
+                $this->project_ids_per_level['all'][] = $task['project_id'];
             }
         }
     }
@@ -193,6 +199,9 @@ class TasksTimesPreparer
         foreach (($task['levels'] ?? []) as $level) {
             $this->times_per_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, $level
+            );
+            $this->times_per_level->addTimes(
+                $estimated, $spent, $remaining, $overtime, 'all'
             );
         }
     }
