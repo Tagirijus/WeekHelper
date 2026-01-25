@@ -34,11 +34,11 @@ class TasksTimesPreparer
     ];
 
     /**
-     * Just the project ids per level.
+     * Just the project ids by level.
      *
      * @var array
      **/
-    var $project_ids_per_level = [];
+    var $project_ids_by_level = [];
 
     /**
      * All "prepared" final tasks with their ID as the key.
@@ -53,7 +53,7 @@ class TasksTimesPreparer
     var $tasks = [];
 
     /**
-     * The class attribute, holding the tasks per level.
+     * The class attribute, holding the tasks by level.
      * The value array has the task id as key and the task
      * itself as value.
      *
@@ -67,7 +67,7 @@ class TasksTimesPreparer
      *
      * @var array
      **/
-    var $tasks_per_level = [];
+    var $tasks_by_level = [];
 
     /**
      * Simply all times as a TimesData instance.
@@ -81,49 +81,49 @@ class TasksTimesPreparer
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_column;
+    var $times_by_column;
 
     /**
      * Times for all levels individually.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_level;
+    var $times_by_level;
 
     /**
-     * Times per project.
+     * Times by project.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_project;
+    var $times_by_project;
 
     /**
      * Times for all swimlanes individually.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_swimlane;
+    var $times_by_swimlane;
 
     /**
      * Times for all swimlanes+columns individually.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_swimlane_column;
+    var $times_by_swimlane_column;
 
     /**
-     * Times per task.
+     * Times by task.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_task;
+    var $times_by_task;
 
     /**
-     * Times per user.
+     * Times by user.
      *
      * @var TimesDataByEntity
      **/
-    var $times_per_user;
+    var $times_by_user;
 
     /**
      * The TimetaggerTranscriber, which can overwrite
@@ -142,13 +142,13 @@ class TasksTimesPreparer
     {
         $this->initConfig($config);
         $this->times = new TimesData();
-        $this->times_per_column = new TimesDataByEntity();
-        $this->times_per_level = new TimesDataByEntity();
-        $this->times_per_project = new TimesDataByEntity();
-        $this->times_per_swimlane = new TimesDataByEntity();
-        $this->times_per_swimlane_column = new TimesDataByEntity();
-        $this->times_per_task = new TimesDataByEntity();
-        $this->times_per_user = new TimesDataByEntity();
+        $this->times_by_column = new TimesDataByEntity();
+        $this->times_by_level = new TimesDataByEntity();
+        $this->times_by_project = new TimesDataByEntity();
+        $this->times_by_swimlane = new TimesDataByEntity();
+        $this->times_by_swimlane_column = new TimesDataByEntity();
+        $this->times_by_task = new TimesDataByEntity();
+        $this->times_by_user = new TimesDataByEntity();
     }
 
     /**
@@ -160,23 +160,23 @@ class TasksTimesPreparer
     public function addProjectInfo($task)
     {
         foreach (($task['levels'] ?? []) as $level) {
-            if (!array_key_exists($level, $this->project_ids_per_level)) {
-                $this->project_ids_per_level[$level] = [];
+            if (!array_key_exists($level, $this->project_ids_by_level)) {
+                $this->project_ids_by_level[$level] = [];
             }
-            if (!array_key_exists('all', $this->project_ids_per_level)) {
-                $this->project_ids_per_level['all'] = [];
+            if (!array_key_exists('all', $this->project_ids_by_level)) {
+                $this->project_ids_by_level['all'] = [];
             }
-            if (!in_array($task['project_id'], $this->project_ids_per_level[$level])) {
-                $this->project_ids_per_level[$level][] = $task['project_id'];
+            if (!in_array($task['project_id'], $this->project_ids_by_level[$level])) {
+                $this->project_ids_by_level[$level][] = $task['project_id'];
             }
-            if (!in_array($task['project_id'], $this->project_ids_per_level['all'])) {
-                $this->project_ids_per_level['all'][] = $task['project_id'];
+            if (!in_array($task['project_id'], $this->project_ids_by_level['all'])) {
+                $this->project_ids_by_level['all'][] = $task['project_id'];
             }
         }
     }
 
     /**
-     * Add the given task to the internal tasks_per_level array, depending
+     * Add the given task to the internal tasks_by_level array, depending
      * on it's level. This info at this point should already be parsed
      * be the TaskDataExtender, thus the key 'levels' should exist.
      *
@@ -185,15 +185,15 @@ class TasksTimesPreparer
     public function addTaskToLevel(&$task)
     {
         foreach (($task['levels'] ?? []) as $level) {
-            if (!array_key_exists($level, $this->tasks_per_level)) {
-                $this->tasks_per_level[$level] = [];
+            if (!array_key_exists($level, $this->tasks_by_level)) {
+                $this->tasks_by_level[$level] = [];
             }
-            $this->tasks_per_level[$level][$task['id']] = &$task;
+            $this->tasks_by_level[$level][$task['id']] = &$task;
         }
     }
 
     /**
-     * Add the given times to the internal times_per_level array,
+     * Add the given times to the internal times_by_level array,
      * depending on the tasks level. This info at this point should
      * already be parsed be the TaskDataExtender, thus the key
      * 'levels' should exist.
@@ -213,10 +213,10 @@ class TasksTimesPreparer
     )
     {
         foreach (($task['levels'] ?? []) as $level) {
-            $this->times_per_level->addTimes(
+            $this->times_by_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, $level
             );
-            $this->times_per_level->addTimes(
+            $this->times_by_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, 'all'
             );
         }
@@ -228,11 +228,11 @@ class TasksTimesPreparer
     protected function emptyInternalValues()
     {
         $this->tasks = [];
-        $this->tasks_per_level = [];
+        $this->tasks_by_level = [];
         $this->times->resetTimes();
-        $this->times_per_level->resetTimes();
-        $this->times_per_project->resetTimes();
-        $this->times_per_user->resetTimes();
+        $this->times_by_level->resetTimes();
+        $this->times_by_project->resetTimes();
+        $this->times_by_user->resetTimes();
     }
 
     /**
@@ -264,14 +264,14 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get has_times per project.
+     * Get has_times by project.
      *
      * @param  integer $project_id
      * @return boolean
      */
     public function hasTimesByProject($project_id = -1)
     {
-        return $this->times_per_project->hasTimes($project_id);
+        return $this->times_by_project->hasTimes($project_id);
     }
 
     /**
@@ -342,14 +342,14 @@ class TasksTimesPreparer
             // == == == == == == == ==
 
             $this->times->addTimes($estimated, $spent, $remaining, $overtime);
-            $this->times_per_swimlane->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name']);
-            $this->times_per_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
-            $this->times_per_swimlane_column->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name'] . $task['column_name']);
+            $this->times_by_swimlane->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name']);
+            $this->times_by_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
+            $this->times_by_swimlane_column->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name'] . $task['column_name']);
             // similar with swimlane
             $this->addTimesToLevel($estimated, $spent, $remaining, $overtime, $task);
-            $this->times_per_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
-            $this->times_per_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
-            $this->times_per_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
+            $this->times_by_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
+            $this->times_by_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
+            $this->times_by_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
 
             // == == == == == == ==
             // ADDING TIMES  -  END
@@ -401,7 +401,7 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get estimated per column.
+     * Get estimated by column.
      *
      * @param  string $column
      * @param  boolean $readable
@@ -409,11 +409,11 @@ class TasksTimesPreparer
      */
     public function getEstimatedByColumn($column = '', $readable = false)
     {
-        return $this->times_per_column->getEstimated($column, $readable);
+        return $this->times_by_column->getEstimated($column, $readable);
     }
 
     /**
-     * Get estimated per level.
+     * Get estimated by level.
      *
      * @param  string $level
      * @param  boolean $readable
@@ -421,11 +421,11 @@ class TasksTimesPreparer
      */
     public function getEstimatedByLevel($level = '', $readable = false)
     {
-        return $this->times_per_level->getEstimated($level, $readable);
+        return $this->times_by_level->getEstimated($level, $readable);
     }
 
     /**
-     * Get estimated per project.
+     * Get estimated by project.
      *
      * @param  integer $project_id
      * @param  boolean $readable
@@ -433,11 +433,11 @@ class TasksTimesPreparer
      */
     public function getEstimatedByProject($project_id = -1, $readable = false)
     {
-        return $this->times_per_project->getEstimated($project_id, $readable);
+        return $this->times_by_project->getEstimated($project_id, $readable);
     }
 
     /**
-     * Get estimated per swimlane.
+     * Get estimated by swimlane.
      *
      * @param  string $swimlane
      * @param  boolean $readable
@@ -445,11 +445,11 @@ class TasksTimesPreparer
      */
     public function getEstimatedBySwimlane($swimlane = '', $readable = false)
     {
-        return $this->times_per_swimlane->getEstimated($swimlane, $readable);
+        return $this->times_by_swimlane->getEstimated($swimlane, $readable);
     }
 
     /**
-     * Get estimated per swimlane+column.
+     * Get estimated by swimlane+column.
      *
      * @param  string $swimlane
      * @param  string $column
@@ -459,11 +459,11 @@ class TasksTimesPreparer
     public function getEstimatedBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
     {
         $entity = $swimlane . $column;
-        return $this->times_per_swimlane_column->getEstimated($entity, $readable);
+        return $this->times_by_swimlane_column->getEstimated($entity, $readable);
     }
 
     /**
-     * Get estimated per task.
+     * Get estimated by task.
      *
      * @param  integer $task_id
      * @param  boolean $readable
@@ -471,11 +471,11 @@ class TasksTimesPreparer
      */
     public function getEstimatedByTask($task_id = -1, $readable = false)
     {
-        return $this->times_per_task->getEstimated($task_id, $readable);
+        return $this->times_by_task->getEstimated($task_id, $readable);
     }
 
     /**
-     * Get estimated per user.
+     * Get estimated by user.
      *
      * @param  integer $user_id
      * @param  boolean $readable
@@ -483,7 +483,7 @@ class TasksTimesPreparer
      */
     public function getEstimatedByUser($user_id = -1, $readable = false)
     {
-        return $this->times_per_user->getEstimated($user_id, $readable);
+        return $this->times_by_user->getEstimated($user_id, $readable);
     }
 
     /**
@@ -499,7 +499,7 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get overtime per column.
+     * Get overtime by column.
      *
      * @param  string $column
      * @param  boolean $readable
@@ -507,11 +507,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeByColumn($column = '', $readable = false)
     {
-        return $this->times_per_column->getOvertime($column, $readable);
+        return $this->times_by_column->getOvertime($column, $readable);
     }
 
     /**
-     * Get overtime per level.
+     * Get overtime by level.
      *
      * @param  string $level
      * @param  boolean $readable
@@ -519,11 +519,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeByLevel($level = '', $readable = false)
     {
-        return $this->times_per_level->getOvertime($level, $readable);
+        return $this->times_by_level->getOvertime($level, $readable);
     }
 
     /**
-     * Get overtime per project.
+     * Get overtime by project.
      *
      * @param  integer $project_id
      * @param  boolean $readable
@@ -531,11 +531,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeByProject($project_id = -1, $readable = false)
     {
-        return $this->times_per_project->getOvertime($project_id, $readable);
+        return $this->times_by_project->getOvertime($project_id, $readable);
     }
 
     /**
-     * Get overtime per swimlane.
+     * Get overtime by swimlane.
      *
      * @param  string $swimlane
      * @param  boolean $readable
@@ -543,11 +543,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeBySwimlane($swimlane = '', $readable = false)
     {
-        return $this->times_per_swimlane->getOvertime($swimlane, $readable);
+        return $this->times_by_swimlane->getOvertime($swimlane, $readable);
     }
 
     /**
-     * Get overtime per swimlane+column.
+     * Get overtime by swimlane+column.
      *
      * @param  string $swimlane
      * @param  string $column
@@ -557,11 +557,11 @@ class TasksTimesPreparer
     public function getOvertimeBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
     {
         $entity = $swimlane . $column;
-        return $this->times_per_swimlane_column->getOvertime($entity, $readable);
+        return $this->times_by_swimlane_column->getOvertime($entity, $readable);
     }
 
     /**
-     * Get overtime per task.
+     * Get overtime by task.
      *
      * @param  integer $task_id
      * @param  boolean $readable
@@ -569,11 +569,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeByTask($task_id = -1, $readable = false)
     {
-        return $this->times_per_task->getOvertime($task_id, $readable);
+        return $this->times_by_task->getOvertime($task_id, $readable);
     }
 
     /**
-     * Get overtime per user.
+     * Get overtime by user.
      *
      * @param  integer $user_id
      * @param  boolean $readable
@@ -581,11 +581,11 @@ class TasksTimesPreparer
      */
     public function getOvertimeByUser($user_id = -1, $readable = false)
     {
-        return $this->times_per_user->getOvertime($user_id, $readable);
+        return $this->times_by_user->getOvertime($user_id, $readable);
     }
 
     /**
-     * Get percent of times per project.
+     * Get percent of times by project.
      *
      * @param  integer $project_id
      * @param  boolean $readable
@@ -594,11 +594,11 @@ class TasksTimesPreparer
      */
     public function getPercentByProject($project_id = -1, $readable = false, $suffix = '%')
     {
-        return $this->times_per_project->getPercent($project_id, $readable, $suffix);
+        return $this->times_by_project->getPercent($project_id, $readable, $suffix);
     }
 
     /**
-     * Get percent of times per task.
+     * Get percent of times by task.
      *
      * @param  integer $task_id
      * @param  boolean $readable
@@ -607,11 +607,11 @@ class TasksTimesPreparer
      */
     public function getPercentByTask($task_id = -1, $readable = false, $suffix = '%')
     {
-        return $this->times_per_task->getPercent($task_id, $readable, $suffix);
+        return $this->times_by_task->getPercent($task_id, $readable, $suffix);
     }
 
     /**
-     * Get the project ids from the internal times_per_project
+     * Get the project ids from the internal times_by_project
      * attribute, which also should cover the correct sorting,
      * liek defined in the config.
      *
@@ -619,18 +619,18 @@ class TasksTimesPreparer
      */
     public function getProjectIds()
     {
-        return $this->times_per_project->getEntities();
+        return $this->times_by_project->getEntities();
     }
 
     /**
-     * Get the project ids per level, if this level exists internally.
+     * Get the project ids by level, if this level exists internally.
      *
      * @param  string  $level
      * @return array
      */
     public function getProjectIdsByLevel($level)
     {
-        return $this->project_ids_per_level[$level] ?? [];
+        return $this->project_ids_by_level[$level] ?? [];
     }
 
     /**
@@ -646,7 +646,7 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get remaining per column.
+     * Get remaining by column.
      *
      * @param  string $column
      * @param  boolean $readable
@@ -654,11 +654,11 @@ class TasksTimesPreparer
      */
     public function getRemainingByColumn($column = '', $readable = false)
     {
-        return $this->times_per_column->getRemaining($column, $readable);
+        return $this->times_by_column->getRemaining($column, $readable);
     }
 
     /**
-     * Get remaining per level.
+     * Get remaining by level.
      *
      * @param  string $level
      * @param  boolean $readable
@@ -666,11 +666,11 @@ class TasksTimesPreparer
      */
     public function getRemainingByLevel($level = '', $readable = false)
     {
-        return $this->times_per_level->getRemaining($level, $readable);
+        return $this->times_by_level->getRemaining($level, $readable);
     }
 
     /**
-     * Get remaining per project.
+     * Get remaining by project.
      *
      * @param  integer $project_id
      * @param  boolean $readable
@@ -678,11 +678,11 @@ class TasksTimesPreparer
      */
     public function getRemainingByProject($project_id = -1, $readable = false)
     {
-        return $this->times_per_project->getRemaining($project_id, $readable);
+        return $this->times_by_project->getRemaining($project_id, $readable);
     }
 
     /**
-     * Get remaining per swimlane.
+     * Get remaining by swimlane.
      *
      * @param  string $swimlane
      * @param  boolean $readable
@@ -690,11 +690,11 @@ class TasksTimesPreparer
      */
     public function getRemainingBySwimlane($swimlane = '', $readable = false)
     {
-        return $this->times_per_swimlane->getRemaining($swimlane, $readable);
+        return $this->times_by_swimlane->getRemaining($swimlane, $readable);
     }
 
     /**
-     * Get remaining per swimlane+column.
+     * Get remaining by swimlane+column.
      *
      * @param  string $swimlane
      * @param  string $column
@@ -704,11 +704,11 @@ class TasksTimesPreparer
     public function getRemainingBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
     {
         $entity = $swimlane . $column;
-        return $this->times_per_swimlane_column->getRemaining($entity, $readable);
+        return $this->times_by_swimlane_column->getRemaining($entity, $readable);
     }
 
     /**
-     * Get remaining per task.
+     * Get remaining by task.
      *
      * @param  integer $task_id
      * @param  boolean $readable
@@ -716,11 +716,11 @@ class TasksTimesPreparer
      */
     public function getRemainingByTask($task_id = -1, $readable = false)
     {
-        return $this->times_per_task->getRemaining($task_id, $readable);
+        return $this->times_by_task->getRemaining($task_id, $readable);
     }
 
     /**
-     * Get remaining per user.
+     * Get remaining by user.
      *
      * @param  integer $user_id
      * @param  boolean $readable
@@ -728,7 +728,7 @@ class TasksTimesPreparer
      */
     public function getRemainingByUser($user_id = -1, $readable = false)
     {
-        return $this->times_per_user->getRemaining($user_id, $readable);
+        return $this->times_by_user->getRemaining($user_id, $readable);
     }
 
     /**
@@ -744,7 +744,7 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get spent per column.
+     * Get spent by column.
      *
      * @param  string $column
      * @param  boolean $readable
@@ -752,11 +752,11 @@ class TasksTimesPreparer
      */
     public function getSpentByColumn($column = '', $readable = false)
     {
-        return $this->times_per_column->getSpent($column, $readable);
+        return $this->times_by_column->getSpent($column, $readable);
     }
 
     /**
-     * Get spent per level.
+     * Get spent by level.
      *
      * @param  string $level
      * @param  boolean $readable
@@ -764,11 +764,11 @@ class TasksTimesPreparer
      */
     public function getSpentByLevel($level = '', $readable = false)
     {
-        return $this->times_per_level->getSpent($level, $readable);
+        return $this->times_by_level->getSpent($level, $readable);
     }
 
     /**
-     * Get spent per project.
+     * Get spent by project.
      *
      * @param  integer $project_id
      * @param  boolean $readable
@@ -776,11 +776,11 @@ class TasksTimesPreparer
      */
     public function getSpentByProject($project_id = -1, $readable = false)
     {
-        return $this->times_per_project->getSpent($project_id, $readable);
+        return $this->times_by_project->getSpent($project_id, $readable);
     }
 
     /**
-     * Get spent per swimlane.
+     * Get spent by swimlane.
      *
      * @param  string $swimlane
      * @param  boolean $readable
@@ -788,11 +788,11 @@ class TasksTimesPreparer
      */
     public function getSpentBySwimlane($swimlane = '', $readable = false)
     {
-        return $this->times_per_swimlane->getSpent($swimlane, $readable);
+        return $this->times_by_swimlane->getSpent($swimlane, $readable);
     }
 
     /**
-     * Get spent per swimlane+column.
+     * Get spent by swimlane+column.
      *
      * @param  string $swimlane
      * @param  string $column
@@ -802,11 +802,11 @@ class TasksTimesPreparer
     public function getSpentBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
     {
         $entity = $swimlane . $column;
-        return $this->times_per_swimlane_column->getSpent($entity, $readable);
+        return $this->times_by_swimlane_column->getSpent($entity, $readable);
     }
 
     /**
-     * Get spent per task.
+     * Get spent by task.
      *
      * @param  integer $task_id
      * @param  boolean $readable
@@ -814,11 +814,11 @@ class TasksTimesPreparer
      */
     public function getSpentByTask($task_id = -1, $readable = false)
     {
-        return $this->times_per_task->getSpent($task_id, $readable);
+        return $this->times_by_task->getSpent($task_id, $readable);
     }
 
     /**
-     * Get spent per user.
+     * Get spent by user.
      *
      * @param  integer $user_id
      * @param  boolean $readable
@@ -826,7 +826,7 @@ class TasksTimesPreparer
      */
     public function getSpentByUser($user_id = -1, $readable = false)
     {
-        return $this->times_per_user->getSpent($user_id, $readable);
+        return $this->times_by_user->getSpent($user_id, $readable);
     }
 
     /**
@@ -850,7 +850,7 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get the internal tasks_per_level array. A level
+     * Get the internal tasks_by_level array. A level
      * can be defined as a parameter so that only that
      * level's task will be returned.
      *
@@ -859,10 +859,10 @@ class TasksTimesPreparer
      */
     public function getTasksByLevel($level = '')
     {
-        if (array_key_exists($level, $this->tasks_per_level)) {
-            return $this->tasks_per_level[$level];
+        if (array_key_exists($level, $this->tasks_by_level)) {
+            return $this->tasks_by_level[$level];
         } else {
-            return $this->tasks_per_level;
+            return $this->tasks_by_level;
         }
     }
 
@@ -888,27 +888,27 @@ class TasksTimesPreparer
     protected function sortProjects()
     {
         // first sort the TimesDataByEntity instance
-        // for times_per_project, which will manage to
+        // for times_by_project, which will manage to
         // sort the projects by their time
         $project_sorting = $this->getConfig('project_sorting');
         if ($project_sorting == 'id') {
-            $this->times_per_project->sort();
+            $this->times_by_project->sort();
         } elseif ($project_sorting == 'remaining_hours_asc') {
-            $this->times_per_project->sort('remaining', 'asc');
+            $this->times_by_project->sort('remaining', 'asc');
         } elseif ($project_sorting == 'remaining_hours_desc') {
-            $this->times_per_project->sort('remaining', 'desc');
+            $this->times_by_project->sort('remaining', 'desc');
         }
 
         // now use this sorting to sort the plain IDs as well accordingly
         // 1. doing this by creating a lookup map first
         $sort_map = [];
-        foreach ($this->times_per_project->getEntities() as $i => $id) {
+        foreach ($this->times_by_project->getEntities() as $i => $id) {
             $sort_map[$id] = $i;
         }
 
         // 2. using this to sort the project_ids, while non existing ids will be
         //    put at the end
-        foreach ($this->project_ids_per_level as &$project_ids) {
+        foreach ($this->project_ids_by_level as &$project_ids) {
             self::sortProjectIdsLevel($project_ids, $sort_map);
         }
     }

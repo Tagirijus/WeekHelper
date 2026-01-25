@@ -336,7 +336,7 @@ final class TasksTimesPreparerTest extends TestCase
             ]
         ];
         $ttp->initTasksAndTimes($tasks, $subtasks);
-        $msg = 'TasksTimesPreparer times per task went wrong.';
+        $msg = 'TasksTimesPreparer times by task went wrong.';
         $this->assertSame(1.5, $ttp->getRemainingByTask($tasks[0]['id']), $msg);
         $this->assertSame(1.0, $ttp->getOvertimeByTask($tasks[1]['id']), $msg);
         $this->assertSame(-4.0, $ttp->getOvertimeByTask($tasks[2]['id']), $msg);
@@ -364,7 +364,7 @@ final class TasksTimesPreparerTest extends TestCase
         ];
 
         $ttp->initTasksAndTimes($tasks);
-        $msg = 'TasksTimesPreparer times per level went wrong.';
+        $msg = 'TasksTimesPreparer times by level went wrong.';
         $this->assertSame(12.0, $ttp->getEstimatedByLevel('level_1'), $msg);
         $this->assertSame(9.0, $ttp->getEstimatedByLevel('level_2'), $msg);
         $this->assertSame(2.0, $ttp->getEstimatedByLevel('level_3'), $msg);
