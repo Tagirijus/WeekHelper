@@ -298,8 +298,8 @@ final class TasksTimesPreparerTest extends TestCase
         ];
         $ttp->initTasksAndTimes($tasks);
         $msg = 'TasksTimesPreparer times column calculation went wrong.';
-        $this->assertSame(12.0, $ttp->getEstimatedPerColumn('backlog'), $msg);
-        $this->assertSame(7.0, $ttp->getEstimatedPerColumn('started'), $msg);
+        $this->assertSame(12.0, $ttp->getEstimatedByColumn('backlog'), $msg);
+        $this->assertSame(7.0, $ttp->getEstimatedByColumn('started'), $msg);
     }
 
     public function testTimesPerTask()
@@ -318,9 +318,9 @@ final class TasksTimesPreparerTest extends TestCase
         ];
         $ttp->initTasksAndTimes($tasks, $subtasks);
         $msg = 'TasksTimesPreparer times per task went wrong.';
-        $this->assertSame(1.5, $ttp->getRemainingPerTask($tasks[0]['id']), $msg);
-        $this->assertSame(1.0, $ttp->getOvertimePerTask($tasks[1]['id']), $msg);
-        $this->assertSame(-4.0, $ttp->getOvertimePerTask($tasks[2]['id']), $msg);
+        $this->assertSame(1.5, $ttp->getRemainingByTask($tasks[0]['id']), $msg);
+        $this->assertSame(1.0, $ttp->getOvertimeByTask($tasks[1]['id']), $msg);
+        $this->assertSame(-4.0, $ttp->getOvertimeByTask($tasks[2]['id']), $msg);
     }
 
     public function testTimesPerLevel()
@@ -346,10 +346,10 @@ final class TasksTimesPreparerTest extends TestCase
 
         $ttp->initTasksAndTimes($tasks);
         $msg = 'TasksTimesPreparer times per level went wrong.';
-        $this->assertSame(12.0, $ttp->getEstimatedPerLevel('level_1'), $msg);
-        $this->assertSame(9.0, $ttp->getEstimatedPerLevel('level_2'), $msg);
-        $this->assertSame(2.0, $ttp->getEstimatedPerLevel('level_3'), $msg);
-        $this->assertSame(7.0, $ttp->getEstimatedPerLevel('level_4'), $msg);
-        $this->assertSame(0.0, $ttp->getEstimatedPerLevel('level_5'), $msg);
+        $this->assertSame(12.0, $ttp->getEstimatedByLevel('level_1'), $msg);
+        $this->assertSame(9.0, $ttp->getEstimatedByLevel('level_2'), $msg);
+        $this->assertSame(2.0, $ttp->getEstimatedByLevel('level_3'), $msg);
+        $this->assertSame(7.0, $ttp->getEstimatedByLevel('level_4'), $msg);
+        $this->assertSame(0.0, $ttp->getEstimatedByLevel('level_5'), $msg);
     }
 }

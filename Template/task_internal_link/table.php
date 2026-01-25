@@ -67,12 +67,12 @@
                 <?php endif ?>
             </td>
             <td>
-                <?php if (! empty($times->getSpentPerTask($link['task_id']))): ?>
-                    <?= $times->getSpentPerTask($link['task_id'], true) . 'h ' . t('spent') ?>
+                <?php if (! empty($times->getSpentByTask($link['task_id']))): ?>
+                    <?= $times->getSpentByTask($link['task_id'], true) . 'h ' . t('spent') ?>
                 <?php endif ?>
-                <?php if (! empty($times->getSpentPerTask($link['task_id'])) && ! empty($times->getEstimatedPerTask($link['task_id']))): ?>/<?php endif ?>
-                <?php if (! empty($times->getEstimatedPerTask($link['task_id']))): ?>
-                    <?= $times->getEstimatedPerTask($link['task_id'], true) . 'h ' . t('estimated') ?>
+                <?php if (! empty($times->getSpentByTask($link['task_id'])) && ! empty($times->getEstimatedByTask($link['task_id']))): ?>/<?php endif ?>
+                <?php if (! empty($times->getEstimatedByTask($link['task_id']))): ?>
+                    <?= $times->getEstimatedByTask($link['task_id'], true) . 'h ' . t('estimated') ?>
                 <?php endif ?>
             </td>
         </tr>

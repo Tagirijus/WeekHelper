@@ -488,9 +488,9 @@ class HoursViewHelper extends Base
     //  *
     //  * @return array
     //  */
-    // public function getTasksPerLevel()
+    // public function getTasksByLevel()
     // {
-    //     return $this->getTimes()->getTasksPerLevel();
+    //     return $this->getTimes()->getTasksByLevel();
     // }
 
     /**

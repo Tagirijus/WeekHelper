@@ -79,9 +79,9 @@ $times = $this->hoursViewHelper->getTimes();
             </span>
         <?php endif ?>
 
-        <?php if (! empty($times->getEstimatedPerTask($task['id']) || ! empty($times->getSpentPerTask($task['id'])))): ?>
+        <?php if (! empty($times->getEstimatedByTask($task['id']) || ! empty($times->getSpentByTask($task['id'])))): ?>
             <span class="task-time-estimated" title="<?= t('Time remaining') ?>">
-                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'], true)) ?>h
+                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingByTask($task['id'], true)) ?>h
             </span>
         <?php endif ?>
 
@@ -148,10 +148,10 @@ $times = $this->hoursViewHelper->getTimes();
 
         <!-- Task Progress Bar -->
 
-        <?php if ($times->getEstimatedPerTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+        <?php if ($times->getEstimatedByTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
             <?php
-                $percent = (int) $times->getPercentPerTask($task['id'], true, '');
+                $percent = (int) $times->getPercentByTask($task['id'], true, '');
                 $percent_txt = $percent . '%';
                 $percent_opacity = $hoursview_config['progressbar_opacity'];
                 if ($percent > 100) {

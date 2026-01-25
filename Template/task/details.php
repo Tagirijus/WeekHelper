@@ -107,21 +107,21 @@
                     <li>
                         <strong><?= t('Time estimated:') ?></strong>
                         <span>
-                            <?= $times->getEstimatedPerTask($task['id'], true); ?>h
+                            <?= $times->getEstimatedByTask($task['id'], true); ?>h
                         </span>
                     </li>
                     <li>
                         <strong><?= t('Time spent:') ?></strong>
                         <span>
-                            <?= $times->getSpentPerTask($task['id'], true); ?>h
+                            <?= $times->getSpentByTask($task['id'], true); ?>h
                         </span>
                     </li>
                     <li>
                         <strong><?= t('Overtime') . ':' ?></strong>
                         <span>
-                            <?= $times->getOvertimePerTask($task['id'], true); ?>h
+                            <?= $times->getOvertimeByTask($task['id'], true); ?>h
                             <i class="thv-font-small" title="<?= t('>> means you worked faster, << means you worked slower') ?>">
-                                <?php if ($times->getOvertimePerTask($task['id']) < 0): ?>
+                                <?php if ($times->getOvertimeByTask($task['id']) < 0): ?>
                                     (>>)
                                 <?php else: ?>
                                     (<<)
@@ -132,7 +132,7 @@
                     <li>
                         <strong><?= t('Time remaining:') ?></strong>
                         <span>
-                            <?= $times->getRemainingPerTask($task['id'], true); ?>h
+                            <?= $times->getRemainingByTask($task['id'], true); ?>h
                         </span>
                     </li>
 
@@ -209,10 +209,10 @@
         $hoursview_config = $this->hoursViewHelper->getConfig();
     ?>
 
-    <?php if ($times->getEstimatedPerTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
+    <?php if ($times->getEstimatedByTask($task['id']) > 0 && $hoursview_config['progressbar_enabled'] == 1): ?>
 
         <?php
-            $percent = $times->getPercentPerTask($task['id'], true, '');
+            $percent = $times->getPercentByTask($task['id'], true, '');
             $percent_txt = $percent . '%';
             $percent_opacity = 1;
             if ($percent > 100) {

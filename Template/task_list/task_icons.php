@@ -33,10 +33,10 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
         </span>
     <?php endif ?>
 
-    <?php if (! empty($times->getEstimatedPerTask($task['id'])) || ! empty($times->getSpentPerTask($task['id']))): ?>
+    <?php if (! empty($times->getEstimatedByTask($task['id'])) || ! empty($times->getSpentByTask($task['id']))): ?>
         <span class="task-time-estimated" title="<?= t('Time spent and estimated') ?>">
-            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($times->getRemainingPerTask($task['id'])) ?>h
-                    - <?= $times->getPercentPerTask($task['id'], true) ?>
+            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($times->getRemainingByTask($task['id'])) ?>h
+                    - <?= $times->getPercentByTask($task['id'], true) ?>
         </span>
     <?php endif ?>
 

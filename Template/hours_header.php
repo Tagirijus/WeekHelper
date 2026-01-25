@@ -22,7 +22,7 @@
                         <?= t('Estimated'); ?>:
                     </span>
                     <span class="thv-estimated-color">
-                        <?= $times->getEstimatedPerLevel($level, true); ?>h
+                        <?= $times->getEstimatedByLevel($level, true); ?>h
                     </span>
                 </div>
 
@@ -31,10 +31,10 @@
                         <?= t('Spent'); ?>:
                     </span>
                     <span class="thv-spent-color">
-                        <?= $times->getSpentPerLevel($level, true); ?>h
-                        <?php if ($times->getOvertimePerLevel($level) != 0.0): ?>
+                        <?= $times->getSpentByLevel($level, true); ?>h
+                        <?php if ($times->getOvertimeByLevel($level) != 0.0): ?>
                             <i class="thv-font-weak">
-                                (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentPerLevel($level), $times->getOvertimePerLevel($level)); ?>)
+                                (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByLevel($level), $times->getOvertimeByLevel($level)); ?>)
                             </i>
                         <?php endif ?>
                     </span>
@@ -45,7 +45,7 @@
                         <?= t('Remaining'); ?>:
                     </span>
                     <span class="thv-remaining-color">
-                        <?= $times->getRemainingPerLevel($level, true); ?>h
+                        <?= $times->getRemainingByLevel($level, true); ?>h
                     </span>
                 </div>
 

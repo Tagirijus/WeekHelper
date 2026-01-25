@@ -221,13 +221,13 @@ class AutomaticPlanner extends Base
         // the project_times variable has to be initiated as well;
         // so I will just call the getter, which will initiliaze it, if needed
         $this->getProjectTimes();
-        if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->getTasksPerLevel())) {
-            $this->tasks_active_week = $this->helper->hoursViewHelper->getTasksPerLevel()[$level_active_week];
+        if (array_key_exists($level_active_week, $this->helper->hoursViewHelper->getTasksByLevel())) {
+            $this->tasks_active_week = $this->helper->hoursViewHelper->getTasksByLevel()[$level_active_week];
         } else {
             $this->logger->info(
                 'AutomaticPlanner->initTasksActiveWeek() cannot access '
                 . '"' . $level_active_week . '" '
-                . 'in "' . $this->helper->hoursViewHelper->getTasksPerLevel() . '"'
+                . 'in "' . $this->helper->hoursViewHelper->getTasksByLevel() . '"'
             );
         }
 
@@ -279,13 +279,13 @@ class AutomaticPlanner extends Base
         // the project_times variable has to be initiated as well;
         // so I will just call the getter, which will initiliaze it, if needed
         $this->getProjectTimes();
-        if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->getTasksPerLevel())) {
-            $this->tasks_planned_week = $this->helper->hoursViewHelper->getTasksPerLevel()[$level_planned_week];
+        if (array_key_exists($level_planned_week, $this->helper->hoursViewHelper->getTasksByLevel())) {
+            $this->tasks_planned_week = $this->helper->hoursViewHelper->getTasksByLevel()[$level_planned_week];
         } else {
             $this->logger->info(
                 'AutomaticPlanner->initTasksPlannedWeek() cannot access '
                 . '"' . $level_planned_week . '" '
-                . 'in "' . $this->helper->hoursViewHelper->getTasksPerLevel() . '"'
+                . 'in "' . $this->helper->hoursViewHelper->getTasksByLevel() . '"'
             );
         }
 
