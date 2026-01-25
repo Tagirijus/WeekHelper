@@ -5,7 +5,7 @@ namespace Kanboard\Plugin\WeekHelper\Helper;
 use Pimple\Container;
 use Kanboard\Core\Base;
 use Kanboard\Model\TaskModel;
-// use Kanboard\Model\ProjectModel;
+use Kanboard\Model\ProjectModel;
 // use Kanboard\Model\SubtaskModel;
 use Kanboard\Core\Paginator;
 use Kanboard\Filter\TaskProjectsFilter;
@@ -200,7 +200,7 @@ class HoursViewHelper extends Base
             $builder->withQuery($query);
             $tasks = $builder->build('status:open')->toArray();
 
-        // simply fetch all open tasks
+        // simply fetch all open tasks from all open projects
         // todo: maybe at some point this should be split into
         //       "all" and "all by user id". but at the moment
         //       I am the only person using my Kanboard, thus
@@ -208,6 +208,7 @@ class HoursViewHelper extends Base
         //       "open tasks" and "open tasks by user".
         } else {
             $query = $this->taskFinderModel->getExtendedQuery();
+            $query->eq(ProjectModel::TABLE.'.is_active', 1);
             $builder = $this->taskLexer;
             $builder->withQuery($query);
             $tasks = $builder->build('status:open')->toArray();
