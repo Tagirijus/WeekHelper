@@ -34,6 +34,13 @@ class TasksTimesPreparer
     ];
 
     /**
+     * Just the project ids per level.
+     *
+     * @var array
+     **/
+    var $project_ids_per_level = [];
+
+    /**
      * All "prepared" final tasks with their ID as the key.
      *
      *  [
@@ -126,6 +133,24 @@ class TasksTimesPreparer
         $this->times_per_project = new TimesDataPerEntity();
         $this->times_per_task = new TimesDataPerEntity();
         $this->times_per_user = new TimesDataPerEntity();
+    }
+
+    /**
+     * Store project info into internal variables for easier
+     * access later on.
+     *
+     * @param array $task
+     */
+    public function addProjectInfo($task)
+    {
+        foreach (($task['levels'] ?? []) as $level) {
+            if (!array_key_exists($level, $this->project_ids_per_level)) {
+                $this->project_ids_per_level[$level] = [];
+            }
+            if (!in_array($task['project_id'], $this->project_ids_per_level[$level])) {
+                $this->project_ids_per_level[$level][] = $task['project_id'];
+            }
+        }
     }
 
     /**
@@ -283,6 +308,9 @@ class TasksTimesPreparer
             // add the tasks to some internal variables (by reference)
             $this->tasks[$task['id']] = &$tasks[$i];
             $this->addTaskToLevel($tasks[$i]);
+
+            // store some project related stuff as well
+            $this->addProjectInfo($task);
 
             // == == == == == == == ==
             // ADDING TIMES   -  START
@@ -515,6 +543,17 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get the project ids per level, if this level exists internally.
+     *
+     * @param  string  $level
+     * @return array
+     */
+    public function getProjectIdsPerLevel($level)
+    {
+        return $this->project_ids_per_level[$level] ?? [];
+    }
+
+    /**
      * Get remaining for total.
      *
      * @param  string $level
@@ -716,8 +755,10 @@ class TasksTimesPreparer
      */
     protected function sortProjects()
     {
+        // first sort the TimesDataPerEntity instance
+        // for times_per_project, which will manage to
+        // sort the projects by their time
         $project_sorting = $this->getConfig('project_sorting');
-
         if ($project_sorting == 'id') {
             $this->times_per_project->sort();
         } elseif ($project_sorting == 'remaining_hours_asc') {
@@ -725,5 +766,37 @@ class TasksTimesPreparer
         } elseif ($project_sorting == 'remaining_hours_desc') {
             $this->times_per_project->sort('remaining', 'desc');
         }
+
+        // now use this sorting to sort the plain IDs as well accordingly
+        // 1. doing this by creating a lookup map first
+        $sort_map = [];
+        foreach ($this->times_per_project->getEntities() as $i => $id) {
+            $sort_map[$id] = $i;
+        }
+
+        // 2. using this to sort the project_ids, while non existing ids will be
+        //    put at the end
+        foreach ($this->project_ids_per_level as &$project_ids) {
+            self::sortProjectIdsLevel($project_ids, $sort_map);
+        }
+    }
+
+    /**
+     * Sort the given array by the sort_map, which should contain the project
+     * id as the key and the sorting integer as the value.
+     *
+     * @param  array &$arr
+     * @param  array $sort_map
+     */
+    protected static function sortProjectIdsLevel(&$arr, $sort_map)
+    {
+        usort($arr, function($a, $b) use ($sort_map) {
+            $pa = isset($sort_map[$a]) ? $sort_map[$a] : PHP_INT_MAX;
+            $pb = isset($sort_map[$b]) ? $sort_map[$b] : PHP_INT_MAX;
+            if ($pa === $pb) {
+                return 0; // behalte relative Reihenfolge; alternativ: return $a <=> $b;
+            }
+            return $pa < $pb ? -1 : 1;
+        });
     }
 }
