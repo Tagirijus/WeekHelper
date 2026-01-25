@@ -291,15 +291,34 @@ final class TasksTimesPreparerTest extends TestCase
         $ttp = new TasksTimesPreparer();
 
         $tasks = [
-            TestTask::create(column_name: 'backlog', time_estimated: 10.0),
-            TestTask::create(column_name: 'backlog', time_estimated: 2.0),
-            TestTask::create(column_name: 'started', time_estimated: 5.0),
-            TestTask::create(column_name: 'started', time_estimated: 2.0),
+            TestTask::create(
+                column_name: 'backlog',
+                swimlane_name: 'active',
+                time_estimated: 10.0
+            ),
+            TestTask::create(
+                column_name: 'backlog',
+                swimlane_name: 'active',
+                time_estimated: 2.0
+            ),
+            TestTask::create(
+                column_name: 'started',
+                swimlane_name: 'active',
+                time_estimated: 5.0
+            ),
+            TestTask::create(
+                column_name: 'started',
+                swimlane_name: 'planned',
+                time_estimated: 2.0
+            ),
         ];
         $ttp->initTasksAndTimes($tasks);
         $msg = 'TasksTimesPreparer times column calculation went wrong.';
         $this->assertSame(12.0, $ttp->getEstimatedByColumn('backlog'), $msg);
         $this->assertSame(7.0, $ttp->getEstimatedByColumn('started'), $msg);
+        $this->assertSame(17.0, $ttp->getEstimatedBySwimlane('active'), $msg);
+        $this->assertSame(5.0, $ttp->getEstimatedBySwimlaneColumn('active', 'started'), $msg);
+        $this->assertSame(2.0, $ttp->getEstimatedBySwimlaneColumn('planned', 'started'), $msg);
     }
 
     public function testTimesPerTask()

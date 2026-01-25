@@ -98,6 +98,20 @@ class TasksTimesPreparer
     var $times_per_project;
 
     /**
+     * Times for all swimlanes individually.
+     *
+     * @var TimesDataByEntity
+     **/
+    var $times_per_swimlane;
+
+    /**
+     * Times for all swimlanes+columns individually.
+     *
+     * @var TimesDataByEntity
+     **/
+    var $times_per_swimlane_column;
+
+    /**
      * Times per task.
      *
      * @var TimesDataByEntity
@@ -131,6 +145,8 @@ class TasksTimesPreparer
         $this->times_per_column = new TimesDataByEntity();
         $this->times_per_level = new TimesDataByEntity();
         $this->times_per_project = new TimesDataByEntity();
+        $this->times_per_swimlane = new TimesDataByEntity();
+        $this->times_per_swimlane_column = new TimesDataByEntity();
         $this->times_per_task = new TimesDataByEntity();
         $this->times_per_user = new TimesDataByEntity();
     }
@@ -326,7 +342,10 @@ class TasksTimesPreparer
             // == == == == == == == ==
 
             $this->times->addTimes($estimated, $spent, $remaining, $overtime);
+            $this->times_per_swimlane->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name']);
             $this->times_per_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
+            $this->times_per_swimlane_column->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name'] . $task['column_name']);
+            // similar with swimlane
             $this->addTimesToLevel($estimated, $spent, $remaining, $overtime, $task);
             $this->times_per_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
             $this->times_per_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
@@ -418,6 +437,32 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get estimated per swimlane.
+     *
+     * @param  string $swimlane
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedBySwimlane($swimlane = '', $readable = false)
+    {
+        return $this->times_per_swimlane->getEstimated($swimlane, $readable);
+    }
+
+    /**
+     * Get estimated per swimlane+column.
+     *
+     * @param  string $swimlane
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
+    {
+        $entity = $swimlane . $column;
+        return $this->times_per_swimlane_column->getEstimated($entity, $readable);
+    }
+
+    /**
      * Get estimated per task.
      *
      * @param  integer $task_id
@@ -487,6 +532,32 @@ class TasksTimesPreparer
     public function getOvertimeByProject($project_id = -1, $readable = false)
     {
         return $this->times_per_project->getOvertime($project_id, $readable);
+    }
+
+    /**
+     * Get overtime per swimlane.
+     *
+     * @param  string $swimlane
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimeBySwimlane($swimlane = '', $readable = false)
+    {
+        return $this->times_per_swimlane->getOvertime($swimlane, $readable);
+    }
+
+    /**
+     * Get overtime per swimlane+column.
+     *
+     * @param  string $swimlane
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimeBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
+    {
+        $entity = $swimlane . $column;
+        return $this->times_per_swimlane_column->getOvertime($entity, $readable);
     }
 
     /**
@@ -611,6 +682,32 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get remaining per swimlane.
+     *
+     * @param  string $swimlane
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingBySwimlane($swimlane = '', $readable = false)
+    {
+        return $this->times_per_swimlane->getRemaining($swimlane, $readable);
+    }
+
+    /**
+     * Get remaining per swimlane+column.
+     *
+     * @param  string $swimlane
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
+    {
+        $entity = $swimlane . $column;
+        return $this->times_per_swimlane_column->getRemaining($entity, $readable);
+    }
+
+    /**
      * Get remaining per task.
      *
      * @param  integer $task_id
@@ -680,6 +777,32 @@ class TasksTimesPreparer
     public function getSpentByProject($project_id = -1, $readable = false)
     {
         return $this->times_per_project->getSpent($project_id, $readable);
+    }
+
+    /**
+     * Get spent per swimlane.
+     *
+     * @param  string $swimlane
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentBySwimlane($swimlane = '', $readable = false)
+    {
+        return $this->times_per_swimlane->getSpent($swimlane, $readable);
+    }
+
+    /**
+     * Get spent per swimlane+column.
+     *
+     * @param  string $swimlane
+     * @param  string $column
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentBySwimlaneColumn($swimlane = '', $column = '', $readable = false)
+    {
+        $entity = $swimlane . $column;
+        return $this->times_per_swimlane_column->getSpent($entity, $readable);
     }
 
     /**
