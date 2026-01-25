@@ -147,7 +147,7 @@ class HoursViewHelper extends Base
         );
         $this->subtasks = [];
         foreach ($subtasks as $subtask) {
-            if (array_key_exists($subtask['task_id'], $this->subtasks)) {
+            if (!array_key_exists($subtask['task_id'], $this->subtasks)) {
                 $this->subtasks[$subtask['task_id']] = [];
             }
             $this->subtasks[$subtask['task_id']][] = $subtask;
