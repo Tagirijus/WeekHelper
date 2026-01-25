@@ -1,5 +1,6 @@
 <?php
 
+$this->hoursViewHelper->initTasks('project', $column['project_id']);
 $times = $this->hoursViewHelper->getTimes();
 $column_name = $column['title'];
 $hover_text = t('Estimated') . ': ' . $times->getEstimatedByColumn($column_name, true) . 'h';
