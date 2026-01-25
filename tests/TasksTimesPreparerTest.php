@@ -322,4 +322,32 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(1.0, $ttp->getOvertimePerTask($tasks[1]['id']), $msg);
         $this->assertSame(-4.0, $ttp->getOvertimePerTask($tasks[2]['id']), $msg);
     }
+
+    public function testTimesPerLevel()
+    {
+        $config = [
+            'levels_config' => [
+                'level_1' => 'col_a',
+                'level_2' => 'col_b',
+                'level_3' => 'col_a [swim_a]',
+                'level_4' => '[swim_b]',
+            ]
+        ];
+        $ttp = new TasksTimesPreparer($config);
+
+        $tasks = [
+            TestTask::create(time_estimated: 10.0, column_name: 'col_a', swimlane_name: ''),
+            TestTask::create(time_estimated: 2.0, column_name: 'col_a', swimlane_name: 'swim_a'),
+            TestTask::create(time_estimated: 5.0, column_name: 'col_b', swimlane_name: ''),
+            TestTask::create(time_estimated: 4.0, column_name: 'col_b', swimlane_name: 'swim_b'),
+            TestTask::create(time_estimated: 3.0, column_name: 'col_c', swimlane_name: 'swim_b'),
+        ];
+
+        $ttp->initTasksAndTimes($tasks);
+        $msg = 'TasksTimesPreparer times per level went wrong.';
+        $this->assertSame(12.0, $ttp->getEstimatedPerLevel('level_1'), $msg);
+        $this->assertSame(9.0, $ttp->getEstimatedPerLevel('level_2'), $msg);
+        $this->assertSame(2.0, $ttp->getEstimatedPerLevel('level_3'), $msg);
+        $this->assertSame(7.0, $ttp->getEstimatedPerLevel('level_4'), $msg);
+    }
 }
