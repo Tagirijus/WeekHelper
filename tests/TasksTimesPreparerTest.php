@@ -331,6 +331,7 @@ final class TasksTimesPreparerTest extends TestCase
                 'level_2' => 'col_b',
                 'level_3' => 'col_a [swim_a]',
                 'level_4' => '[swim_b]',
+                'level_5' => '',
             ]
         ];
         $ttp = new TasksTimesPreparer($config);
@@ -349,5 +350,6 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(9.0, $ttp->getEstimatedPerLevel('level_2'), $msg);
         $this->assertSame(2.0, $ttp->getEstimatedPerLevel('level_3'), $msg);
         $this->assertSame(7.0, $ttp->getEstimatedPerLevel('level_4'), $msg);
+        $this->assertSame(0.0, $ttp->getEstimatedPerLevel('level_5'), $msg);
     }
 }

@@ -75,15 +75,30 @@ class TimesDataPerEntity
         if (array_key_exists($entity, $this->entities)) {
             return $this->entities[$entity]->getEstimated($readable);
         } else {
-            $out = 0.0;
-            foreach ($this->entities as $entity) {
-                $out += $entity->getEstimated();
-            }
             if ($readable) {
-                return TimesData::floatToHHMM($out);
+                return TimesData::floatToHHMM(0.0);
             } else {
-                return $out;
+                return 0.0;
             }
+        }
+    }
+
+    /**
+     * Get the the estimated time for all entities.
+     *
+     * @param boolean $readable
+     * @return float
+     */
+    public function getEstimatedAll($readable = false)
+    {
+        $out = 0.0;
+        foreach ($this->entities as $entity) {
+            $out += $entity->getEstimated();
+        }
+        if ($readable) {
+            return TimesData::floatToHHMM($out);
+        } else {
+            return $out;
         }
     }
 
@@ -101,15 +116,30 @@ class TimesDataPerEntity
         if (array_key_exists($entity, $this->entities)) {
             return $this->entities[$entity]->getOvertime($readable);
         } else {
-            $out = 0.0;
-            foreach ($this->entities as $entity) {
-                $out += $entity->getOvertime();
-            }
             if ($readable) {
-                return TimesData::floatToHHMM($out);
+                return TimesData::floatToHHMM(0.0);
             } else {
-                return $out;
+                return 0.0;
             }
+        }
+    }
+
+    /**
+     * Get the the overtime time for all entities.
+     *
+     * @param boolean $readable
+     * @return float
+     */
+    public function getOvertimeAll($readable = false)
+    {
+        $out = 0.0;
+        foreach ($this->entities as $entity) {
+            $out += $entity->getOvertime();
+        }
+        if ($readable) {
+            return TimesData::floatToHHMM($out);
+        } else {
+            return $out;
         }
     }
 
@@ -159,15 +189,30 @@ class TimesDataPerEntity
         if (array_key_exists($entity, $this->entities)) {
             return $this->entities[$entity]->getRemaining($readable);
         } else {
-            $out = 0.0;
-            foreach ($this->entities as $entity) {
-                $out += $entity->getRemaining();
-            }
             if ($readable) {
-                return TimesData::floatToHHMM($out);
+                return TimesData::floatToHHMM(0.0);
             } else {
-                return $out;
+                return 0.0;
             }
+        }
+    }
+
+    /**
+     * Get the the remaining time for all entities.
+     *
+     * @param boolean $readable
+     * @return float
+     */
+    public function getRemainingAll($readable = false)
+    {
+        $out = 0.0;
+        foreach ($this->entities as $entity) {
+            $out += $entity->getRemaining();
+        }
+        if ($readable) {
+            return TimesData::floatToHHMM($out);
+        } else {
+            return $out;
         }
     }
 
@@ -185,15 +230,30 @@ class TimesDataPerEntity
         if (array_key_exists($entity, $this->entities)) {
             return $this->entities[$entity]->getSpent($readable);
         } else {
-            $out = 0.0;
-            foreach ($this->entities as $entity) {
-                $out += $entity->getSpent();
-            }
             if ($readable) {
-                return TimesData::floatToHHMM($out);
+                return TimesData::floatToHHMM(0.0);
             } else {
-                return $out;
+                return 0.0;
             }
+        }
+    }
+
+    /**
+     * Get the the spent time for all entities.
+     *
+     * @param boolean $readable
+     * @return float
+     */
+    public function getSpentAll($readable = false)
+    {
+        $out = 0.0;
+        foreach ($this->entities as $entity) {
+            $out += $entity->getSpent();
+        }
+        if ($readable) {
+            return TimesData::floatToHHMM($out);
+        } else {
+            return $out;
         }
     }
 

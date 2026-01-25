@@ -61,10 +61,16 @@ final class TimesDataPerEntityTest extends TestCase
         $this->assertSame(0.5, $tdpe->getOvertime(2), $msg);
 
         // all - float
-        $this->assertSame(18.0, $tdpe->getEstimated(), $msg);
-        $this->assertSame(11.5, $tdpe->getSpent(), $msg);
-        $this->assertSame(7.0, $tdpe->getRemaining(), $msg);
-        $this->assertSame(0.5, $tdpe->getOvertime(), $msg);
+        $this->assertSame(18.0, $tdpe->getEstimatedAll(), $msg);
+        $this->assertSame(11.5, $tdpe->getSpentAll(), $msg);
+        $this->assertSame(7.0, $tdpe->getRemainingAll(), $msg);
+        $this->assertSame(0.5, $tdpe->getOvertimeAll(), $msg);
+
+        // should find none - float
+        $this->assertSame(0.0, $tdpe->getEstimated(), $msg);
+        $this->assertSame(0.0, $tdpe->getSpent(), $msg);
+        $this->assertSame(0.0, $tdpe->getRemaining(), $msg);
+        $this->assertSame(0.0, $tdpe->getOvertime(), $msg);
 
         // project 1 - readable
         $this->assertSame('10:00', $tdpe->getEstimated(1, true), $msg);
@@ -79,10 +85,16 @@ final class TimesDataPerEntityTest extends TestCase
         $this->assertSame('0:30', $tdpe->getOvertime(2, true), $msg);
 
         // all - readable
-        $this->assertSame('18:00', $tdpe->getEstimated(-1, true), $msg);
-        $this->assertSame('11:30', $tdpe->getSpent(-1, true), $msg);
-        $this->assertSame('7:00', $tdpe->getRemaining(-1, true), $msg);
-        $this->assertSame('0:30', $tdpe->getOvertime(-1, true), $msg);
+        $this->assertSame('18:00', $tdpe->getEstimatedAll(true), $msg);
+        $this->assertSame('11:30', $tdpe->getSpentAll(true), $msg);
+        $this->assertSame('7:00', $tdpe->getRemainingAll(true), $msg);
+        $this->assertSame('0:30', $tdpe->getOvertimeAll(true), $msg);
+
+        // should find none - readable
+        $this->assertSame('0:00', $tdpe->getEstimated(-1, true), $msg);
+        $this->assertSame('0:00', $tdpe->getSpent(-1, true), $msg);
+        $this->assertSame('0:00', $tdpe->getRemaining(-1, true), $msg);
+        $this->assertSame('0:00', $tdpe->getOvertime(-1, true), $msg);
 
         $this->assertTrue(
             $tdpe->hasTimes(),
