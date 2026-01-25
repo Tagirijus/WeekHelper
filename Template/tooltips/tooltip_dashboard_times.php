@@ -87,22 +87,22 @@
             </td>
             <td>
                 <span class="thv-estimated-color">
-                    <?= $times->getEstimatedTotal(true) ?>h
+                    <?= $times->getEstimatedByLevel($level, true) ?>h
                 </span>
             </td>
             <td>
                 <span class="thv-spent-color">
-                    <?= $times->getSpentTotal(true) ?>h
-                    <?php if ($times->getOvertimeTotal() != 0.0): ?>
+                    <?= $times->getSpentByLevel($level, true) ?>h
+                    <?php if ($times->getOvertimeByLevel($level, ) != 0.0): ?>
                         <i class="thv-font-weak">
-                            (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentTotal(), $times->getOvertimeTotal()); ?>)
+                            (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByLevel($level, ), $times->getOvertimeByLevel($level, )); ?>)
                         </i>
                     <?php endif ?>
                 </span>
             </td>
             <td>
                 <span class="thv-remaining-color">
-                    <?= $times->getRemainingTotal(true) ?>h
+                    <?= $times->getRemainingByLevel($level, true) ?>h
                 </span>
             </td>
         </tr>
