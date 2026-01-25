@@ -60,12 +60,7 @@ class TasksTimesPreparer
      *
      * @var array
      **/
-    var $tasks_per_level = [
-        'level_1' => [],
-        'level_2' => [],
-        'level_3' => [],
-        'level_4' => [],
-    ];
+    var $tasks_per_level = [];
 
     /**
      * Simply all times as a TimesData instance.
@@ -143,6 +138,9 @@ class TasksTimesPreparer
     public function addTaskToLevel(&$task)
     {
         foreach (($task['levels'] ?? []) as $level) {
+            if (!array_key_exists($level, $this->tasks_per_level)) {
+                $this->tasks_per_level[$level] = [];
+            }
             $this->tasks_per_level[$level][$task['id']] = &$task;
         }
     }
@@ -180,12 +178,7 @@ class TasksTimesPreparer
     protected function emptyInternalValues()
     {
         $this->tasks = [];
-        $this->tasks_per_level = [
-            'level_1' => [],
-            'level_2' => [],
-            'level_3' => [],
-            'level_4' => [],
-        ];
+        $this->tasks_per_level = [];
         $this->times->resetTimes();
         $this->times_per_level->resetTimes();
         $this->times_per_project->resetTimes();
