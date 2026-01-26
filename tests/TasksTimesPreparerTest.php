@@ -391,6 +391,7 @@ final class TasksTimesPreparerTest extends TestCase
             TestTask::create(project_id: 2, time_estimated: 5.0, column_name: 'col_b'),
             TestTask::create(project_id: 2, time_estimated: 4.0, column_name: 'col_b'),
             TestTask::create(project_id: 2, time_estimated: 3.0, column_name: 'col_a'),
+            TestTask::create(project_id: 3, time_estimated: 9.0, column_name: 'col_a'),
         ];
 
         $ttp->initTasksAndTimes($tasks);
@@ -402,5 +403,11 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(3.0, $ttp->getEstimatedByProjectLevel(1, 'all'), $msg);
         $this->assertSame(12.0, $ttp->getEstimatedByProjectLevel(2, 'all'), $msg);
         $this->assertSame(12.0, $ttp->getRemainingByProjectLevel(2, 'all'), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectLevel(1, 'level_1'), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectLevel(1, 'level_3'), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectLevel(2, 'level_1'), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectLevel(2, 'level_3'), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectLevel(3, 'level_1'), $msg);
+        $this->assertFalse($ttp->hasTimesByProjectLevel(3, 'level_3'), $msg);
     }
 }

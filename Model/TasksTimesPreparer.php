@@ -289,6 +289,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get has_time by project + level.
+     *
+     * @param  integer $project_id
+     * @param  string $level
+     * @return boolean
+     */
+    public function hasTimesByProjectLevel($project_id = -1, $level = '')
+    {
+        return $this->times_by_project_level->hasTimes($project_id . $level);
+    }
+
+    /**
      * Init the config with the given array.
      *
      * @param  array  $config
