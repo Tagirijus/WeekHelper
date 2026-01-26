@@ -35,7 +35,7 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
 
     <?php if (! empty($times->getEstimatedByTask($task['id'])) || ! empty($times->getSpentByTask($task['id']))): ?>
         <span class="task-time-estimated" title="<?= t('Time spent and estimated') ?>">
-            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($times->getRemainingByTask($task['id'])) ?>h
+            <span class="ui-helper-hidden-accessible"><?= t('Time spent and estimated') ?> </span><?= $this->text->e($times->getRemainingByTask($task['id'], true)) ?>h
                     - <?= $times->getPercentByTask($task['id'], true) ?>
         </span>
     <?php endif ?>
