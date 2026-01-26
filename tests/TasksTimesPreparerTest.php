@@ -370,5 +370,6 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(2.0, $ttp->getEstimatedByLevel('level_3'), $msg);
         $this->assertSame(7.0, $ttp->getEstimatedByLevel('level_4'), $msg);
         $this->assertSame(0.0, $ttp->getEstimatedByLevel('level_5'), $msg);
+        $this->assertSame(24.0, $ttp->getEstimatedByLevel('all'), $msg);
     }
 }

@@ -216,10 +216,10 @@ class TasksTimesPreparer
             $this->times_by_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, $level
             );
-            $this->times_by_level->addTimes(
-                $estimated, $spent, $remaining, $overtime, 'all'
-            );
         }
+        $this->times_by_level->addTimes(
+            $estimated, $spent, $remaining, $overtime, 'all'
+        );
     }
 
     /**
