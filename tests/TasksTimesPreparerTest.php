@@ -410,4 +410,36 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertTrue($ttp->hasTimesByProjectLevel(3, 'level_1'), $msg);
         $this->assertFalse($ttp->hasTimesByProjectLevel(3, 'level_3'), $msg);
     }
+
+    public function testTimesPerProjectHome()
+    {
+        $config = [
+            'levels_config' => [
+                'level_1' => 'col_a',
+                'level_2' => '',
+                'level_3' => 'col_b',
+                'level_4' => '',
+            ],
+            'progress_home_project_level' => [
+                'level_1'
+            ]
+        ];
+        $ttp = new TasksTimesPreparer($config);
+
+        $tasks = [
+            TestTask::create(project_id: 1, time_estimated: 1.0, column_name: 'col_a'),
+            TestTask::create(project_id: 1, time_estimated: 2.0, column_name: 'col_a'),
+            TestTask::create(project_id: 1, time_estimated: 3.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 4.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 5.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 6.0, column_name: 'col_b'),
+        ];
+
+        $ttp->initTasksAndTimes($tasks);
+        $msg = 'TasksTimesPreparer times by project for home went wrong.';
+        $this->assertSame(3.0, $ttp->getEstimatedByProjectHome(1), $msg);
+        $this->assertSame(0.0, $ttp->getEstimatedByProjectHome(2), $msg);
+        $this->assertTrue($ttp->hasTimesByProjectHome(1), $msg);
+        $this->assertFalse($ttp->hasTimesByProjectHome(2), $msg);
+    }
 }

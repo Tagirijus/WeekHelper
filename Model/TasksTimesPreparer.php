@@ -22,6 +22,7 @@ class TasksTimesPreparer
     var $config = [
         'levels_config' => [],
         'non_time_mode_minutes' => 0,
+        'progress_home_project_level' => ['all'],
         // project_sorting can be:
         //    'id', 'remaining_hours_asc', 'remaining_hours_desc'
         'project_sorting' => 'id',
@@ -105,6 +106,13 @@ class TasksTimesPreparer
     var $times_by_project_level;
 
     /**
+     * Times by project on dashboard / home.
+     *
+     * @var TimesDataByEntity
+     **/
+    var $times_by_project_home;
+
+    /**
      * Times for all swimlanes individually.
      *
      * @var TimesDataByEntity
@@ -153,6 +161,7 @@ class TasksTimesPreparer
         $this->times_by_level = new TimesDataByEntity();
         $this->times_by_project = new TimesDataByEntity();
         $this->times_by_project_level = new TimesDataByEntity();
+        $this->times_by_project_home = new TimesDataByEntity();
         $this->times_by_swimlane = new TimesDataByEntity();
         $this->times_by_swimlane_column = new TimesDataByEntity();
         $this->times_by_task = new TimesDataByEntity();
@@ -201,9 +210,10 @@ class TasksTimesPreparer
     }
 
     /**
-     * Add the given times to the internal times_by_level array,
-     * and also to times_by_project_level, depending on the tasks
-     * level. This info at this point should already be parsed be
+     * Add the given times to the internal values, which do
+     * depend on the level.
+     *
+     * The level info at this point should already be parsed be
      * the TaskDataExtender, thus the key 'levels' should exist.
      *
      * @param float $estimated
@@ -212,7 +222,7 @@ class TasksTimesPreparer
      * @param float $overtime
      * @param array $task
      */
-    public function addTimesToLevel(
+    public function addTimesLevelDepending(
         $estimated,
         $spent,
         $remaining,
@@ -227,6 +237,14 @@ class TasksTimesPreparer
             $this->times_by_project_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, $task['project_id'] . $level
             );
+            if (
+                in_array($level, $this->getConfig('progress_home_project_level'))
+                || in_array('all', $this->getConfig('progress_home_project_level'))
+            ) {
+                $this->times_by_project_home->addTimes(
+                    $estimated, $spent, $remaining, $overtime, $task['project_id']
+                );
+            }
         }
         $this->times_by_level->addTimes(
             $estimated, $spent, $remaining, $overtime, 'all'
@@ -286,6 +304,17 @@ class TasksTimesPreparer
     public function hasTimesByProject($project_id = -1)
     {
         return $this->times_by_project->hasTimes($project_id);
+    }
+
+    /**
+     * Get has_times by project on home.
+     *
+     * @param  integer $project_id
+     * @return boolean
+     */
+    public function hasTimesByProjectHome($project_id = -1)
+    {
+        return $this->times_by_project_home->hasTimes($project_id);
     }
 
     /**
@@ -372,7 +401,7 @@ class TasksTimesPreparer
             $this->times_by_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
             $this->times_by_swimlane_column->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name'] . $task['column_name']);
             // similar with swimlane
-            $this->addTimesToLevel($estimated, $spent, $remaining, $overtime, $task);
+            $this->addTimesLevelDepending($estimated, $spent, $remaining, $overtime, $task);
             $this->times_by_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
             $this->times_by_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
             $this->times_by_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
@@ -407,7 +436,7 @@ class TasksTimesPreparer
      * Get the internal config for the given key.
      *
      * @param  string $key
-     * @return string|integer|null
+     * @return string|integer|array|null
      */
     protected function getConfig($key)
     {
@@ -460,6 +489,18 @@ class TasksTimesPreparer
     public function getEstimatedByProject($project_id = -1, $readable = false)
     {
         return $this->times_by_project->getEstimated($project_id, $readable);
+    }
+
+    /**
+     * Get estimated by project on home.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedByProjectHome($project_id = -1, $readable = false)
+    {
+        return $this->times_by_project_home->getEstimated($project_id, $readable);
     }
 
     /**
@@ -571,6 +612,18 @@ class TasksTimesPreparer
     public function getOvertimeByProject($project_id = -1, $readable = false)
     {
         return $this->times_by_project->getOvertime($project_id, $readable);
+    }
+
+    /**
+     * Get overtime by project on home.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimeByProjectHome($project_id = -1, $readable = false)
+    {
+        return $this->times_by_project_home->getOvertime($project_id, $readable);
     }
 
     /**
@@ -734,6 +787,18 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get remaining by project on home.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingByProjectHome($project_id = -1, $readable = false)
+    {
+        return $this->times_by_project_home->getRemaining($project_id, $readable);
+    }
+
+    /**
      * Get remaining by project + level.
      *
      * @param  integer $project_id
@@ -842,6 +907,18 @@ class TasksTimesPreparer
     public function getSpentByProject($project_id = -1, $readable = false)
     {
         return $this->times_by_project->getSpent($project_id, $readable);
+    }
+
+    /**
+     * Get spent by project on home.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentByProjectHome($project_id = -1, $readable = false)
+    {
+        return $this->times_by_project_home->getSpent($project_id, $readable);
     }
 
     /**

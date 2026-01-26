@@ -252,6 +252,10 @@ class HoursViewHelper extends Base
                 'level_4' => $this->configModel->get('hoursview_level_4_columns', '')
             ],
             'non_time_mode_minutes' => $this->configModel->get('hoursview_non_time_mode_minutes', 0),
+            'progress_home_project_level' => array_map(
+                'trim',
+                explode(',', $this->configModel->get('hoursview_progress_home_project_level', 'all'))
+            ),
             'project_sorting' => $this->configModel->get('hoursview_tooltip_sorting', 'id'),
             'sorting_logic' => $this->configModel->get('weekhelper_sorting_logic', ''),
             'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
