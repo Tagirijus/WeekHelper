@@ -703,6 +703,19 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get percent of times by project on home.
+     *
+     * @param  integer $project_id
+     * @param  boolean $readable
+     * @param  string  $suffix
+     * @return float|string
+     */
+    public function getPercentByProjectHome($project_id = -1, $readable = false, $suffix = '%')
+    {
+        return $this->times_by_project_home->getPercent($project_id, $readable, $suffix);
+    }
+
+    /**
      * Get percent of times by task.
      *
      * @param  integer $task_id
