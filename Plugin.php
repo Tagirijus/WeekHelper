@@ -68,7 +68,9 @@ class Plugin extends Base
             'template:project:header:before', 'WeekHelper:board/project_head_hours'
         );
         $this->template->hook->attach(
-            'template:board:column:header', 'WeekHelper:board/column_hours'
+            'template:board:column:header', 'WeekHelper:board/column_hours', [
+                'caller_controller' => $this->request->getStringParam('controller')
+            ]
         );
         $this->template->hook->attach(
             'template:dashboard:show:after-filter-box', 'WeekHelper:dashboard/project_times_summary_all'
