@@ -40,7 +40,7 @@
 
             <?php $project = $this->hoursViewHelper->getProject($project_id); ?>
 
-            <?php if (!$times->hasTimesByProject($project_id)): continue ?>
+            <?php if (!$times->hasTimesByProjectLevel($project_id, $level)): continue ?>
             <?php endif ?>
 
             <tr>
@@ -49,34 +49,34 @@
                 </td>
                 <td>
                     <span class="thv-estimated-color">
-                        <?= $times->getEstimatedByProject($project_id, true) ?>h
+                        <?= $times->getEstimatedByProjectLevel($project_id, $level, true) ?>h
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($times->getEstimatedByProject($project_id), $times->getEstimatedTotal()) ?>
+                        <?= percentFromTotal($times->getEstimatedByProjectLevel($project_id, $level), $times->getEstimatedByLevel($level)) ?>
                     </span>
                 </td>
                 <td>
                     <span class="thv-spent-color">
-                        <?= $times->getSpentByProject($project_id, true) ?>h
-                        <?php if ($times->getOvertimeByProject($project_id) != 0.0): ?>
+                        <?= $times->getSpentByProjectLevel($project_id, $level, true) ?>h
+                        <?php if ($times->getOvertimeByProjectLevel($project_id, $level) != 0.0): ?>
                             <i class="thv-font-weak">
-                                (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByProject($project_id), $times->getOvertimeByProject($project_id)); ?>)
+                                (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByProjectLevel($project_id, $level), $times->getOvertimeByProjectLevel($project_id, $level)); ?>)
                             </i>
                         <?php endif ?>
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($times->getSpentByProject($project_id), $times->getSpentTotal()) ?>
+                        <?= percentFromTotal($times->getSpentByProjectLevel($project_id, $level), $times->getSpentByLevel($level)) ?>
                     </span>
                 </td>
                 <td>
                     <span class="thv-remaining-color">
-                        <?= $times->getRemainingByProject($project_id, true) ?>h
+                        <?= $times->getRemainingByProjectLevel($project_id, $level, true) ?>h
                     </span>
                     <br>
                     <span class="thv-font-small">
-                        <?= percentFromTotal($times->getRemainingByProject($project_id), $times->getRemainingTotal()) ?>
+                        <?= percentFromTotal($times->getRemainingByProjectLevel($project_id, $level), $times->getRemainingByLevel($level)) ?>
                     </span>
                 </td>
             </tr>
@@ -93,9 +93,9 @@
             <td>
                 <span class="thv-spent-color">
                     <?= $times->getSpentByLevel($level, true) ?>h
-                    <?php if ($times->getOvertimeByLevel($level, ) != 0.0): ?>
+                    <?php if ($times->getOvertimeByLevel($level) != 0.0): ?>
                         <i class="thv-font-weak">
-                            (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByLevel($level, ), $times->getOvertimeByLevel($level, )); ?>)
+                            (<?= $this->hoursViewHelper->getOvertimeInfo($times->getSpentByLevel($level), $times->getOvertimeByLevel($level)); ?>)
                         </i>
                     <?php endif ?>
                 </span>
