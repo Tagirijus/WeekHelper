@@ -372,4 +372,35 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(0.0, $ttp->getEstimatedByLevel('level_5'), $msg);
         $this->assertSame(24.0, $ttp->getEstimatedByLevel('all'), $msg);
     }
+
+    public function testTimesPerProjectLevel()
+    {
+        $config = [
+            'levels_config' => [
+                'level_1' => 'col_a',
+                'level_2' => '',
+                'level_3' => 'col_b',
+                'level_4' => '',
+            ]
+        ];
+        $ttp = new TasksTimesPreparer($config);
+
+        $tasks = [
+            TestTask::create(project_id: 1, time_estimated: 1.0, column_name: 'col_a'),
+            TestTask::create(project_id: 1, time_estimated: 2.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 5.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 4.0, column_name: 'col_b'),
+            TestTask::create(project_id: 2, time_estimated: 3.0, column_name: 'col_a'),
+        ];
+
+        $ttp->initTasksAndTimes($tasks);
+        $msg = 'TasksTimesPreparer times by project + level went wrong.';
+        $this->assertSame(1.0, $ttp->getEstimatedByProjectLevel(1, 'level_1'), $msg);
+        $this->assertSame(2.0, $ttp->getEstimatedByProjectLevel(1, 'level_3'), $msg);
+        $this->assertSame(3.0, $ttp->getEstimatedByProjectLevel(2, 'level_1'), $msg);
+        $this->assertSame(9.0, $ttp->getEstimatedByProjectLevel(2, 'level_3'), $msg);
+        $this->assertSame(3.0, $ttp->getEstimatedByProjectLevel(1, 'all'), $msg);
+        $this->assertSame(12.0, $ttp->getEstimatedByProjectLevel(2, 'all'), $msg);
+        $this->assertSame(12.0, $ttp->getRemainingByProjectLevel(2, 'all'), $msg);
+    }
 }

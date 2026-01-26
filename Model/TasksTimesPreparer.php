@@ -98,6 +98,13 @@ class TasksTimesPreparer
     var $times_by_project;
 
     /**
+     * Times by project+level.
+     *
+     * @var TimesDataByEntity
+     **/
+    var $times_by_project_level;
+
+    /**
      * Times for all swimlanes individually.
      *
      * @var TimesDataByEntity
@@ -145,6 +152,7 @@ class TasksTimesPreparer
         $this->times_by_column = new TimesDataByEntity();
         $this->times_by_level = new TimesDataByEntity();
         $this->times_by_project = new TimesDataByEntity();
+        $this->times_by_project_level = new TimesDataByEntity();
         $this->times_by_swimlane = new TimesDataByEntity();
         $this->times_by_swimlane_column = new TimesDataByEntity();
         $this->times_by_task = new TimesDataByEntity();
@@ -194,9 +202,9 @@ class TasksTimesPreparer
 
     /**
      * Add the given times to the internal times_by_level array,
-     * depending on the tasks level. This info at this point should
-     * already be parsed be the TaskDataExtender, thus the key
-     * 'levels' should exist.
+     * and also to times_by_project_level, depending on the tasks
+     * level. This info at this point should already be parsed be
+     * the TaskDataExtender, thus the key 'levels' should exist.
      *
      * @param float $estimated
      * @param float $spent
@@ -216,9 +224,15 @@ class TasksTimesPreparer
             $this->times_by_level->addTimes(
                 $estimated, $spent, $remaining, $overtime, $level
             );
+            $this->times_by_project_level->addTimes(
+                $estimated, $spent, $remaining, $overtime, $task['project_id'] . $level
+            );
         }
         $this->times_by_level->addTimes(
             $estimated, $spent, $remaining, $overtime, 'all'
+        );
+        $this->times_by_project_level->addTimes(
+            $estimated, $spent, $remaining, $overtime, $task['project_id'] . 'all'
         );
     }
 
@@ -437,6 +451,19 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get estimated by project + level.
+     *
+     * @param  integer $project_id
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getEstimatedByProjectLevel($project_id = -1, $level = '', $readable = false)
+    {
+        return $this->times_by_project_level->getEstimated($project_id . $level, $readable);
+    }
+
+    /**
      * Get estimated by swimlane.
      *
      * @param  string $swimlane
@@ -532,6 +559,19 @@ class TasksTimesPreparer
     public function getOvertimeByProject($project_id = -1, $readable = false)
     {
         return $this->times_by_project->getOvertime($project_id, $readable);
+    }
+
+    /**
+     * Get overtime by project + level.
+     *
+     * @param  integer $project_id
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getOvertimeByProjectLevel($project_id = -1, $level = '', $readable = false)
+    {
+        return $this->times_by_project_level->getOvertime($project_id . $level, $readable);
     }
 
     /**
@@ -682,6 +722,19 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get remaining by project + level.
+     *
+     * @param  integer $project_id
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getRemainingByProjectLevel($project_id = -1, $level = '', $readable = false)
+    {
+        return $this->times_by_project_level->getRemaining($project_id . $level, $readable);
+    }
+
+    /**
      * Get remaining by swimlane.
      *
      * @param  string $swimlane
@@ -777,6 +830,19 @@ class TasksTimesPreparer
     public function getSpentByProject($project_id = -1, $readable = false)
     {
         return $this->times_by_project->getSpent($project_id, $readable);
+    }
+
+    /**
+     * Get spent by project + level.
+     *
+     * @param  integer $project_id
+     * @param  string $level
+     * @param  boolean $readable
+     * @return float|string
+     */
+    public function getSpentByProjectLevel($project_id = -1, $level = '', $readable = false)
+    {
+        return $this->times_by_project_level->getSpent($project_id . $level, $readable);
     }
 
     /**
