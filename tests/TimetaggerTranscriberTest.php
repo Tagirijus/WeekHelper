@@ -97,40 +97,19 @@ final class TimetaggerTranscriberTest extends TestCase
 
         // now overwrite these tasks spent times
         $ts = new TimetaggerTranscriber($tf);
-        $ts->overwriteSpentTimesForTasks($tasks);
+        foreach ($tasks as &$task) {
+            $ts->overwriteSpentTimeForTask($task);
+        }
+        $ts->overwriteSpentTimesForRemainingTasks();
 
-
+        $msg = 'TimetaggerTranscriber incorrectly modified the spent times for the tasks.';
         // final check
-        $this->assertSame(
-            0.5,
-            $tasks[0]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
-        $this->assertSame(
-            2.0,
-            $tasks[1]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
-        $this->assertSame(
-            9.9,
-            $tasks[2]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
-        $this->assertSame(
-            2.5,
-            $tasks[3]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
-        $this->assertSame(
-            2.75,
-            $tasks[4]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
-        $this->assertSame(
-            0.25,
-            $tasks[5]['time_spent'],
-            'TimetaggerTranscriber incorrectly modified the spent times for the tasks.'
-        );
+        $this->assertSame(0.5, $tasks[0]['time_spent'], $msg);
+        $this->assertSame(2.0, $tasks[1]['time_spent'], $msg);
+        $this->assertSame(9.9, $tasks[2]['time_spent'], $msg);
+        $this->assertSame(2.5, $tasks[3]['time_spent'], $msg);
+        $this->assertSame(2.75, $tasks[4]['time_spent'], $msg);
+        $this->assertSame(0.25, $tasks[5]['time_spent'], $msg);
     }
 
     public function testTagsMatch()
@@ -167,6 +146,26 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertFalse(
             TimetaggerTranscriber::tagsMatch($task_tags, $tags_a),
             'TimetaggerTranscriber::tagsMatch() not working as intended.'
+        );
+    }
+
+    public function testTimetaggerTagSorting()
+    {
+        $msg = 'TimetaggerTranscriber::getTimetaggerTagsSorted() not working as intended.';
+        $this->assertSame(
+            'a,b,c',
+            TimetaggerTranscriber::getTimetaggerTagsSorted('b,c,a'),
+            $msg
+        );
+        $this->assertSame(
+            '',
+            TimetaggerTranscriber::getTimetaggerTagsSorted(''),
+            $msg
+        );
+        $this->assertSame(
+            '0,2,a,b,c',
+            TimetaggerTranscriber::getTimetaggerTagsSorted('b,0,c,a,2'),
+            $msg
         );
     }
 }
