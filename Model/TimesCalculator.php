@@ -134,23 +134,14 @@ class TimesCalculator
      */
     protected static function calculateRemaining($task_or_subtask)
     {
-        $done = (
-            // it's a task
-            isset($task_or_subtask['is_active']) && $task_or_subtask['is_active'] == 0
-        ) || (
-            // it's a subtask
-            isset($task_or_subtask['status']) && $task_or_subtask['status'] == 2
-        );
-
-        // if the subtask is done or the tasks is closed,
-        // yet the spent time is below the estimated time,
-        // only use the lower spent time as the estimated time then
-        if ($done && $task_or_subtask['time_spent'] < $task_or_subtask['time_estimated']) {
-            $tmp_estimated = $task_or_subtask['time_spent'];
+        if (
+            self::isDone($task_or_subtask)
+            || $task_or_subtask['time_spent'] > $task_or_subtask['time_estimated']
+        ) {
+            return 0.0;
         } else {
-            $tmp_estimated = $task_or_subtask['time_estimated'];
+            return $task_or_subtask['time_estimated'] - $task_or_subtask['time_spent'];
         }
-        return $tmp_estimated - $task_or_subtask['time_spent'];
     }
 
     /**
