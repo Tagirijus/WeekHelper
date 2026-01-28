@@ -134,24 +134,23 @@ class TimesCalculator
      */
     protected static function calculateRemaining($task_or_subtask)
     {
-        // OLD
-        // $done = (
-        //     // it's a task
-        //     isset($task_or_subtask['is_active']) && $task_or_subtask['is_active'] == 0
-        // ) || (
-        //     // it's a subtask
-        //     isset($task_or_subtask['status']) && $task_or_subtask['status'] == 2
-        // );
+        $done = (
+            // it's a task
+            isset($task_or_subtask['is_active']) && $task_or_subtask['is_active'] == 0
+        ) || (
+            // it's a subtask
+            isset($task_or_subtask['status']) && $task_or_subtask['status'] == 2
+        );
 
-        // // if the subtask is done or the tasks is closed,
-        // // yet the spent time is below the estimated time,
-        // // only use the lower spent time as the estimated time then
-        // if ($done && $task_or_subtask['time_spent'] < $task_or_subtask['time_estimated']) {
-        //     $tmp_estimated = $task_or_subtask['time_spent'];
-        // } else {
-        //     $tmp_estimated = $task_or_subtask['time_estimated'];
-        // }
-        // return $tmp_estimated - $task_or_subtask['time_spent'];
+        // if the subtask is done or the tasks is closed,
+        // yet the spent time is below the estimated time,
+        // only use the lower spent time as the estimated time then
+        if ($done && $task_or_subtask['time_spent'] < $task_or_subtask['time_estimated']) {
+            $tmp_estimated = $task_or_subtask['time_spent'];
+        } else {
+            $tmp_estimated = $task_or_subtask['time_estimated'];
+        }
+        return $tmp_estimated - $task_or_subtask['time_spent'];
     }
 
     /**
