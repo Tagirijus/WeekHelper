@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Kanboard\Plugin\WeekHelper\tests;
 
 require_once __DIR__ . '/../Helper/TimeHelper.php';
+require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimetaggerEvent.php';
 require_once __DIR__ . '/../Model/TimetaggerFetcher.php';
 require_once __DIR__ . '/../Model/TimetaggerTranscriber.php';
@@ -47,47 +48,59 @@ final class TimetaggerTranscriberTest extends TestCase
         $tasks = [
             [
                 'id' => 1,
-                'time_spent' => 0.0,  # should become 0.5
                 'time_estimated' => 0.5,
+                'time_spent' => 0.0,      # should become 0.5
+                'time_remaining' => 0.5,  # should become 0.0
+                'time_overtime' => -0.5,  # should become 0.0
                 'nb_subtasks' => 6,
                 'nb_completed_subtasks' => 6,
                 'timetagger_tags' => 'a,b,c'
             ],
             [
                 'id' => 2,
-                'time_spent' => 0.0,  # should become 2.0
                 'time_estimated' => 1.0,
+                'time_spent' => 0.0,      # should become 2.0
+                'time_remaining' => 1.0,  # should become 0.0
+                'time_overtime' => 0.0,   # should become 1.0
                 'nb_subtasks' => 2,
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'a,b,c'
             ],
             [
                 'id' => 3,
-                'time_spent' => 9.9,  # should stay 9.9
                 'time_estimated' => 10,
+                'time_spent' => 9.9,      # should stay 9.9
+                'time_remaining' => 0.1,  # should stay 0.1
+                'time_overtime' => 0.0,   # should stay 0.0
                 'nb_subtasks' => 0,
                 'nb_completed_subtasks' => 0,
             ],
             [
                 'id' => 4,
-                'time_spent' => 1.0,  # should become 2.5
                 'time_estimated' => 3.0,
+                'time_spent' => 1.0,      # should become 2.5
+                'time_remaining' => 2.0,  # should become 0.5
+                'time_overtime' => 0.0,   # should stay 0.0
                 'nb_subtasks' => 0,
                 'nb_completed_subtasks' => 0,
                 'timetagger_tags' => 'e'
             ],
             [
                 'id' => 5,
-                'time_spent' => 1.0,  # should become 2.75
                 'time_estimated' => 0.5,
+                'time_spent' => 1.0,      # should become 2.75
+                'time_remaining' => 0.0,  # should stay 0.0
+                'time_overtime' => 0.5,   # should become 2.25
                 'nb_subtasks' => 1,
                 'nb_completed_subtasks' => 0,
                 'timetagger_tags' => 'g'
             ],
             [
                 'id' => 6,
-                'time_spent' => 0.0,  # should become 0.25
                 'time_estimated' => 0.25,
+                'time_spent' => 0.0,      # should become 0.25
+                'time_remaining' => 0.25, # should become 0.0
+                'time_overtime' => 0.0,   # should stay 0.0
                 'nb_subtasks' => 1,
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'g'
@@ -105,11 +118,28 @@ final class TimetaggerTranscriberTest extends TestCase
         $msg = 'TimetaggerTranscriber incorrectly modified the spent times for the tasks.';
         // final check
         $this->assertSame(0.5, $tasks[0]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_overtime'], $msg);
+
         $this->assertSame(2.0, $tasks[1]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[1]['time_remaining'], $msg);
+        $this->assertSame(1.0, $tasks[1]['time_overtime'], $msg);
+
         $this->assertSame(9.9, $tasks[2]['time_spent'], $msg);
+        $this->assertSame(0.1, $tasks[2]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[2]['time_overtime'], $msg);
+
         $this->assertSame(2.5, $tasks[3]['time_spent'], $msg);
+        $this->assertSame(0.5, $tasks[3]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[3]['time_overtime'], $msg);
+
         $this->assertSame(2.75, $tasks[4]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[4]['time_remaining'], $msg);
+        $this->assertSame(2.25, $tasks[4]['time_overtime'], $msg);
+
         $this->assertSame(0.25, $tasks[5]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[5]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[5]['time_overtime'], $msg);
     }
 
     public function testTagsMatch()

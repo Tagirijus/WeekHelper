@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Model\TimeCalculator;
 
 
 /**
@@ -145,6 +146,8 @@ class TimetaggerTranscriber
                     $task['_timetagger_transcribing'] = true;
                     $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
                     $task['time_spent'] = 0;
+                    $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
+                    $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
                 }
             } else {
                 continue;
@@ -165,6 +168,14 @@ class TimetaggerTranscriber
             $task['time_spent'] += $alloc;
             $available -= $alloc;
             $event->distribute($alloc);
+
+            // also adjust the other times now
+            $task['time_remaining'] = TimesCalculator::calculateRemaining($task);
+            $task['time_overtime'] = TimesCalculator::calculateOvertime(
+                $task['time_estimated'],
+                $task['time_spent'],
+                TimesCalculator::isDone($task)
+            );
         }
 
         // convert task times back to hours
@@ -172,6 +183,8 @@ class TimetaggerTranscriber
             unset($task['_timetagger_transcribing']);
             $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
             $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
+            $task['time_remaining'] = TimeHelper::secondsToHours($task['time_remaining']);
+            $task['time_overtime'] = TimeHelper::secondsToHours($task['time_overtime']);
         }
     }
 
