@@ -10,6 +10,7 @@ use Kanboard\Model\ProjectModel;
 use Kanboard\Core\Paginator;
 use Kanboard\Filter\TaskProjectsFilter;
 use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
+use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
 
 
 class HoursViewHelper extends Base
@@ -420,9 +421,15 @@ class HoursViewHelper extends Base
             return 'progress-color-50';
         } elseif ($percent >= 75 && $percent < 100) {
             return 'progress-color-75';
-        } elseif ($percent >= 100 && $task['open_subtasks'] == 0) {
+        } elseif (
+            $percent >= 100
+            && TimesCalculator::isDone($task)
+        ) {
             return 'progress-color-100';
-        } elseif ($percent >= 100 && $task['open_subtasks'] != 0) {
+        } elseif (
+            $percent >= 100
+            && !TimesCalculator::isDone($task)
+        ) {
             return 'progress-color-100-undone';
         } else {
             return 'progress-color';
