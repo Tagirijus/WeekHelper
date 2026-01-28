@@ -116,7 +116,7 @@ class TimesCalculator
      * @param  boolean $done
      * @return float
      */
-    protected static function calculateOvertime($estimated, $spent, $done)
+    public static function calculateOvertime($estimated, $spent, $done)
     {
         $overtime = $spent - $estimated;
         if ($overtime < 0.0 && !$done) {
@@ -132,7 +132,7 @@ class TimesCalculator
      * @param  array $task_or_subtask
      * @return float
      */
-    protected static function calculateRemaining($task_or_subtask)
+    public static function calculateRemaining($task_or_subtask)
     {
         if (
             self::isDone($task_or_subtask)
