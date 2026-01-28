@@ -30,7 +30,7 @@ class TasksTimesPreparer
         'timetagger_url' => '',
         'timetagger_authtoken' => '',
         'timetagger_cookies' => '',
-        'timetagger_overwrites_levels_spent' => '',
+        'timetagger_overwrites_levels' => '',
         'timetagger_start_fetch' => '',
     ];
 
@@ -278,7 +278,11 @@ class TasksTimesPreparer
     protected function extendTasksData(&$tasks)
     {
         foreach ($tasks as &$task) {
-            TaskDataExtender::extendTask($task, $this->getConfig('levels_config'));
+            TaskDataExtender::extendTask(
+                $task,
+                $this->getConfig('levels_config'),
+                $this->getConfig('timetagger_overwrites_levels')
+            );
         }
         unset($task);
     }
@@ -358,6 +362,9 @@ class TasksTimesPreparer
         $this->emptyInternalValues();
         SortingLogic::sortTasks($tasks, $this->getConfig('sorting_logic'));
 
+        // phase 1:
+        // get times of tasks, update it maybe by timetagger,
+        // add tasks as reference to internal attributes.
         foreach ($tasks as $i => &$task) {
 
             // getting the tasks subtasks
@@ -385,31 +392,41 @@ class TasksTimesPreparer
             // but are maybe used later somewhere.
             $calculator->updateTask($task);
 
+            // maybe overwrite the spent time, though, by the
+            // TimetaggerTranscriber
+            $this->overwriteTimes($task);
+
             // add the tasks to some internal variables (by reference)
             $this->tasks[$task['id']] = &$tasks[$i];
             $this->addTaskToLevel($tasks[$i]);
 
             // store some project related stuff as well
             $this->addProjectInfo($task);
+        }
+        unset($task);
 
-            // == == == == == == == ==
-            // ADDING TIMES   -  START
-            // == == == == == == == ==
+        // phase 2:
+        // update the remaining tasks with timetagger, if
+        // it's enabled and such tasks exist
+        $this->overwriteTimesFinal();
+
+        // phase 3:
+        // now use the final updated tasks to add them into
+        // internal time attributes
+        foreach ($tasks as $i => $task) {
+            $estimated = $task['time_estimated'];
+            $spent = $task['time_spent'];
+            $remaining = $task['time_remaining'];
+            $overtime = $task['time_overtime'];
 
             $this->times->addTimes($estimated, $spent, $remaining, $overtime);
             $this->times_by_swimlane->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name']);
             $this->times_by_column->addTimes($estimated, $spent, $remaining, $overtime, $task['column_name']);
             $this->times_by_swimlane_column->addTimes($estimated, $spent, $remaining, $overtime, $task['swimlane_name'] . $task['column_name']);
-            // similar with swimlane
             $this->addTimesLevelDepending($estimated, $spent, $remaining, $overtime, $task);
             $this->times_by_project->addTimes($estimated, $spent, $remaining, $overtime, $task['project_id']);
             $this->times_by_task->addTimes($estimated, $spent, $remaining, $overtime, $task['id']);
             $this->times_by_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
-
-            // == == == == == == ==
-            // ADDING TIMES  -  END
-            // == == == == == == ==
-
         }
         unset($task);
 
@@ -430,6 +447,21 @@ class TasksTimesPreparer
             strtotime($this->getConfig('timetagger_start_fetch'))
         );
         $this->timetagger_transcriber = new TimetaggerTranscriber($timetagger_fetcher);
+    }
+
+    /**
+     * Checks whether the internal config has enough values
+     * set in the config to initialize the TimetaggerTranscriber.
+     *
+     * @return boolean
+     */
+    public function isTimetaggerConfigSet()
+    {
+        return (
+            $this->getConfig('timetagger_url') != ''
+            && $this->getConfig('timetagger_authtoken') != ''
+            && $this->getConfig('timetagger_start_fetch') != ''
+        );
     }
 
     /**
@@ -1047,6 +1079,35 @@ class TasksTimesPreparer
             $this->initTimetagger();
         }
         return $this->timetagger_transcriber;
+    }
+
+    /**
+     * Check if TimetaggerTranscriber is available,
+     * then overwrite the tasks spent time with the
+     * logic of TimetaggerTranscriber and return
+     * the new spent time.
+     *
+     * @param  array &$task
+     */
+    public function overwriteTimes(&$task)
+    {
+        if ($this->isTimetaggerConfigSet()) {
+            if ($task['timetagger_can_overwrite']) {
+                $this->getTimetaggerTranscriber()->overwriteTimesForTask($task);
+            }
+        }
+    }
+
+    /**
+     * Check if TimetaggerTranscriber is available
+     * and only then use the second phase for
+     * overwriting tasks spent time.
+     */
+    public function overwriteTimesFinal()
+    {
+        if ($this->isTimetaggerConfigSet()) {
+            $this->getTimetaggerTranscriber()->overwriteTimesForRemainingTasks();
+        }
     }
 
     /**

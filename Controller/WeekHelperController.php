@@ -252,7 +252,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'timetagger_url' => $form['timetagger_url'],
             'timetagger_authtoken' => $form['timetagger_authtoken'],
             'timetagger_cookies' => $form['timetagger_cookies'],
-            'timetagger_overwrites_levels_spent' => $form['timetagger_overwrites_levels_spent'],
+            'timetagger_overwrites_levels' => $form['timetagger_overwrites_levels'],
             'timetagger_start_fetch' => $form['timetagger_start_fetch'],
         ];
 

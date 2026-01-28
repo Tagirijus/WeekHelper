@@ -98,9 +98,9 @@ final class TimetaggerTranscriberTest extends TestCase
         // now overwrite these tasks spent times
         $ts = new TimetaggerTranscriber($tf);
         foreach ($tasks as &$task) {
-            $ts->overwriteSpentTimeForTask($task);
+            $ts->overwriteTimesForTask($task);
         }
-        $ts->overwriteSpentTimesForRemainingTasks();
+        $ts->overwriteTimesForRemainingTasks();
 
         $msg = 'TimetaggerTranscriber incorrectly modified the spent times for the tasks.';
         // final check

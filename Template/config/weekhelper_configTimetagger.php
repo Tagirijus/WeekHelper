@@ -42,8 +42,8 @@
     <div class="task-form-container">
 
         <div class="task-form-main-column">
-            <?= $this->form->label(t('Timetagger can overwrite spent times for tasks in these levels'), 'timetagger_overwrites_levels_spent') ?>
-            <?= $this->form->text('timetagger_overwrites_levels_spent', ['timetagger_overwrites_levels_spent' => $timetagger_overwrites_levels_spent], [], [
+            <?= $this->form->label(t('Timetagger can overwrite times for tasks in these levels'), 'timetagger_overwrites_levels') ?>
+            <?= $this->form->text('timetagger_overwrites_levels', ['timetagger_overwrites_levels' => $timetagger_overwrites_levels], [], [
                 'placeholder="e.g. \'level_1,level_3\'"'
             ]) ?>
         </div>

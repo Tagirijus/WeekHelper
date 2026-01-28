@@ -101,22 +101,35 @@ class TaskDataExtender
      *
      * @param  array $task
      * @param  array  $levels_config
+     * @param  string  $timetagger_overwrites_levels_spent
      * @return array
      */
-    public static function extendLevels($task, $levels_config = [])
+    public static function extendLevels(
+        $task,
+        $levels_config = [],
+        $timetagger_overwrites_levels_spent = ''
+    )
     {
         $levels = [];
+        $timetagger_can_overwrite = false;
         foreach ($levels_config as $level => $config_str) {
             foreach (array_map('trim', explode(',', $config_str)) as $level_single_config) {
                 if (self::swimlaneColumnCheck(
                     $level_single_config, $task['swimlane_name'], $task['column_name']
                 )) {
                     $levels[] = $level;
+                    // also switch timetagger_can_overwrite to true, if level is applicable
+                    if (
+                        $timetagger_can_overwrite === false
+                        && str_contains($timetagger_overwrites_levels_spent, $level)
+                    ) {
+                        $timetagger_can_overwrite = true;
+                    }
                     break;
                 }
             }
         }
-        return $levels;
+        return [$levels, $timetagger_can_overwrite];
     }
 
     /**
@@ -125,11 +138,22 @@ class TaskDataExtender
      *
      * @param  array &$task
      * @param  array $levels_config
+     * @param  string  $timetagger_overwrites_levels_spent
      */
-    public static function extendTask(&$task, $levels_config = [])
+    public static function extendTask(
+        &$task,
+        $levels_config = [],
+        $timetagger_overwrites_levels_spent = ''
+    )
     {
         $fetched = self::getTaskInfoByTask($task);
-        $fetched['levels'] = self::extendLevels($task, $levels_config);
+        [$levels, $timetagger_can_overwrite] = self::extendLevels(
+            $task,
+            $levels_config,
+            $timetagger_overwrites_levels_spent
+        );
+        $fetched['levels'] = $levels;
+        $fetched['timetagger_can_overwrite'] = $timetagger_can_overwrite;
         $fetched['info_parsed'] = true;
         $task = array_merge($task, $fetched);
     }

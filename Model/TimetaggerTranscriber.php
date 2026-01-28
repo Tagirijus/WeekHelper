@@ -120,13 +120,13 @@ class TimetaggerTranscriber
     }
 
     /**
-     * The functionality to overwrite a tasks spent time
+     * The functionality to overwrite a tasks times
      * with the event tracked times.
      *
      * @param  array &$task
      * @param  string $timetagger_tags
      */
-    protected function overwriteSpentTime(&$task, $timetagger_tags)
+    protected function overwriteTimes(&$task, $timetagger_tags)
     {
         // for each event, find matching tags and distribute
         foreach ($this->timetagger_fetcher->getEvents() as $event) {
@@ -182,17 +182,17 @@ class TimetaggerTranscriber
      * attributes so that this method knows which tasks
      * now can get the remaining events time.
      */
-    public function overwriteSpentTimesForRemainingTasks()
+    public function overwriteTimesForRemainingTasks()
     {
         if (empty($this->timetagger_fetcher->getEvents())) {
             // nothing to do
             return;
         }
         foreach ($this->remaining_open_tasks as $timetagger_tags => &$task) {
-            $this->overwriteSpentTime($task, $timetagger_tags);
+            $this->overwriteTimes($task, $timetagger_tags);
         }
         foreach ($this->remaining_done_tasks as $timetagger_tags => &$task) {
-            $this->overwriteSpentTime($task, $timetagger_tags);
+            $this->overwriteTimes($task, $timetagger_tags);
         }
     }
 
@@ -216,7 +216,7 @@ class TimetaggerTranscriber
      *
      * @param  array &$task
      */
-    public function overwriteSpentTimeForTask(&$task)
+    public function overwriteTimesForTask(&$task)
     {
         $timetagger_tags = self::getTimetaggerTagsSorted($task['timetagger_tags'] ?? '');
         if (empty($timetagger_tags)) {
@@ -238,6 +238,6 @@ class TimetaggerTranscriber
             return;
         }
 
-        $this->overwriteSpentTime($task, $timetagger_tags);
+        $this->overwriteTimes($task, $timetagger_tags);
     }
 }

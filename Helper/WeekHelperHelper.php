@@ -107,7 +107,7 @@ class WeekHelperHelper extends Base
             'timetagger_url' =>  $this->configModel->get('timetagger_url', ''),
             'timetagger_authtoken' =>  $this->configModel->get('timetagger_authtoken', ''),
             'timetagger_cookies' =>  $this->configModel->get('timetagger_cookies', ''),
-            'timetagger_overwrites_levels_spent' => $this->configModel->get('timetagger_overwrites_levels_spent', ''),
+            'timetagger_overwrites_levels' => $this->configModel->get('timetagger_overwrites_levels', ''),
             'timetagger_start_fetch' => $this->configModel->get('timetagger_start_fetch', ''),
         ];
     }
