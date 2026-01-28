@@ -21,6 +21,8 @@ class TestTask
     public static function create(
         $column_name = '',
         $description = '',
+        $nb_completed_subtasks = 0,
+        $nb_subtasks = 0,
         $project_id = -1,
         $project_max_hours_day = 0,
         $project_max_hours_fri = -1,
@@ -45,6 +47,8 @@ class TestTask
             'column_name' => $column_name,
             'description' => $description,
             'id' => $id,
+            'nb_completed_subtasks' => $nb_completed_subtasks,
+            'nb_subtasks' => $nb_subtasks,
             'owner_id' => $user_id,
             'project_id' => $project_id,
             'project_max_hours_day' => $project_max_hours_day,

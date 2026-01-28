@@ -134,9 +134,6 @@ class TimesCalculator
      */
     protected static function calculateRemaining($task_or_subtask)
     {
-        if (self::isDone) {
-            // code...
-        }
         // OLD
         // $done = (
         //     // it's a task
@@ -431,7 +428,7 @@ class TimesCalculator
             $overtime = self::calculateOvertime(
                 $this->getEstimated(),
                 $this->getSpent(),
-                $this->isDone()
+                self::isDone($this->task)
             );
         } else {
             $overtime = $this->subtasks_overtime;
@@ -484,11 +481,7 @@ class TimesCalculator
      */
     protected function initSubtasks()
     {
-        if (!array_key_exists('open_subtasks', $this->task)) {
-            $this->task['open_subtasks'] = 0;
-        }
         foreach ($this->subtasks as $subtask) {
-            $this->task['open_subtasks'] += $subtask['status'] != 2 ? 1 : 0;
             $this->subtasks_estimated += $subtask['time_estimated'];
             $this->subtasks_spent += $subtask['time_spent'];
             $this->subtasks_overtime += self::calculateOvertime(
@@ -512,17 +505,20 @@ class TimesCalculator
     /**
      * The logic if a task is considered to be done or not.
      *
+     * @param  array  $task
      * @return boolean
      */
-    public function isDone()
+    public static function isDone($task)
     {
         // subtasks exist: none has to be open still
-        if (!empty($this->subtasks)) {
-            return $this->task['open_subtasks'] == 0;
+        if ($task['nb_subtasks'] != 0) {
+            return (
+                $task['nb_subtasks'] - $task['nb_completed_subtasks'] == 0
+            );
 
         // no subtasks exist: spent has to be >= estimated
         } else {
-            return $this->getSpent() >= $this->getEstimated();
+            return $task['time_spent'] >= $task['time_estimated'];
         }
     }
 

@@ -116,7 +116,7 @@ final class TimesCalculatorTest extends TestCase
         );
         $tc = new TimesCalculator($task);
         $this->assertFalse(
-            $tc->isDone(),
+            TimesCalculator::isDone($task),
             'TimesCalculator->isDone() should be false in status tests.'
         );
 
@@ -126,7 +126,7 @@ final class TimesCalculatorTest extends TestCase
         );
         $tc = new TimesCalculator($task);
         $this->assertTrue(
-            $tc->isDone(),
+            TimesCalculator::isDone($task),
             'TimesCalculator->isDone() should be true in status tests.'
         );
 
@@ -146,7 +146,7 @@ final class TimesCalculatorTest extends TestCase
         ];
         $tc = new TimesCalculator($task, $subtasks);
         $this->assertFalse(
-            $tc->isDone(),
+            TimesCalculator::isDone($task),
             'TimesCalculator->isDone() should be false in status tests with subtasks.'
         );
 
@@ -168,11 +168,13 @@ final class TimesCalculatorTest extends TestCase
         ];
         $tc = new TimesCalculator($task, $subtasks);
         $this->assertFalse(
-            $tc->isDone(),
+            TimesCalculator::isDone($task),
             'TimesCalculator->isDone() should be false in status tests with subtasks.'
         );
 
         $task = TestTask::create(
+            nb_subtasks: 1,
+            nb_completed_subtasks: 1,
             time_estimated: 10,
             time_spent: 4
         );
@@ -185,7 +187,7 @@ final class TimesCalculatorTest extends TestCase
         ];
         $tc = new TimesCalculator($task, $subtasks);
         $this->assertTrue(
-            $tc->isDone(),
+            TimesCalculator::isDone($task),
             'TimesCalculator->isDone() should be true in status tests with subtasks.'
         );
     }
