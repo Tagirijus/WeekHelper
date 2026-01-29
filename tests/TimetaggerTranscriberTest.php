@@ -17,7 +17,7 @@ use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
 final class TimetaggerTranscriberTest extends TestCase
 {
-    public function testSpentTimeOverwriting()
+    public function testTimesOverwriting()
     {
         //
         // SIMULATED TIMETAGGER FETCHING
