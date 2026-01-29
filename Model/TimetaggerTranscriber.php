@@ -97,30 +97,6 @@ class TimetaggerTranscriber
     }
 
     /**
-     * Helper: is a task "done" by the rules:
-     * - nb_subtasks == 0 OR
-     * - nb_subtasks - nb_completed_subtasks == 0
-     *
-     * Keys may be missing; default to 0. This also
-     * means: if a task has no subtasks, it is always
-     * considered to be done!
-     *
-     * @param array $task
-     * @return bool
-     */
-    protected static function isTaskDone($task)
-    {
-        $nb_subtasks = (int) ($task['nb_subtasks'] ?? 0);
-        $nb_completed = (int) ($task['nb_completed_subtasks'] ?? 0);
-
-        if ($nb_subtasks === 0) {
-            return true;
-        }
-
-        return ($nb_subtasks - $nb_completed) === 0;
-    }
-
-    /**
      * The functionality to overwrite a tasks times
      * with the event tracked times.
      *
@@ -154,7 +130,7 @@ class TimetaggerTranscriber
             }
 
             $capacity = (
-                self::isTaskDone($task) ?
+                TimesCalculator::isDone($task) ?
                 max(0, $task['time_estimated'] - $task['time_spent'])
                 : $available
             );
@@ -235,7 +211,7 @@ class TimetaggerTranscriber
         if (empty($timetagger_tags)) {
             return;
         }
-        if (self::isTaskDone($task)) {
+        if (TimesCalculator::isDone($task)) {
             $this->remaining_done_tasks[$timetagger_tags] = &$task;
         } else {
             $this->remaining_open_tasks[$timetagger_tags] = &$task;
