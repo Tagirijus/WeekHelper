@@ -193,7 +193,7 @@ class TimetaggerTranscriber
             return;
         }
         foreach ($this->remaining_open_tasks as $timetagger_tags => &$task) {
-            $this->overwriteTimes($task, $timetagger_tags);
+            $this->overwriteTimes($task, $timetagger_tags, true);
         }
         foreach ($this->remaining_done_tasks as $timetagger_tags => &$task) {
             $this->overwriteTimes($task, $timetagger_tags, true);
