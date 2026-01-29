@@ -17,6 +17,10 @@ use Kanboard\Plugin\WeekHelper\Model\TimetaggerTranscriber;
 
 final class TimetaggerTranscriberTest extends TestCase
 {
+    /**
+     * Here I test some general overwriting things and checking the
+     * overwritten times.
+     */
     public function testTimesOverwriting()
     {
         //
@@ -142,6 +146,11 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(0.0, $tasks[5]['time_overtime'], $msg);
     }
 
+    /**
+     * This case tests, what will happen, if a task is open
+     * and will get more spent time than estimated. Overtime
+     * should be changed as well.
+     */
     public function testTimesOverwritingB()
     {
         //
@@ -191,6 +200,11 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(3.25, $tasks[0]['time_overtime'], $msg);
     }
 
+    /**
+     * This case is similar to case B, while now the task is
+     * done. It should still get the correct amount of spent
+     * time and also the overtime accordingly as well again.
+     */
     public function testTimesOverwritingC()
     {
         //
@@ -238,6 +252,74 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(5.25, $tasks[0]['time_spent'], $msg);
         $this->assertSame(0.0, $tasks[0]['time_remaining'], $msg);
         $this->assertSame(3.25, $tasks[0]['time_overtime'], $msg);
+    }
+
+    /**
+     * This test is about two tasks sharing the same timetagger tags,
+     * while being open both. Only the first one in the cue should get
+     * the spent time filled up.
+     */
+    public function testTimesOverwritingD()
+    {
+        //
+        // SIMULATED TIMETAGGER FETCHING
+        //
+
+        $tf = new TimetaggerFetcher();
+        $json = '{"records": [';
+        // length: 5.25 hours
+        // tags: a, b, c
+        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 18900, "ds": "#a #b #c", "st": 0.0}';
+        $json .= ']}';
+        // finally this makes for project "#a #b #c":
+        // length: 5.25
+
+        $tf->events = TimetaggerFetcher::eventsFromJSONString($json);
+
+
+        //
+        // SIMULATED KANBAORD TASKS
+        //
+        $tasks = [
+            [
+                'id' => 1,
+                'time_estimated' => 2.0,
+                'time_spent' => 0.0,      # should become 5.25
+                'time_remaining' => 2.0,  # should become 0.0
+                'time_overtime' => 0.0,   # should become 3.25
+                'nb_subtasks' => 2,
+                'nb_completed_subtasks' => 1,
+                'timetagger_tags' => 'a,b,c'
+            ],
+            [
+                'id' => 2,
+                'time_estimated' => 1.5,
+                'time_spent' => 0.0,      # should stay
+                'time_remaining' => 1.5,  # should stay
+                'time_overtime' => 0.0,   # should stay
+                'nb_subtasks' => 1,
+                'nb_completed_subtasks' => 0,
+                'timetagger_tags' => 'a,b,c'
+            ],
+        ];
+
+
+        // now overwrite these tasks spent times
+        $ts = new TimetaggerTranscriber($tf);
+        foreach ($tasks as &$task) {
+            $ts->overwriteTimesForTask($task);
+        }
+        $ts->overwriteTimesForRemainingTasks();
+
+        $msg = 'TimetaggerTranscriber incorrectly modified the spent times for the tasks, case D.';
+        // final check
+        $this->assertSame(5.25, $tasks[0]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_remaining'], $msg);
+        $this->assertSame(3.25, $tasks[0]['time_overtime'], $msg);
+
+        $this->assertSame(0.0, $tasks[1]['time_spent'], $msg);
+        $this->assertSame(1.5, $tasks[1]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[1]['time_overtime'], $msg);
     }
 
     public function testTagsMatch()

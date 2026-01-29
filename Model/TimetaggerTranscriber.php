@@ -227,9 +227,17 @@ class TimetaggerTranscriber
             return;
         }
         if (TimesCalculator::isDone($task)) {
-            $this->remaining_done_tasks[$timetagger_tags] = &$task;
+            // only add the first task from the whole cue, bascially.
+            // so the first task having the exact timetagger tags
+            // should be added here, only once.
+            if (!array_key_exists($timetagger_tags, $this->remaining_done_tasks)) {
+                $this->remaining_done_tasks[$timetagger_tags] = &$task;
+            }
         } else {
-            $this->remaining_open_tasks[$timetagger_tags] = &$task;
+            // again: only add the first task from the whole cue.
+            if (!array_key_exists($timetagger_tags, $this->remaining_open_tasks)) {
+                $this->remaining_open_tasks[$timetagger_tags] = &$task;
+            }
             // open tasks will get event times in another method.
             // so it's just about adding the task to the internal
             // array to know that this task might get tracked
