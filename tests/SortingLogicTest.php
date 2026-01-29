@@ -118,4 +118,39 @@ final class SortingLogicTest extends TestCase
             'SortingLogic failed on sorting by tasks level.'
         );
     }
+
+    public function testSortCaseWithTwoAlmostIdentical()
+    {
+        $tasks = [
+            [
+                'id' => 1, 'title' => 'one', 'levels' => ['level_1'],
+                'plan_from' => '', 'column_position' => 1, 'priority' => 0,
+                'project_priority' => '', 'position' => 1
+            ],
+            [
+                'id' => 2, 'title' => 'two', 'levels' => ['level_1'],
+                'plan_from' => '', 'column_position' => 2, 'priority' => 0,
+                'project_priority' => '', 'position' => 1
+            ],
+        ];
+        $tasks_sorted = [
+            [
+                'id' => 2, 'title' => 'two', 'levels' => ['level_1'],
+                'plan_from' => '', 'column_position' => 2, 'priority' => 0,
+                'project_priority' => '', 'position' => 1
+            ],
+            [
+                'id' => 1, 'title' => 'one', 'levels' => ['level_1'],
+                'plan_from' => '', 'column_position' => 1, 'priority' => 0,
+                'project_priority' => '', 'position' => 1
+            ],
+        ];
+        $config = "levels asc\nplan_from desc\ncolumn_position desc\npriority desc\nproject_priority desc\nposition asc";
+        $sorted = SortingLogic::sortTasks($tasks, $config);
+        $this->assertSame(
+            $tasks_sorted,
+            $sorted,
+            'SortingLogic failed on sorting with two almost identical.'
+        );
+    }
 }
