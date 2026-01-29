@@ -165,7 +165,7 @@ class TimetaggerTranscriber
         }
 
         // convert task times back to hours
-        if ($remaining_run && ($task['_timetagger_transcribing'] ?? false)) {
+        if ($remaining_run && isset($task['_timetagger_transcribing'])) {
             unset($task['_timetagger_transcribing']);
             $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
             $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
