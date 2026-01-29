@@ -360,7 +360,7 @@ class TasksTimesPreparer
     {
         $this->extendTasksData($tasks);
         $this->emptyInternalValues();
-        SortingLogic::sortTasks($tasks, $this->getConfig('sorting_logic'));
+        $tasks = SortingLogic::sortTasks($tasks, $this->getConfig('sorting_logic'));
 
         // phase 1:
         // get times of tasks, update it maybe by timetagger,
