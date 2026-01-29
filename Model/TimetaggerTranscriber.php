@@ -105,8 +105,8 @@ class TimetaggerTranscriber
      * during the normal distribution loop, which
      * will use overwriteTimesForTask(), the task
      * should not get more event time, if estimated
-     * - spent is 0. But for the final run, "phase 3",
-     * such tasks should get the remaining event time
+     * - spent is 0. But for the final run, such
+     * tasks should get the remaining event time
      * on top.
      *
      * @param  array &$task
