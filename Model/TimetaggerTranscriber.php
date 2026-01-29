@@ -100,10 +100,21 @@ class TimetaggerTranscriber
      * The functionality to overwrite a tasks times
      * with the event tracked times.
      *
+     * $remaining_run will be used in the method
+     * overwriteTimesForRemainingTasks(). Normally
+     * during the normal distribution loop, which
+     * will use overwriteTimesForTask(), the task
+     * should not get more event time, if estimated
+     * - spent is 0. But for the final run, "phase 3",
+     * such tasks should get the remaining event time
+     * on top. Also the spent time shoudl not be
+     * initialized with "0" in the "final remaining run".
+     *
      * @param  array &$task
      * @param  string $timetagger_tags
+     * @param  boolean $remaining_run
      */
-    protected function overwriteTimes(&$task, $timetagger_tags)
+    protected function overwriteTimes(&$task, $timetagger_tags, $remaining_run = false)
     {
         // for each event, find matching tags and distribute
         foreach ($this->timetagger_fetcher->getEvents() as $event) {
@@ -121,7 +132,11 @@ class TimetaggerTranscriber
                 if (!isset($task['_timetagger_transcribing'])) {
                     $task['_timetagger_transcribing'] = true;
                     $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
-                    $task['time_spent'] = 0;
+                    if ($remaining_run) {
+                        $task['time_spent'] = TimeHelper::hoursToSeconds($task['time_spent']);
+                    } else {
+                        $task['time_spent'] = 0;
+                    }
                     $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
                     $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
                 }
@@ -130,7 +145,7 @@ class TimetaggerTranscriber
             }
 
             $capacity = (
-                TimesCalculator::isDone($task) ?
+                TimesCalculator::isDone($task) && !$remaining_run ?
                 max(0, $task['time_estimated'] - $task['time_spent'])
                 : $available
             );
@@ -181,7 +196,7 @@ class TimetaggerTranscriber
             $this->overwriteTimes($task, $timetagger_tags);
         }
         foreach ($this->remaining_done_tasks as $timetagger_tags => &$task) {
-            $this->overwriteTimes($task, $timetagger_tags);
+            $this->overwriteTimes($task, $timetagger_tags, true);
         }
     }
 
