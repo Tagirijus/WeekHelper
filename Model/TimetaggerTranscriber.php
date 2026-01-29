@@ -107,8 +107,7 @@ class TimetaggerTranscriber
      * should not get more event time, if estimated
      * - spent is 0. But for the final run, "phase 3",
      * such tasks should get the remaining event time
-     * on top. Also the spent time shoudl not be
-     * initialized with "0" in the "final remaining run".
+     * on top.
      *
      * @param  array &$task
      * @param  string $timetagger_tags
@@ -132,11 +131,7 @@ class TimetaggerTranscriber
                 if (!isset($task['_timetagger_transcribing'])) {
                     $task['_timetagger_transcribing'] = true;
                     $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
-                    if ($remaining_run) {
-                        $task['time_spent'] = TimeHelper::hoursToSeconds($task['time_spent']);
-                    } else {
-                        $task['time_spent'] = 0;
-                    }
+                    $task['time_spent'] = 0;
                     $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
                     $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
                 }
@@ -170,7 +165,7 @@ class TimetaggerTranscriber
         }
 
         // convert task times back to hours
-        if (($task['_timetagger_transcribing'] ?? false)) {
+        if ($remaining_run && ($task['_timetagger_transcribing'] ?? false)) {
             unset($task['_timetagger_transcribing']);
             $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
             $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
