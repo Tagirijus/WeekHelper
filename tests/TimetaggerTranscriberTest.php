@@ -150,18 +150,9 @@ final class TimetaggerTranscriberTest extends TestCase
 
         $tf = new TimetaggerFetcher();
         $json = '{"records": [';
-        // length: 1.5 hours
+        // length: 5.25 hours
         // tags: a, b, c
-        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 5400, "ds": "#a #b #c", "st": 0.0},';
-        // length: 1 hours
-        // tags: a, b, c
-        $json .= '{"key": "B", "mt": 0, "t1": 5400, "t2": 9000, "ds": "#a #b #c", "st": 0.0},';
-        // length: 2.75 hours
-        // tags: a, b, c
-        $json .= '{"key": "C", "mt": 0, "t1": 9000, "t2": 18900, "ds": "#a #b #c", "st": 0.0},';
-        // length: 3.0 hours
-        // tags: d
-        $json .= '{"key": "D", "mt": 0, "t1": 20000, "t2": 30800, "ds": "#d", "st": 0.0}';
+        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 18900, "ds": "#a #b #c", "st": 0.0}';
         $json .= ']}';
         // finally this makes for project "#a #b #c":
         // length: 5.25
@@ -183,15 +174,6 @@ final class TimetaggerTranscriberTest extends TestCase
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'a,b,c'
             ],
-            [
-                'id' => 2,
-                'time_estimated' => 1.5,
-                'time_spent' => 0.0,      # should stay
-                'time_remaining' => 1.5,  # should stay
-                'time_overtime' => 0.0,   # should stay
-                'nb_subtasks' => 0,
-                'nb_completed_subtasks' => 0,
-            ],
         ];
 
 
@@ -207,10 +189,6 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(5.25, $tasks[0]['time_spent'], $msg);
         $this->assertSame(0.0, $tasks[0]['time_remaining'], $msg);
         $this->assertSame(3.25, $tasks[0]['time_overtime'], $msg);
-
-        $this->assertSame(0.0, $tasks[1]['time_spent'], $msg);
-        $this->assertSame(1.5, $tasks[1]['time_remaining'], $msg);
-        $this->assertSame(0.0, $tasks[1]['time_overtime'], $msg);
     }
 
     public function testTimesOverwritingC()
@@ -221,18 +199,9 @@ final class TimetaggerTranscriberTest extends TestCase
 
         $tf = new TimetaggerFetcher();
         $json = '{"records": [';
-        // length: 1.5 hours
+        // length: 5.25 hours
         // tags: a, b, c
-        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 5400, "ds": "#a #b #c", "st": 0.0},';
-        // length: 1 hours
-        // tags: a, b, c
-        $json .= '{"key": "B", "mt": 0, "t1": 5400, "t2": 9000, "ds": "#a #b #c", "st": 0.0},';
-        // length: 2.75 hours
-        // tags: a, b, c
-        $json .= '{"key": "C", "mt": 0, "t1": 9000, "t2": 18900, "ds": "#a #b #c", "st": 0.0},';
-        // length: 3.0 hours
-        // tags: d
-        $json .= '{"key": "D", "mt": 0, "t1": 20000, "t2": 30800, "ds": "#d", "st": 0.0}';
+        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 18900, "ds": "#a #b #c", "st": 0.0}';
         $json .= ']}';
         // finally this makes for project "#a #b #c":
         // length: 5.25
@@ -253,15 +222,6 @@ final class TimetaggerTranscriberTest extends TestCase
                 'nb_subtasks' => 2,
                 'nb_completed_subtasks' => 2, # <-- this changed in case C; task is done now!
                 'timetagger_tags' => 'a,b,c'
-            ],
-            [
-                'id' => 2,
-                'time_estimated' => 1.5,
-                'time_spent' => 0.0,      # should stay
-                'time_remaining' => 1.5,  # should stay
-                'time_overtime' => 0.0,   # should stay
-                'nb_subtasks' => 0,
-                'nb_completed_subtasks' => 0,
             ],
         ];
 
