@@ -365,11 +365,21 @@ final class TimetaggerTranscriberTest extends TestCase
                 'id' => 2,
                 'time_estimated' => 2.0,
                 'time_spent' => 1.0,      # should become 0.0
-                'time_remaining' => 2.0,  # should stay
+                'time_remaining' => 1.0,  # should become 2.0
                 'time_overtime' => 0.0,   # should stay
                 'nb_subtasks' => 2,
                 'nb_completed_subtasks' => 1,
                 'timetagger_tags' => 'a,b,c'
+            ],
+            [
+                'id' => 3,
+                'time_estimated' => 3.0,
+                'time_spent' => 1.5,      # should become 0.0
+                'time_remaining' => 1.5,  # should become 3.0
+                'time_overtime' => 0.0,   # should stay
+                'nb_subtasks' => 2,
+                'nb_completed_subtasks' => 1,
+                'timetagger_tags' => 'doesNotExist'
             ],
         ];
 
@@ -390,6 +400,10 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(0.0, $tasks[1]['time_spent'], $msg);
         $this->assertSame(2.0, $tasks[1]['time_remaining'], $msg);
         $this->assertSame(0.0, $tasks[1]['time_overtime'], $msg);
+
+        $this->assertSame(0.0, $tasks[2]['time_spent'], $msg);
+        $this->assertSame(3.0, $tasks[2]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[2]['time_overtime'], $msg);
     }
 
     public function testTagsMatch()

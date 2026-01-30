@@ -5,7 +5,6 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Model\TimeCalculator;
 
-
 /**
  * This class is for overwriting the given tasks spent times.
  */
@@ -43,6 +42,32 @@ class TimetaggerTranscriber
      * @var array
      **/
     var $remaining_open_tasks = [];
+
+    /**
+     * This array will hold the info, if the spent time
+     * for a task was initialized already. This is needed,
+     * since otherwise it would happen that tasks with
+     * "timetagger_tag" exiting would always got their
+     * spent time reset, before adding new time to it.
+     *
+     * Also this array at the same time will hold the
+     * info about which task times should be convert
+     * back from seconds to hours. This is important
+     * for the final remaining method, which earlier
+     * did only loop through the remaining arrays
+     * from above. This could lead to tasks not being
+     * in these arrays would keep their converted times
+     * in seconds.
+     *
+     * This array will store the data like this:
+     *
+     *  [
+     *      task_id => &$task
+     *  ]
+     *
+     * @var array
+     **/
+    var $task_times_converted = [];
 
     public function __construct($timetagger_fetcher)
     {
@@ -97,6 +122,60 @@ class TimetaggerTranscriber
     }
 
     /**
+     * Convert the task times back to hours and basically
+     * end the overwriting process with this method.
+     *
+     * @param  array &$task
+     */
+    protected function taskTimesToHours(&$task)
+    {
+        $task_id = $task['id'] ?? -1;
+        if (array_key_exists($task_id, $this->task_times_converted)) {
+            $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
+            $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
+            $task['time_remaining'] = TimeHelper::secondsToHours($task['time_remaining']);
+            $task['time_overtime'] = TimeHelper::secondsToHours($task['time_overtime']);
+            unset($this->task_times_converted[$task_id]);
+        }
+    }
+
+    /**
+     * Init the tasks spent time the logic that tasks with
+     * "timetagger_tag" should first reset their spent time
+     * no matter what. Otherwise it should just convert
+     * the original spent time into seconds.
+     *
+     * Also convert the other times to seconds.
+     *
+     * @param  array &$task
+     */
+    protected function taskTimesToSeconds(&$task)
+    {
+        $task_id = $task['id'] ?? -1;
+        if (!in_array($task_id, $this->task_times_converted)) {
+            $this->task_times_converted[] = $task_id;
+            if (($task['timetagger_tags'] ?? '') != '') {
+                $task['time_spent'] = 0;
+                $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
+                $task['time_remaining'] = TimesCalculator::calculateRemaining($task);
+                $task['time_overtime'] = TimesCalculator::calculateOvertime(
+                    $task['time_estimated'],
+                    $task['time_spent'],
+                    TimesCalculator::isDone($task)
+                );
+            } else {
+                $task['time_spent'] = TimeHelper::hoursToSeconds(
+                    $task['time_spent'] ?? 0.0
+                );
+                $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
+                $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
+                $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
+            }
+            $this->task_times_converted[$task['id']] = &$task;
+        }
+    }
+
+    /**
      * The functionality to overwrite a tasks times
      * with the event tracked times.
      *
@@ -105,8 +184,10 @@ class TimetaggerTranscriber
      * during the normal distribution loop, which
      * will use overwriteTimesForTask(), the task
      * should not get more event time, if estimated
-     * - spent is 0. But for the final run, such
-     * tasks should get the remaining event time
+     * - spent is 0 (means that for the first run
+     * tasks are being filled up to their max according
+     * to estimated only first). But for the final run,
+     * such tasks should get the remaining event time
      * on top.
      *
      * @param  array &$task
@@ -125,17 +206,7 @@ class TimetaggerTranscriber
 
             $event_tags = $event->getTags() ?: [];
 
-            if (self::tagsMatch($timetagger_tags, $event_tags)) {
-                // change times from hours into seconds
-                // and reset time_spent
-                if (!isset($task['_timetagger_transcribing'])) {
-                    $task['_timetagger_transcribing'] = true;
-                    $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
-                    $task['time_spent'] = 0;
-                    $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
-                    $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
-                }
-            } else {
+            if (!self::tagsMatch($timetagger_tags, $event_tags)) {
                 continue;
             }
 
@@ -163,15 +234,6 @@ class TimetaggerTranscriber
                 TimesCalculator::isDone($task)
             );
         }
-
-        // convert task times back to hours
-        if ($remaining_run && isset($task['_timetagger_transcribing'])) {
-            unset($task['_timetagger_transcribing']);
-            $task['time_estimated'] = TimeHelper::secondsToHours($task['time_estimated']);
-            $task['time_spent'] = TimeHelper::secondsToHours($task['time_spent']);
-            $task['time_remaining'] = TimeHelper::secondsToHours($task['time_remaining']);
-            $task['time_overtime'] = TimeHelper::secondsToHours($task['time_overtime']);
-        }
     }
 
     /**
@@ -189,9 +251,16 @@ class TimetaggerTranscriber
         }
         foreach ($this->remaining_open_tasks as $timetagger_tags => &$task) {
             $this->overwriteTimes($task, $timetagger_tags, true);
+            $this->taskTimesToHours($task);
         }
         foreach ($this->remaining_done_tasks as $timetagger_tags => &$task) {
             $this->overwriteTimes($task, $timetagger_tags, true);
+            $this->taskTimesToHours($task);
+        }
+        // now convert the task times back from seconds to hours for the
+        // tasks which were not in the remaining arrays from above
+        foreach ($this->task_times_converted as &$task) {
+            $this->taskTimesToHours($task);
         }
     }
 
@@ -217,6 +286,8 @@ class TimetaggerTranscriber
      */
     public function overwriteTimesForTask(&$task)
     {
+        $this->taskTimesToSeconds($task);
+
         $timetagger_tags = self::getTimetaggerTagsSorted($task['timetagger_tags'] ?? '');
         if (empty($timetagger_tags)) {
             return;
