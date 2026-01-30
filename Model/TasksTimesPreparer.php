@@ -1050,19 +1050,18 @@ class TasksTimesPreparer
     }
 
     /**
-     * Get the internal tasks_by_level array. A level
-     * can be defined as a parameter so that only that
-     * level's task will be returned.
+     * Get the tasks on that level. If there are no tasks,
+     * return an empty array.
      *
      * @param string $level
      * @return array
      */
-    public function getTasksByLevel($level = '')
+    public function getTasksByLevel($level)
     {
         if (array_key_exists($level, $this->tasks_by_level)) {
             return $this->tasks_by_level[$level];
         } else {
-            return $this->tasks_by_level;
+            return [];
         }
     }
 
