@@ -82,6 +82,19 @@ class TasksPlan
     var $min_slot_length = 0;
 
     /**
+     * The minutes a Kanboard task score should be. So
+     * far this value is used for tasks, which are
+     * open, but have overtime. My logic here is just
+     * to use the non_time_mode_minutes as the remaining
+     * time for such tasks. They might take longer or
+     * shorter, but I need anything so that such still-open
+     * tasks can be planned.
+     *
+     * @var integer
+     **/
+    var $non_time_mode_minutes;
+
+    /**
      * This variable holds the overall planned, spent and
      * remaining times per week and per day. Structure:
      *
@@ -144,11 +157,17 @@ class TasksPlan
      *
      * @param integer $min_slot_length
      * @param boolean $worked_mode
+     * @param integer $non_time_mode_minutes
      */
-    public function __construct($min_slot_length = 0, $worked_mode = false)
+    public function __construct(
+        $min_slot_length = 0,
+        $worked_mode = false,
+        $non_time_mode_minutes = 0
+    )
     {
         $this->min_slot_length = $min_slot_length;
         $this->worked_mode = $worked_mode;
+        $this->non_time_mode_minutes = $non_time_mode_minutes;
     }
 
     /**

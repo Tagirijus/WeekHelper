@@ -1074,4 +1074,70 @@ final class TasksPlanTest extends TestCase
             'TasksPlan combiner returned something incorrect.'
         );
     }
+
+    /**
+     * Sometimes there might be tasks, which are still open, while
+     * they do not have remaining time, but overtime already. Such
+     * tasks should still be able to be planned so that it is clear
+     * that such tasks aren't done yet.
+     */
+    public function testOpenTaskAndOvertimeA()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay("0:00-10:00", 'mon');
+
+        $task_a = TestTask::create(
+            title: 'a', time_estimated: 5.0, time_spent: 6.0,
+            nb_completed_subtasks: 1, nb_subtasks: 2
+        );
+        $task_b = TestTask::create(
+            title: 'b', time_estimated: 1.0, time_spent: 0.0,
+            nb_completed_subtasks: 0, nb_subtasks: 2
+        );
+
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+
+        // expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 30,
+                    'length' => 30,
+                    'spent' => 360,
+                    'remaining' => 30,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 30,
+                    'end' => 90,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'TasksPlan with open tasks and overtime did not plan tasks as expected.'
+        );
+    }
 }

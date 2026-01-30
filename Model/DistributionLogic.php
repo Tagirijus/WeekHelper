@@ -85,10 +85,15 @@ class DistributionLogic
     ])
     {
         $this->parseTimeSlots($time_slots_config);
-        $this->tasks_plan = new TasksPlan($time_slots_config['min_slot_length']);
+        $this->tasks_plan = new TasksPlan(
+            $time_slots_config['min_slot_length'],
+            false,
+            $time_slots_config['non_time_mode_minutes']
+        );
         $this->worked_plan = new TasksPlan(
             $time_slots_config['min_slot_length'],
-            true
+            true,
+            $time_slots_config['non_time_mode_minutes']
         );
     }
 
