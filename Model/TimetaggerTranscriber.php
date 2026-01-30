@@ -11,6 +11,17 @@ use Kanboard\Plugin\WeekHelper\Model\TimeCalculator;
 class TimetaggerTranscriber
 {
     /**
+     * This attribute is for the logic that for a
+     * running Timetagger tracking event the first
+     * task, for which this fits, can get the
+     * additional key "is_running". But after that
+     * no other task shall get this value.
+     *
+     * @var boolean
+     **/
+    var $gave_running = false;
+
+    /**
      * The TimetaggerFetcher instance used for fetching the
      * Timetagger tasks. And for returning these events
      * accordingly.
@@ -198,6 +209,7 @@ class TimetaggerTranscriber
     {
         // for each event, find matching tags and distribute
         foreach ($this->timetagger_fetcher->getEvents() as $event) {
+
             // available hours for this event
             $available = $event->getAvailable();
             if ($available <= 0) {
@@ -233,6 +245,13 @@ class TimetaggerTranscriber
                 $task['time_spent'],
                 TimesCalculator::isDone($task)
             );
+
+            // additionally check if the task is running and should get
+            // the "is_running" key
+            if (!$this->gave_running && $event->isRunning()) {
+                $task['is_running'] = true;
+                $this->gave_running = true;
+            }
         }
     }
 
