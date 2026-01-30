@@ -80,7 +80,8 @@ class DistributionLogic
         'fri' => '',
         'sat' => '',
         'sun' => '',
-        'min_slot_length' => 0
+        'min_slot_length' => 0,
+        'non_time_mode_minutes' => 0,
     ])
     {
         $this->parseTimeSlots($time_slots_config);

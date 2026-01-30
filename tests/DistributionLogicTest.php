@@ -599,14 +599,15 @@ final class DistributionLogicTest extends TestCase
         );
     }
 
+    /**
+     * I had a bug that I created a pseudo blocking task from 9:00-17:00.
+     * Then it was 7:45 and normally another task should still be planned,
+     * until that point, but somehow this blocking task got shown from
+     * 7:45-17:00 ...
+     * With this test I try to solve this issue
+     */
     public function testBlockingTaskWithNow(): void
     {
-        // I had a bug that I created a pseudo blocking task from 9:00-17:00.
-        // Then it was 7:45 and normally another task should still be planned,
-        // until that point, but somehow this blocking task got shown from
-        // 7:45-17:00 ...
-        // With this test I try to solve this issue
-
         $blocking_config = "mon 9:00-17:00";
 
         $task = TestTask::create(
@@ -674,6 +675,147 @@ final class DistributionLogicTest extends TestCase
             $sorted_plan,
             $distributed_plan,
             'DistributionLogic with blocking pseudo tasts and "now" did not distribute tasks as expected.'
+        );
+    }
+
+    /**
+     * Sometimes there might be tasks, which are still open, while
+     * they do not have remaining time, but overtime already. Such
+     * tasks should still be able to be planned so that it is clear
+     * that such tasks aren't done yet.
+     */
+    public function testOpenTaskAndOvertimeA()
+    {
+        $time_slots_config = [
+            'mon' => '0:00-10:00',
+            'tue' => '',
+            'wed' => '',
+            'thu' => '',
+            'fri' => '',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 30,
+            'non_time_mode_minutes' => 30,
+        ];
+
+        $task_a = TestTask::create(
+            title: 'a', time_estimated: 5.0, time_spent: 6.0,
+            nb_completed_subtasks: 1, nb_subtasks: 2
+        );
+        $task_b = TestTask::create(
+            title: 'b', time_estimated: 1.0, time_spent: 0.0,
+            nb_completed_subtasks: 0, nb_subtasks: 2
+        );
+        $init_tasks = [$task_a, $task_b];
+
+        // expected sorted plan
+        $sorted_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 30,
+                    'length' => 30,
+                    'spent' => 360,
+                    'remaining' => 30,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 30,
+                    'end' => 90,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // now the final distribution instance
+        $distributor = new DistributionLogic($time_slots_config);
+        $distributor->distributeTasks($init_tasks);
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
+
+        $this->assertSame(
+            $sorted_plan,
+            $distributed_plan,
+            'DistributionLogic with open tasks and overtime did not distribute tasks as expected.'
+        );
+    }
+
+    /**
+     * This test is like testOpenTaskAndOvertimeA(), but the
+     * "non_time_mode_minutes" are (like default) 0, which
+     * should make them internally become 5.
+     */
+    public function testOpenTaskAndOvertimeB()
+    {
+        $time_slots_config = [
+            'mon' => '0:00-10:00',
+            'tue' => '',
+            'wed' => '',
+            'thu' => '',
+            'fri' => '',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 30,
+            'non_time_mode_minutes' => 0,
+        ];
+
+        $task_a = TestTask::create(
+            title: 'a', time_estimated: 5.0, time_spent: 6.0,
+            nb_completed_subtasks: 1, nb_subtasks: 2
+        );
+        $task_b = TestTask::create(
+            title: 'b', time_estimated: 1.0, time_spent: 0.0,
+            nb_completed_subtasks: 0, nb_subtasks: 2
+        );
+        $init_tasks = [$task_a, $task_b];
+
+        // expected sorted plan
+        $sorted_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 5,
+                    'length' => 5,
+                    'spent' => 360,
+                    'remaining' => 5,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 5,
+                    'end' => 65,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // now the final distribution instance
+        $distributor = new DistributionLogic($time_slots_config);
+        $distributor->distributeTasks($init_tasks);
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
+
+        $this->assertSame(
+            $sorted_plan,
+            $distributed_plan,
+            'DistributionLogic with open tasks and overtime (but none non_time_mode_minutes given) did not distribute tasks as expected.'
         );
     }
 }
