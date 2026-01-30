@@ -153,6 +153,20 @@ class TasksPlan
     var $worked_mode = false;
 
     /**
+     * This attribute will hold info about which task
+     * is open and has overtime, but still was used
+     * in the plan already. I need this to have "still
+     * open tasks" shown in the week plan, even if
+     * they technically normally do not have remaining
+     * time left. They may appear once in the plan. Then
+     * their ID gets added to this array so that they
+     * do not appear once more in the week plan.
+     *
+     * @var array
+     **/
+    var $open_overtime_task_ids = [];
+
+    /**
      * Initialize the instance.
      *
      * @param integer $min_slot_length
@@ -455,10 +469,12 @@ class TasksPlan
                 $task['time_spent'],
                 TimesCalculator::isDone($task)
             )
+            && !in_array($task['id'], $this->open_overtime_task_ids)
         ) {
             // in that case just use the non_time_mode_minutes
             // as the planable minutes, since it is quite of
             // unclear anyway, when the task will be done
+            $this->open_overtime_task_ids[] = $task['id'];
             return $this->non_time_mode_minutes;
         }
 

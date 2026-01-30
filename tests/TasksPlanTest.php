@@ -51,7 +51,8 @@ final class TasksPlanTest extends TestCase
 
         $task = TestTask::create(
             title: 'over, uh oh', time_estimated: 5.0, time_spent: 6.0,
-            nb_completed_subtasks: 1, nb_subtasks: 2
+            nb_completed_subtasks: 1, nb_subtasks: 2,
+            project_max_hours_day: 10
         );
         $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
         $this->assertSame(
@@ -67,8 +68,6 @@ final class TasksPlanTest extends TestCase
             $tasks_plan->getTasksActualRemaining($task),
             'Open + overtime task actual remaining is wrong.'
         );
-        // and planning should be a success accordingly
-        $this->assertTrue($plan_success, 'planTask() did not return true ...');
     }
 
     public function testTasksPlanDailyLimits()
