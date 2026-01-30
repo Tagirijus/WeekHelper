@@ -640,9 +640,7 @@ class AutomaticPlanner extends Base
      */
     public function formatSinglePlaintextTitle($task, $params = [])
     {
-        $title = isset($task['task']['is_running']) ? '🔴 ' : '';
-
-        $title .= $params['hide_task_title'] ?? false ? '' : $task['task']['title'];
+        $title = $params['hide_task_title'] ?? false ? '' : $task['task']['title'];
 
         $title = (
             $params['prepend_project_name'] ?? false ?
@@ -665,6 +663,8 @@ class AutomaticPlanner extends Base
             '~~  ' . $title
             : $title
         );
+
+        $title = isset($task['task']['is_running']) ? '🔴 ' . $title : $title;
 
         return $title;
     }
