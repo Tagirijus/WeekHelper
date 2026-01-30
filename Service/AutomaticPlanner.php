@@ -618,6 +618,11 @@ class AutomaticPlanner extends Base
         if (!($params['hide_length'] ?? false)) {
             $out .= " (" . $length . ")";
         }
+
+        // has overtime icon
+        $overtime = $task['task']['time_overtime'] ?? 0.0;
+        $out = $overtime > 0.0 ? $out . '⚠️' : $out;
+
         $out .= "\n";
 
         return $out;
@@ -664,6 +669,7 @@ class AutomaticPlanner extends Base
             : $title
         );
 
+        // is running icon
         $title = isset($task['task']['is_running']) ? '🔴 ' . $title : $title;
 
         return $title;
