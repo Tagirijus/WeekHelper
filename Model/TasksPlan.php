@@ -11,7 +11,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-
+use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
 
 class TasksPlan
 {
@@ -167,7 +167,7 @@ class TasksPlan
     {
         $this->min_slot_length = $min_slot_length;
         $this->worked_mode = $worked_mode;
-        $this->non_time_mode_minutes = $non_time_mode_minutes;
+        $this->non_time_mode_minutes = $non_time_mode_minutes != 0 ? $non_time_mode_minutes : 5;
     }
 
     /**
@@ -220,7 +220,7 @@ class TasksPlan
             $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
         }
         $planned = $this->getPlannedTimeForTask($task['id']);
-        return $remain - $planned;
+        return max(0, $remain - $planned);
     }
 
     /**
@@ -447,6 +447,21 @@ class TasksPlan
      */
     public function minutesCanBePlanned($task, $time_slots_day)
     {
+        // the task is still open and has overtime already
+        if (
+            !TimesCalculator::isDone($task)
+            && TimesCalculator::calculateOvertime(
+                $task['time_estimated'],
+                $task['time_spent'],
+                TimesCalculator::isDone($task)
+            )
+        ) {
+            // in that case just use the non_time_mode_minutes
+            // as the planable minutes, since it is quite of
+            // unclear anyway, when the task will be done
+            return $this->non_time_mode_minutes;
+        }
+
         // this task is completely planned already
         $tasks_actual_remaining = $this->getTasksActualRemaining($task);
         if ($tasks_actual_remaining == 0) {

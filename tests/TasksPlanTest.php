@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Model/TasksPlan.php';
 require_once __DIR__ . '/../tests/TestTask.php';
+require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimeSlotsDay.php';
 require_once __DIR__ . '/../Model/TimePoint.php';
 require_once __DIR__ . '/../Model/TimeSpan.php';
@@ -39,6 +40,32 @@ final class TasksPlanTest extends TestCase
             0,
             $tasks_plan->getTasksActualRemaining($task),
             'Task A actual remaining is wrong.'
+        );
+        // and planning should be a success accordingly
+        $this->assertTrue($plan_success, 'planTask() did not return true ...');
+    }
+
+    public function testTasksPlanRemainingMinutesOpenOvertimeTask()
+    {
+        $tasks_plan = new TasksPlan(non_time_mode_minutes: 15);
+
+        $task = TestTask::create(
+            title: 'over, uh oh', time_estimated: 5.0, time_spent: 6.0,
+            nb_completed_subtasks: 1, nb_subtasks: 2
+        );
+        $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
+        $this->assertSame(
+            15,
+            $tasks_plan->minutesCanBePlanned($task, $time_slots_day_mon),
+            'Open + overtime task gets wrong "minutes can be planned".'
+        );
+        // plan it
+        $plan_success = $tasks_plan->planTask($task, $time_slots_day_mon);
+        // now task a should be completely planned already
+        $this->assertSame(
+            0,
+            $tasks_plan->getTasksActualRemaining($task),
+            'Open + overtime task actual remaining is wrong.'
         );
         // and planning should be a success accordingly
         $this->assertTrue($plan_success, 'planTask() did not return true ...');
@@ -1083,17 +1110,19 @@ final class TasksPlanTest extends TestCase
      */
     public function testOpenTaskAndOvertimeA()
     {
-        $tasks_plan = new TasksPlan();
+        $tasks_plan = new TasksPlan(non_time_mode_minutes: 30);
 
-        $time_slots_day_mon = new TimeSlotsDay("0:00-10:00", 'mon');
+        $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
 
         $task_a = TestTask::create(
             title: 'a', time_estimated: 5.0, time_spent: 6.0,
-            nb_completed_subtasks: 1, nb_subtasks: 2
+            nb_completed_subtasks: 1, nb_subtasks: 2,
+            project_max_hours_day: 10,
         );
         $task_b = TestTask::create(
-            title: 'b', time_estimated: 1.0, time_spent: 0.0,
-            nb_completed_subtasks: 0, nb_subtasks: 2
+            title: 'b', time_estimated: 1.0, time_spent: 0.0, time_remaining: 1.0,
+            nb_completed_subtasks: 0, nb_subtasks: 2,
+            project_max_hours_day: 10,
         );
 
         $tasks_plan->planTask(
@@ -1114,7 +1143,7 @@ final class TasksPlanTest extends TestCase
                     'end' => 30,
                     'length' => 30,
                     'spent' => 360,
-                    'remaining' => 30,
+                    'remaining' => 0,
                 ],
                 [
                     'task' => $task_b,
@@ -1138,6 +1167,72 @@ final class TasksPlanTest extends TestCase
             $expected_plan,
             $tasks_plan->getPlan(),
             'TasksPlan with open tasks and overtime did not plan tasks as expected.'
+        );
+    }
+
+    /**
+     * It's like testOpenTaskAndOvertimeA(), but with no
+     * non_time_mode_minutes given, resulting in 5 min for it.
+     */
+    public function testOpenTaskAndOvertimeB()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
+
+        $task_a = TestTask::create(
+            title: 'a', time_estimated: 5.0, time_spent: 6.0,
+            nb_completed_subtasks: 1, nb_subtasks: 2,
+            project_max_hours_day: 10,
+        );
+        $task_b = TestTask::create(
+            title: 'b', time_estimated: 1.0, time_spent: 0.0, time_remaining: 1.0,
+            nb_completed_subtasks: 0, nb_subtasks: 2,
+            project_max_hours_day: 10,
+        );
+
+        $tasks_plan->planTask(
+            $task_a,
+            $time_slots_day_mon
+        );
+        $tasks_plan->planTask(
+            $task_b,
+            $time_slots_day_mon
+        );
+
+        // expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 5,
+                    'length' => 5,
+                    'spent' => 360,
+                    'remaining' => 0,
+                ],
+                [
+                    'task' => $task_b,
+                    'start' => 5,
+                    'end' => 65,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 60,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'TasksPlan with open tasks and overtime did not plan tasks as expected, when no non_time_mode_minutes is given.'
         );
     }
 }

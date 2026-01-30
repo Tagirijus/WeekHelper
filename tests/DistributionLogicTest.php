@@ -717,7 +717,7 @@ final class DistributionLogicTest extends TestCase
                     'end' => 30,
                     'length' => 30,
                     'spent' => 360,
-                    'remaining' => 30,
+                    'remaining' => 0,
                 ],
                 [
                     'task' => $task_b,
@@ -787,7 +787,7 @@ final class DistributionLogicTest extends TestCase
                     'end' => 5,
                     'length' => 5,
                     'spent' => 360,
-                    'remaining' => 5,
+                    'remaining' => 0,
                 ],
                 [
                     'task' => $task_b,
