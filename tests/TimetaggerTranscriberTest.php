@@ -462,4 +462,52 @@ final class TimetaggerTranscriberTest extends TestCase
             $msg
         );
     }
+
+    /**
+     * I had the occasion that without having any Timetagger events, the
+     * Timetaggertranscrober converted tasks horus to seconds BUT NOT BACK.
+     */
+    public function testWrongConversionWithoutEvents()
+    {
+        //
+        // SIMULATED TIMETAGGER FETCHING
+        //
+
+        $tf = new TimetaggerFetcher();
+        $json = '{"records": []}';
+        $tf->events = TimetaggerFetcher::eventsFromJSONString($json);
+
+
+        //
+        // SIMULATED KANBAORD TASKS
+        //
+        $tasks = [
+            [
+                'id' => 1,
+                'time_estimated' => 1.5,
+                'time_spent' => 0.0,      # should stay
+                'time_remaining' => 1.5,  # should stay
+                'time_overtime' => 0.0,   # should stay
+                'nb_subtasks' => 2,
+                'nb_completed_subtasks' => 1,
+                'timetagger_tags' => 'a,b,c'
+            ],
+        ];
+
+
+        // now overwrite these tasks spent times ... which should do nothing,
+        // since there aren't events at all
+        $ts = new TimetaggerTranscriber($tf);
+        foreach ($tasks as &$task) {
+            $ts->overwriteTimesForTask($task);
+        }
+        $ts->overwriteTimesForRemainingTasks();
+
+        $msg = 'TimetaggerTranscriber should not have changed task times without any events.';
+        // final check
+        $this->assertSame(1.5, $tasks[0]['time_estimated'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_spent'], $msg);
+        $this->assertSame(1.5, $tasks[0]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_overtime'], $msg);
+    }
 }

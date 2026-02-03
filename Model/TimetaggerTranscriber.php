@@ -181,7 +181,7 @@ class TimetaggerTranscriber
                 $task['time_remaining'] = TimeHelper::hoursToSeconds($task['time_remaining']);
                 $task['time_overtime'] = TimeHelper::hoursToSeconds($task['time_overtime']);
             }
-            $this->task_times_converted[$task['id']] = &$task;
+            $this->task_times_converted[$task_id] = &$task;
         }
     }
 
@@ -263,10 +263,6 @@ class TimetaggerTranscriber
      */
     public function overwriteTimesForRemainingTasks()
     {
-        if (empty($this->timetagger_fetcher->getEvents())) {
-            // nothing to do
-            return;
-        }
         foreach ($this->remaining_open_tasks as $timetagger_tags => &$task) {
             $this->overwriteTimes($task, $timetagger_tags, true);
             $this->taskTimesToHours($task);
