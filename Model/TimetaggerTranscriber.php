@@ -163,8 +163,7 @@ class TimetaggerTranscriber
     protected function taskTimesToSeconds(&$task)
     {
         $task_id = $task['id'] ?? -1;
-        if (!in_array($task_id, $this->task_times_converted)) {
-            $this->task_times_converted[] = $task_id;
+        if (!array_key_exists($task_id, $this->task_times_converted)) {
             if (($task['timetagger_tags'] ?? '') != '') {
                 $task['time_spent'] = 0;
                 $task['time_estimated'] = TimeHelper::hoursToSeconds($task['time_estimated']);
