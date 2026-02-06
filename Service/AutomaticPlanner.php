@@ -83,35 +83,6 @@ class AutomaticPlanner extends Base
     var $blocking_pseudo_tasks = null;
 
     /**
-     * Get (and if needed first initialize it) the internal projects
-     * array with the active projects and their additional meta data.
-     *
-     * @return array
-     */
-    public function getProjects()
-    {
-        if (is_null($this->projects)) {
-            $this->initProjects();
-        }
-        return $this->projects;
-    }
-
-    /**
-     * Initialize all active projects and parse their additional
-     * meta data. Store it in the internal attribute.
-     */
-    private function initProjects()
-    {
-        $projects = $this->projectModel->getAllByStatus(ProjectModel::ACTIVE);
-        $projects = array_column($projects, null, 'id');
-        foreach ($projects as $project_id => $project) {
-            $info = ProjectInfoParser::getProjectInfoByProject($project);
-            $projects[$project_id]['info'] = $info;
-        }
-        $this->projects = $projects;
-    }
-
-    /**
      * Get (and if needed first initialize it) the internal sorting
      * logic config array.
      *
@@ -191,29 +162,6 @@ class AutomaticPlanner extends Base
         $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
         $this->tasks_active_week = $this->helper->hoursViewHelper
             ->getTimes()->getTasksByLevel($level_active_week);
-
-        // also extend the project array to each task
-        $this->extendTasksArray($this->tasks_active_week);
-    }
-
-    /**
-     * Extend the given tasks array with the some internal
-     * or "still to parse" data. This will extend the basic
-     * Kanboard tasks array. It will be given an array of
-     * Kanboard task arrays. Each of this Kanboard arrays
-     * will be extended.
-     *
-     * @param  array  &$tasks
-     */
-    public function extendTasksArray(&$tasks = [])
-    {
-        $projects = $this->getProjects();
-        foreach ($tasks as $key => $task) {
-            // if I need other (native Kanboard) project values to sort on,
-            // I should add them here. Otherwise with just the key "info"
-            // there are the ones added / parsed by my plugin.
-            $tasks[$key] = array_merge($task, $projects[$task['project_id']]['info']);
-        }
     }
 
     /**
@@ -240,9 +188,6 @@ class AutomaticPlanner extends Base
         $level_planned_week = $this->configModel->get('weekhelper_level_planned_week', '');
         $this->tasks_planned_week = $this->helper->hoursViewHelper
             ->getTimes()->getTasksByLevel($level_planned_week);
-
-        // also extend the project info to each task
-        $this->extendTasksArray($this->tasks_planned_week);
     }
 
     /**

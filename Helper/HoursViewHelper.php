@@ -8,6 +8,7 @@ use Kanboard\Model\TaskModel;
 use Kanboard\Model\ProjectModel;
 use Kanboard\Core\Paginator;
 use Kanboard\Filter\TaskProjectsFilter;
+use Kanboard\Plugin\WeekHelper\Model\ProjectInfoParser;
 use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
 
@@ -94,6 +95,23 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Extend the task array with its project info, which got parsed
+     * through its description text.
+     *
+     * @param  array &$task
+     */
+    protected function extendTaskWithProjectInfo(&$task)
+    {
+        // if I need other (native Kanboard) project values to sort on,
+        // I should add them here. Otherwise with just the key "info"
+        // there are the ones added / parsed by my plugin.
+        $task = array_merge(
+            $task,
+            $this->getProject($task['project_id'])['info']
+        );
+    }
+
+    /**
      * Will check the given init method with the
      * internally already set one and return whether
      * the init process should be done again or not.
@@ -132,8 +150,11 @@ class HoursViewHelper extends Base
     {
         $projects = $this->projectModel->getAllByIds($project_ids);
         $this->projects = [];
-        foreach ($projects as $project) {
-            $this->projects[$project['id']] = $project;
+        foreach ($projects as &$project) {
+            $project_id = $project['id'];
+            $info = ProjectInfoParser::getProjectInfoByProject($project);
+            $project['info'] = $info;
+            $this->projects[$project_id] = $project;
         }
     }
 
@@ -233,6 +254,14 @@ class HoursViewHelper extends Base
 
         // and initialize the projects as well
         $this->initProjects($project_ids);
+
+        // now extend all the projects info to the tasks so that
+        // later the TaskTimesPreparer can pass the tasks to the
+        // SortingLogic with the needed keys for sorting.
+        foreach ($this->tasks as &$task) {
+            $this->extendTaskWithProjectInfo($task);
+        }
+        unset($task);
 
         // finally tell the instance, that it was initialized already,
         // basically
