@@ -102,6 +102,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
         $this->response->html($this->helper->layout->dashboard('WeekHelper:tooltips/tooltip_dashboard_times', [
             'title' => 'Level: ' . $label,
             'label' => $label,
+            'level' => $level,
+            'user' => $user,
         ]));
     }
 
