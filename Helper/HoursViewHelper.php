@@ -6,7 +6,6 @@ use Pimple\Container;
 use Kanboard\Core\Base;
 use Kanboard\Model\TaskModel;
 use Kanboard\Model\ProjectModel;
-// use Kanboard\Model\SubtaskModel;
 use Kanboard\Core\Paginator;
 use Kanboard\Filter\TaskProjectsFilter;
 use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
