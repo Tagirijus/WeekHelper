@@ -95,4 +95,7 @@ return array(
     'Optional cookies can be set as a single HEADER string here, in case further security cookies or so has to be set.' => 'Optionale Cookies können hier als HEADER string gesetzt werden, falls weitere Sicherheits-Cookies gesetzt werden müssen.',
     'Timetagger start for timerange' => 'Timetagger Start-Punkt für Timerange',
     'This is a string which will be used in the strtotime() PHP method, which can describe with words a time point.' => 'Das muss ein String sein, der in der PHP Funktion strtotime() genutzt wird und mit Wörtern einen Zeitpunkt definineren kann.',
+    'Change complexity' => 'Komplexität ändern',
+    'Complexity changed.' => 'Komplexität geändert',
+    'Unable to change complexity.' => 'Konnte Komplexität nicht ändern',
 );

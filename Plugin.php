@@ -78,6 +78,10 @@ class Plugin extends Base
         $this->template->hook->attach(
             'template:dashboard:project:after-title', 'WeekHelper:dashboard/project_times_summary_single'
         );
+        $this->template->hook->attach(
+            'template:task:sidebar:actions',
+            'WeekHelper:task_sidebar/changecomplexity_button'
+        );
         // levels on dashboard sidebar
         if (
             $this->configModel->get('hoursview_dashboard_link_level_1', 0)
