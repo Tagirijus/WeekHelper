@@ -33,6 +33,20 @@ final class ProjectQuotaTest extends TestCase
         );
     }
 
+    public function testInit2()
+    {
+        $pl = new ProjectQuota([
+            'project_max_hours_day' => 2,
+            'project_max_hours_mon' => -1
+        ]);
+        $msg = 'ProjectQuota got not initialized correctly.';
+        $this->assertSame(
+            120,
+            $pl->getQuota('mon'),
+            $msg
+        );
+    }
+
     public function testSubstraction()
     {
         $pl = new ProjectQuota([

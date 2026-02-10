@@ -73,8 +73,10 @@ class ProjectQuota
         }
         foreach (array_keys($this->quota) as $day) {
             if (array_key_exists('project_max_hours_' . $day, $info)) {
-                $daily_minutes = (int) ($info['project_max_hours_' . $day] * 60);
-                $this->quota[$day] = $daily_minutes;
+                if ($info['project_max_hours_' . $day] != -1) {
+                    $daily_minutes = (int) ($info['project_max_hours_' . $day] * 60);
+                    $this->quota[$day] = $daily_minutes;
+                }
             }
         }
     }
