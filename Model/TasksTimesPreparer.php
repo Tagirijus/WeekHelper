@@ -2,6 +2,7 @@
 
 namespace Kanboard\Plugin\WeekHelper\Model;
 
+use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Model\SortingLogic;
 use Kanboard\Plugin\WeekHelper\Model\TaskDataExtender;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
@@ -40,6 +41,24 @@ class TasksTimesPreparer
      * @var array
      **/
     var $project_ids_by_level = [];
+
+    /**
+     * During initialization of the tasks the project info
+     * about the daily limits can also be fetched already.
+     * These will be stored in this array with this structure:
+     *
+     *  [
+     *      project_id => [
+     *          'mon' => integer,
+     *          'tue' => integer,
+     *          ...
+     *          'sun' => integer,
+     *      ]
+     *  ]
+     *
+     * @var array
+     **/
+    var $project_limits = [];
 
     /**
      * All "prepared" final tasks with their ID as the key.
@@ -188,6 +207,18 @@ class TasksTimesPreparer
             }
             if (!in_array($task['project_id'], $this->project_ids_by_level['all'])) {
                 $this->project_ids_by_level['all'][] = $task['project_id'];
+            }
+        }
+
+        if (!in_array($task['project_id'], $this->project_limits)) {
+            $daily_max = $task['project_max_hours_day'] ?? 24;
+            $this->project_limits[$task['project_id']] = [];
+            foreach (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as $day) {
+                $daily_day = $task['project_max_hours_' . $day] ?? $daily_max;
+                $daily_day = TimeHelper::hoursToMinutes(
+                    $daily_day != -1 ? $daily_day : $daily_max
+                );
+                $this->project_limits[$task['project_id']][$day] = $daily_day;
             }
         }
     }
@@ -399,7 +430,7 @@ class TasksTimesPreparer
             $this->tasks[$task['id']] = &$tasks[$i];
             $this->addTaskToLevel($tasks[$i]);
 
-            // store some project related stuff as well
+            // store some project related stuff
             $this->addProjectInfo($task);
         }
         unset($task);
@@ -780,6 +811,19 @@ class TasksTimesPreparer
     public function getProjectIdsByLevel($level)
     {
         return $this->project_ids_by_level[$level] ?? [];
+    }
+
+    /**
+     * Get the project daily limits for the given project id.
+     * An empty array will be returned, if no limits exist
+     * for the given project id.
+     *
+     * @param  integer $project_id
+     * @return array
+     */
+    public function getProjectLimitsById($project_id)
+    {
+        return $this->project_limits[$project_id] ?? [];
     }
 
     /**

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../Helper/TimeHelper.php';
 require_once __DIR__ . '/../Model/TasksTimesPreparer.php';
 require_once __DIR__ . '/../tests/TestTask.php';
 require_once __DIR__ . '/../Model/SortingLogic.php';
@@ -441,5 +442,23 @@ final class TasksTimesPreparerTest extends TestCase
         $this->assertSame(0.0, $ttp->getEstimatedByProjectHome(2), $msg);
         $this->assertTrue($ttp->hasTimesByProjectHome(1), $msg);
         $this->assertFalse($ttp->hasTimesByProjectHome(2), $msg);
+    }
+
+    public function testProjectLimits()
+    {
+        $ttp = new TasksTimesPreparer();
+
+        $tasks = [
+            TestTask::create(project_id: 1, project_max_hours_day: 2, project_max_hours_mon: 4),
+            TestTask::create(project_id: 2, project_max_hours_day: 1, project_max_hours_wed: 3),
+        ];
+
+        $ttp->initTasksAndTimes($tasks);
+        $msg = 'TasksTimesPreparer could not fetch project limits correctly.';
+        $this->assertSame(240, $ttp->getProjectLimitsById(1)['mon'], $msg);
+        $this->assertSame(120, $ttp->getProjectLimitsById(1)['tue'], $msg);
+        $this->assertSame(60, $ttp->getProjectLimitsById(2)['mon'], $msg);
+        $this->assertSame(60, $ttp->getProjectLimitsById(2)['tue'], $msg);
+        $this->assertSame(180, $ttp->getProjectLimitsById(2)['wed'], $msg);
     }
 }
