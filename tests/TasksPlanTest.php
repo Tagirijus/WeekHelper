@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Model/TasksPlan.php';
 require_once __DIR__ . '/../tests/TestTask.php';
+require_once __DIR__ . '/../Model/ProjectQuota.php';
+require_once __DIR__ . '/../Model/ProjectQuotaAll.php';
 require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimeSlotsDay.php';
 require_once __DIR__ . '/../Model/TimePoint.php';
@@ -14,7 +16,6 @@ use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
-use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 
 
 final class TasksPlanTest extends TestCase

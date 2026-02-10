@@ -3,7 +3,6 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Model\ProjectQuota;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
 use Kanboard\Plugin\WeekHelper\Model\TimePoint;

@@ -11,7 +11,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Model\ProjectQuota;
+use Kanboard\Plugin\WeekHelper\Model\ProjectQuotaAll;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
 
 
@@ -166,23 +166,11 @@ class TasksPlan
     var $open_overtime_task_ids = [];
 
     /**
-     * Project quotas by project id:
+     * Project quotas repository.
      *
-     *  [
-     *      project_id => ProjectQuota
-     *  ]
-     *
-     * @var array
+     * @var ProjectQuotaAll
      **/
-    var $project_quotas = [];
-
-    /**
-     * The optional TaskTimesPreparer, which is needed for
-     * depleting the ProjectQuota by the spent times.
-     *
-     * @var null|TaskTimesPreparer
-     **/
-    var $task_times_preparer = null;
+    var $project_quota_all;
 
     /**
      * Initialize the instance.
@@ -190,23 +178,15 @@ class TasksPlan
      * @param integer $min_slot_length
      * @param integer $non_time_mode_minutes
      * @param null|array $available_day_times
-     * @param null|TaskTimesPreparer $task_times_preparer
      */
     public function __construct(
         $min_slot_length = 0,
         $non_time_mode_minutes = 0,
-        $available_day_times = null,
-        $task_times_preparer = null
     )
     {
         $this->min_slot_length = $min_slot_length;
         $this->non_time_mode_minutes = $non_time_mode_minutes != 0 ? $non_time_mode_minutes : 5;
-        if (!is_null($available_day_times)) {
-            $this->available_day_times = $available_day_times;
-        }
-        if (!is_null($task_times_preparer)) {
-            $this->task_times_preparer = $task_times_preparer;
-        }
+        $this->project_quota_all = new ProjectQuotaAll();
     }
 
     /**
@@ -281,29 +261,16 @@ class TasksPlan
     }
 
     /**
-     * Get ProjectQuota by project id of the given task.
-     * I do want the whole task here, since: if there is
-     * no ProjectQuota yet, it should be initialized
-     * with the values from the whole task. That's why I
-     * would need its array values as well and not just
-     * the project id.
+     * Return the daily time available for the project and the day.
+     * While the internal ProjectQuotaAll instance might not be
+     * given from outside sometimes, this method will automatically
+     * initialize the quota by the tasks data, which hold the project
+     * info as well.
      *
-     * @param  array $task
-     * @return ProjectQuota
-     */
-    public function getProjectQuotaByTask($task)
-    {
-        if (!array_key_exists($task['project_id'], $this->project_quotas)) {
-            $this->initProjectQuota($task);
-        }
-        return $this->project_quotas[$task['project_id']];
-    }
-
-    /**
-     * Check if the daily limit for the given task is full. A task
-     * array will also hold the "project_max_hours_day" value so
-     * that I can check on this key. This method will return the
-     * remaining contingent available for the project.
+     * For example: maybe the quota is not set at all, then
+     * this method will be able to set the quota and some kind of
+     * initialize it with the values given by e.g. "project_hours_max_day"
+     * or "project_hours_max_mon", "..._tue", ...
      *
      * @param  array $task
      * @param  string $day
@@ -320,38 +287,20 @@ class TasksPlan
             return 1440;
         }
 
-        // otherwise get the daily remaining quota by the internal ProjectQuota
-        // intsance belonging to the task
-        return $this->getProjectQuotaByTask($task)->getQuota($day);
-    }
+        // otherwise get the daily remaining quota by the internal ProjectQuotaAll
+        // instance
+        $quota = $this->project_quota_all->getQuotaByProjectIdAndDay($task['project_id'], $day);
 
-    /**
-     * Initialize the project quota with the given task, while also
-     * considering the daily available times, coming from the internal
-     * available_day_times attribute, which was set by DistributionLogic's
-     * TimeSlotsDay instances. Means: a project might have daily limits. But
-     * if the limit is higher than the actual available day time defined by
-     * the slots, the slots should override it.
-     *
-     * @param  array $task
-     */
-    protected function initProjectQuota($task)
-    {
-        $this->project_quotas[$task['project_id']] = new ProjectQuota($task);
-
-        // adjust the ProjectQuota to the daily available times according
-        // to the TimeSlotsDays times
-        foreach ($this->available_day_times as $day => $minutes) {
-            if ($this->project_quotas[$task['project_id']]->getQuota($day) > $minutes) {
-                $this->project_quotas[$task['project_id']]->setQuota($day, $minutes);
-            }
+        if ($quota == -1) {
+            // -1 means that there is no ProjectQuota for this project yet,
+            // so initialize it first
+            $this->project_quota_all->initProjectQuota($task['project_id'], $task);;
+            // now after initialization, set quota again, which now should hold
+            // seom value other than -1
+            $quota = $this->project_quota_all->getQuotaByProjectIdAndDay($task['project_id'], $day);
         }
 
-        // "deplete" the ProjectQuota by already spent times, if TaskTimesPreparer
-        // was given in the constructor
-        if (!is_null($this->task_times_preparer)) {
-            // TODO: Logic to deplete ProjectQuote here!!
-        }
+        return $quota;
     }
 
     /**
@@ -425,8 +374,8 @@ class TasksPlan
             $success = $plan_success == '';
 
             // update the project quota
-            $this->getProjectQuotaByTask($task)->substractQuota(
-                $time_slots_day->getDay(), $time_to_plan
+            $this->project_quota_all->substractQuotaByProjectIdAndDay(
+                $task['project_id'], $time_slots_day->getDay(), $time_to_plan
             );
 
             // add task to the internal planning array and update other
