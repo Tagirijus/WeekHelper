@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Model\ProjectQuota;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
 use Kanboard\Plugin\WeekHelper\Model\TimePoint;
@@ -58,27 +59,6 @@ class DistributionLogic
     ];
 
     /**
-     * This array holds the project limits for each project
-     * by its ID and also by the overall level:
-     *
-     *  [
-     *      level_1 => [
-     *          project_id => ProjectLimits,
-     *          ...
-     *      ],
-     *      level_2 => [
-     *          project_id => ProjectLimits,
-     *          ...
-     *      ],
-     *      ...
-     *  ]
-     *
-     * @var array
-     **/
-    var $project_limits_by_level = [];
-
-
-    /**
      * Initialize the class with its attributes.
      *
      * @param array  $time_slots_config
@@ -126,7 +106,16 @@ class DistributionLogic
     {
         $this->tasks_plan = new TasksPlan(
             $time_slots_config['min_slot_length'],
-            $time_slots_config['non_time_mode_minutes']
+            $time_slots_config['non_time_mode_minutes'],
+            [
+                'mon' => $this->time_slots_days['mon']->getLength(),
+                'tue' => $this->time_slots_days['tue']->getLength(),
+                'wed' => $this->time_slots_days['wed']->getLength(),
+                'thu' => $this->time_slots_days['thu']->getLength(),
+                'fri' => $this->time_slots_days['fri']->getLength(),
+                'sat' => $this->time_slots_days['sat']->getLength(),
+                'sun' => $this->time_slots_days['sun']->getLength(),
+            ]
         );
     }
 

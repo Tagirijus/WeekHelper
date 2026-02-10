@@ -93,6 +93,18 @@ class ProjectQuota
     }
 
     /**
+     * Set the quota for the day.
+     *
+     * @param  string $day
+     * @param  integer $minutes
+     * @return integer
+     */
+    public function setQuota($day, $minutes)
+    {
+        $this->quota[$day] = $minutes;
+    }
+
+    /**
      * Substract minutes from the quota for the day.
      * If the quota holds less minutes than to be
      * subtracted, the method will return the amount
