@@ -12,6 +12,7 @@ namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
+use Kanboard\Plugin\WeekHelper\Model\TimesPoint;
 
 class TasksPlan
 {
@@ -95,6 +96,13 @@ class TasksPlan
     var $non_time_mode_minutes;
 
     /**
+     * The TimePoint instance for "now".
+     *
+     * @var TimePoint
+     **/
+    var $now;
+
+    /**
      * This variable holds the overall planned, spent and
      * remaining times per week and per day. Structure:
      *
@@ -133,26 +141,6 @@ class TasksPlan
     ];
 
     /**
-     * If set to true, the instance will use the tasks
-     * "time_spent" instead of the "time_remaining" key.
-     * This is used for "planning" a week, or better,
-     * basically getting what work was done already, probably.
-     * This way I get a planned_project_times array I cen then
-     * pass onto the actual week planning TasksPlan instance,
-     * which will be able to understand for which projects
-     * tasks were processed already and use the updated
-     * project limits.
-     *
-     * For example: in a week I might have worked for a project
-     * for 5 hours already and it is Wednesday. Maybe the
-     * project daily limit is 2h. This would mean that on Wednesday
-     * only 1 hour is left to plan for this project.
-     *
-     * @var boolean
-     **/
-    var $worked_mode = false;
-
-    /**
      * This attribute will hold info about which task
      * is open and has overtime, but still was used
      * in the plan already. I need this to have "still
@@ -169,18 +157,22 @@ class TasksPlan
     /**
      * Initialize the instance.
      *
+     * @param  TimePoint $now
      * @param integer $min_slot_length
-     * @param boolean $worked_mode
      * @param integer $non_time_mode_minutes
      */
     public function __construct(
+        $now = null,
         $min_slot_length = 0,
-        $worked_mode = false,
         $non_time_mode_minutes = 0
     )
     {
+        if (is_null($now)) {
+            $this->now = new TimePoint();
+        } else {
+            $this->now = $now;
+        }
         $this->min_slot_length = $min_slot_length;
-        $this->worked_mode = $worked_mode;
         $this->non_time_mode_minutes = $non_time_mode_minutes != 0 ? $non_time_mode_minutes : 5;
     }
 
@@ -226,13 +218,7 @@ class TasksPlan
      */
     public function getTasksActualRemaining($task)
     {
-        if ($this->worked_mode) {
-            // see doc comment at start of class to understand what
-            // this is basically for!
-            $remain = TimeHelper::hoursToMinutes($task['time_spent']);
-        } else {
-            $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
-        }
+        $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
         $planned = $this->getPlannedTimeForTask($task['id']);
         return max(0, $remain - $planned);
     }
@@ -569,17 +555,6 @@ class TasksPlan
     public function setMinSlotLength($min_slot_length = 0)
     {
         $this->min_slot_length = $min_slot_length;
-    }
-
-    /**
-     * Copy the internal planned_project_times from another given
-     * TasksPlan instance to this internal attribut accordingly.
-     *
-     * @param  TasksPlan $tasks_plan
-     */
-    public function copyPlannedProjectTimesFromTasksPlan($tasks_plan)
-    {
-        $this->planned_project_times = $tasks_plan->planned_project_times;
     }
 
     /**

@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 
 
 final class TasksPlanTest extends TestCase
@@ -247,7 +248,7 @@ final class TasksPlanTest extends TestCase
 
     public function testTasksPlanMinSlotLength()
     {
-        $tasks_plan = new TasksPlan(15);
+        $tasks_plan = new TasksPlan(min_slot_length: 15);
 
         $task_a = TestTask::create(
             project_id: 4,
@@ -390,7 +391,7 @@ final class TasksPlanTest extends TestCase
 
     public function testTasksPlanPlanningBForMinSlotLength()
     {
-        $tasks_plan = new TasksPlan(16);
+        $tasks_plan = new TasksPlan(min_slot_length: 16);
 
         // for Monday only task A should be planned
         $time_slots_day_mon = new TimeSlotsDay("6:00-8:00", 'mon');
@@ -457,7 +458,7 @@ final class TasksPlanTest extends TestCase
 
     public function testMinSlotLengthAgain()
     {
-        $tasks_plan = new TasksPlan(30);
+        $tasks_plan = new TasksPlan(min_slot_length: 30);
 
         $time_slots_day_mon = new TimeSlotsDay("6:00-6:20\n10:00-12:00", 'mon');
         $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
@@ -542,204 +543,6 @@ final class TasksPlanTest extends TestCase
             ],
             $tasks_plan->getPlan(),
             'TasksPlan plan with min slot length is incorrect.'
-        );
-    }
-
-    public function testWorkedMode()
-    {
-        $tasks_plan = new TasksPlan();
-
-        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
-        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
-
-        $task_a = TestTask::create(
-            project_id: 1,
-            project_max_hours_day: 4,
-            time_remaining: 4,
-            title: 'a',
-        );
-        $task_b = TestTask::create(
-            project_id: 1,
-            project_max_hours_day: 4,
-            time_remaining: 2,
-            title: 'b',
-        );
-        $task_c = TestTask::create(
-            project_id: 2,
-            project_max_hours_day: 2,
-            time_remaining: 2,
-            title: 'c',
-        );
-
-        $tasks_plan->planTask(
-            $task_a,
-            $time_slots_day_mon
-        );
-        $tasks_plan->planTask(
-            $task_b,
-            $time_slots_day_tue
-        );
-        $tasks_plan->planTask(
-            $task_c,
-            $time_slots_day_tue
-        );
-
-        // without looking at spent time, the plan should be this basically
-        $expected_without_worked_mode = [
-            'mon' => [
-                [
-                    'task' => $task_a,
-                    'start' => 600,
-                    'end' => 840,
-                    'length' => 240,
-                    'spent' => 0,
-                    'remaining' => 240,
-                ]
-            ],
-            'tue' => [
-                [
-                    'task' => $task_b,
-                    'start' => 600,
-                    'end' => 720,
-                    'length' => 120,
-                    'spent' => 0,
-                    'remaining' => 120,
-                ],
-                [
-                    'task' => $task_c,
-                    'start' => 720,
-                    'end' => 840,
-                    'length' => 120,
-                    'spent' => 0,
-                    'remaining' => 120,
-                ]
-            ],
-            'wed' => [],
-            'thu' => [],
-            'fri' => [],
-            'sat' => [],
-            'sun' => [],
-            'overflow' => [],
-        ];
-        $this->assertSame(
-            $expected_without_worked_mode,
-            $tasks_plan->getPlan(),
-            'Expected plan is not correct without work mode enabled.'
-        );
-
-        //
-        // now the same with work mode enabled and timeslots depleted
-        // for Monday (as if the new day is Tuesday now after working
-        // Monday already - but task a was not finished).
-        //
-
-        $tasks_plan = new TasksPlan();
-        $tasks_plan_worked = new TasksPlan(0, true);
-
-        $time_slots_day_mon = new TimeSlotsDay("10:00-14:00", 'mon');
-        $time_slots_day_tue = new TimeSlotsDay("10:00-14:00", 'tue');
-        $time_slots_day_ovr = new TimeSlotsDay("0:00-100:00", 'overflow');
-
-        $task_a = TestTask::create(
-            project_id: 1,
-            project_max_hours_day: 4,
-            time_remaining: 2,
-            time_spent: 2,
-            title: 'a',
-        );
-        $task_b = TestTask::create(
-            project_id: 1,
-            project_max_hours_day: 4,
-            time_remaining: 2,
-            title: 'b',
-        );
-        $task_c = TestTask::create(
-            project_id: 2,
-            project_max_hours_day: 2,
-            time_remaining: 2,
-            title: 'c',
-        );
-
-        // create a plan for worked tasks and thus create a correct project
-        // daily limits array internally ...
-        // only do this for task A, since I just know that the other tasks
-        // do not have spent time ... at least here in the test. later in the
-        // distribution logic method, the method will iter through all
-        // time slot day intsnaces anyway.
-        $tasks_plan_worked->planTask(
-            $task_a,
-            $time_slots_day_mon
-        );
-
-        // pass the project daily limits to the actual tasks plan
-        $tasks_plan->copyPlannedProjectTimesFromTasksPlan($tasks_plan_worked);
-
-        // also deplete Monday as if it is Tuesday now already
-        $time_slots_day_mon->deplete();
-
-        // now plan the tasks again for the actual tasksplan instance
-        $tasks_plan->planTask(
-            $task_a,
-            $time_slots_day_mon
-        );
-        $tasks_plan->planTask(
-            $task_a,
-            $time_slots_day_tue
-        );
-        $tasks_plan->planTask(
-            $task_b,
-            $time_slots_day_tue
-        );
-        $tasks_plan->planTask(
-            $task_c,
-            $time_slots_day_tue
-        );
-        $tasks_plan->planTask(
-            $task_c,
-            $time_slots_day_ovr
-        );
-
-        // without looking at spent time, the plan should be this basically
-        $expected_without_worked_mode = [
-            'mon' => [],
-            'tue' => [
-                [
-                    'task' => $task_a,
-                    'start' => 600,
-                    'end' => 720,
-                    'length' => 120,
-                    'spent' => 120,
-                    'remaining' => 120,
-                ],
-                [
-                    'task' => $task_b,
-                    'start' => 720,
-                    'end' => 840,
-                    'length' => 120,
-                    'spent' => 0,
-                    'remaining' => 120,
-                ]
-            ],
-            'wed' => [],
-            'thu' => [],
-            'fri' => [],
-            'sat' => [],
-            'sun' => [],
-            'overflow' => [
-                [
-                    'task' => $task_c,
-                    'start' => 0,
-                    'end' => 120,
-                    'length' => 120,
-                    'spent' => 0,
-                    'remaining' => 120,
-                ]
-            ],
-        ];
-        $this->assertSame(
-            $expected_without_worked_mode,
-            $tasks_plan->getPlan(),
-            'Expected plan is not correct with work mode enabled.'
         );
     }
 
@@ -1232,6 +1035,102 @@ final class TasksPlanTest extends TestCase
             $expected_plan,
             $tasks_plan->getPlan(),
             'TasksPlan with open tasks and overtime did not plan tasks as expected, when no non_time_mode_minutes is given.'
+        );
+    }
+
+    /**
+     * This test is for preparing a new internal logic for distributing
+     * tasks. It can happen that I work in advance for certain tasks,
+     * even if the daily limit would not allow it. Sometimes I might
+     * have some more time than expected. In that case I work on a task.
+     * For now the system handles such things like that: it basically
+     * gets the spent time and "distributes" it throughout the tasks
+     * from the start of the week until the end.
+     *
+     * Example scenario:
+     * I have a daily limit of 1h per day. A task has an estimated for
+     * 5h for the whole week. It could be done for 1h each day, basically.
+     * Now on Monday I found time to even work 2h for this task. This would
+     * mean that the system would get "2h of spent time" and thus "distribute"
+     * this spent time throughout Monday and Tuesday. Now it might be start of
+     * Tuesday and I alrwady worked 2h for this task. This would mean that
+     * the system would not plan this task for this day (Tuesday), since it
+     * already got 2h of spent time, thinking I might have worked these 2h
+     * on Monday+Tuesday already.
+     *
+     * New feature / logic idea:
+     * I might consider adding this as an optional logic, since I am not sure
+     * right now, if it otherwise would break some backwards-compability.
+     * Now the new logic I want to have is that the system would "take" this
+     * "worked in advance" form the end of the week and not from the start.
+     * Means for the above example that not Tuesday would lack of the 1h I
+     * worked in advance already, but Friday.
+     *
+     * Possible solution:
+     * I should keep the "worked in advance" time and substract it from the
+     * end of the week. I have to dig into the code and understand it, but
+     * I guess it is about the "planned_project_times" variable, which also
+     * basically stands for the spent time somehow ... I am still thinking ...
+     */
+    public function TODOtestWorkedInAdvance()
+    {
+        $tasks_plan = new TasksPlan(now: new TimePoint('wed 6:00'));
+
+        $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
+        $time_slots_day_tue = new TimeSlotsDay('0:00-10:00', 'tue');
+        $time_slots_day_wed = new TimeSlotsDay('0:00-10:00', 'wed');
+
+        $task = TestTask::create(
+            title: 'task', time_estimated: 3.0, time_spent: 2.0, time_remaining: 1.0,
+            project_max_hours_day: 1
+        );
+
+        $tasks_plan->planTask($task, $time_slots_day_mon);
+        $tasks_plan->planTask($task, $time_slots_day_tue);
+        $tasks_plan->planTask($task, $time_slots_day_wed);
+
+        $expected = [
+            'mon' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 60,
+                    'length' => 60,
+                    'spent' => 120,
+                    'remaining' => 60,
+                ],
+            ],
+            'tue' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 60,
+                    'length' => 60,
+                    'spent' => 120,
+                    'remaining' => 60,
+                ],
+            ],
+            'wed' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 60,
+                    'length' => 60,
+                    'spent' => 120,
+                    'remaining' => 60,
+                ],
+            ],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        $this->assertSame(
+            $expected,
+            $tasks_plan->getPlan(),
+            'TasksPlan does not plan correctly with "worked in advance" spent times.'
         );
     }
 }

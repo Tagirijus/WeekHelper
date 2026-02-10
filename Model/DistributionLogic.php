@@ -38,16 +38,6 @@ class DistributionLogic
     ];
 
     /**
-     * The virtual plan, which will basically
-     * hold the processed tasks / spent time.
-     * It will be used to update the actual
-     * TasksPlan instance project daily limits.
-     *
-     * @var TasksPlan
-     **/
-    var $worked_plan;
-
-    /**
      * An array with all the TimeSlotsDay instances, which
      * are capable of holding slot capacities.
      * The last ("overflow") instance is basically a day
@@ -68,9 +58,31 @@ class DistributionLogic
     ];
 
     /**
+     * This array holds the project limits for each project
+     * by its ID and also by the overall level:
+     *
+     *  [
+     *      level_1 => [
+     *          project_id => ProjectLimits,
+     *          ...
+     *      ],
+     *      level_2 => [
+     *          project_id => ProjectLimits,
+     *          ...
+     *      ],
+     *      ...
+     *  ]
+     *
+     * @var array
+     **/
+    var $project_limits_by_level = [];
+
+
+    /**
      * Initialize the class with its attributes.
      *
      * @param array  $time_slots_config
+     * @param string $now The TimePoint string; if '' it will use "now"
      */
     public function __construct($time_slots_config = [
         'mon' => '',
@@ -82,19 +94,12 @@ class DistributionLogic
         'sun' => '',
         'min_slot_length' => 0,
         'non_time_mode_minutes' => 0,
-    ])
+        ],
+        $now = ''
+    )
     {
         $this->parseTimeSlots($time_slots_config);
-        $this->tasks_plan = new TasksPlan(
-            $time_slots_config['min_slot_length'],
-            false,
-            $time_slots_config['non_time_mode_minutes']
-        );
-        $this->worked_plan = new TasksPlan(
-            $time_slots_config['min_slot_length'],
-            true,
-            $time_slots_config['non_time_mode_minutes']
-        );
+        $this->initTasksPlans($time_slots_config, $now);
     }
 
     /**
@@ -112,6 +117,23 @@ class DistributionLogic
                 $this->tasks_plan->planTask($task, $time_slots_day);
             }
         }
+    }
+
+    /**
+     * Initialize the internal TasksPlan instances.
+     *
+     * @param array  $time_slots_config
+     * @param string $now The TimePoint string to use for TasksPlan,
+     *                    giving the info about what time it is. Empty
+     *                    means "now".
+     */
+    protected function initTasksPlans($time_slots_config, $now = '')
+    {
+        $this->tasks_plan = new TasksPlan(
+            $now,
+            $time_slots_config['min_slot_length'],
+            $time_slots_config['non_time_mode_minutes']
+        );
     }
 
     /**
@@ -379,27 +401,6 @@ class DistributionLogic
             }
         }
         return [$blocking_timespans, $pseudo_tasks];
-    }
-
-    /**
-     * With the given tasks create some kind of virtual plan internally
-     * with the help of all "time_spent" values, instead of "time_remaining".
-     * With this a "planned_project_times" will be created, which then
-     * will be transfered ot the actual internal TasksPlan instance.
-     *
-     * If a week plan will now be generated, it menas that updated project
-     * daily limits will be used.
-     *
-     * @param  array $tasks
-     */
-    public function updateWorkedTimesForTasksPlan($tasks)
-    {
-        foreach ($this->time_slots_days as $time_slots_day) {
-            foreach ($tasks as $task) {
-                $this->worked_plan->planTask($task, $time_slots_day);
-            }
-        }
-        $this->tasks_plan->copyPlannedProjectTimesFromTasksPlan($this->worked_plan);
     }
 
     /**
