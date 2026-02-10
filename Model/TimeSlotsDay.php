@@ -582,7 +582,7 @@ class TimeSlotsDay
      * So if the TimePoint should represent 13:00 o'clock, it
      * would deplete the TimeSpan of 0:00-13:00.
      *
-     * ignore_day cna be set to true so that a TimePoint with
+     * ignore_day can be set to true so that a TimePoint with
      * a different day than the internal TimeSlotsDay can
      * also be used.
      *
