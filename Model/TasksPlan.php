@@ -596,6 +596,17 @@ class TasksPlan
     }
 
     /**
+     * Override the internal ProjectQuotaAll with the given
+     * one from the parameter here.
+     *
+     * @param ProjectQuotaAll $project_quota_all
+     */
+    public function setProjectQuotaAll($project_quota_all)
+    {
+        $this->project_quota_all = $project_quota_all;
+    }
+
+    /**
      * Sort the tasks on the days according to their starting time.
      *
      * @param  array $plan
