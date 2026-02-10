@@ -230,34 +230,116 @@ class TasksPlan
     }
 
     /**
-     * Return the already planned time in minutes for the
-     * task with the given id.
+     * Add a task into the internal plan finally.
      *
-     * @param  integer $task_id
-     * @return integer
+     * @param array $task
+     * @param string $day
+     * @param integer $start
+     * @param integer $end
      */
-    public function getPlannedTimeForTask($task_id)
+    public function addTaskToPlan($task, $day, $start, $end)
     {
-        if (array_key_exists($task_id, $this->planned_tasks_times)) {
-            return $this->planned_tasks_times[$task_id];
-        } else {
-            return 0;
-        }
+        $this->plan[$day][] = [
+            'task' => $task,
+            'start' => $start,
+            'end' => $end,
+            'length' => $end - $start,
+            'spent' => TimeHelper::hoursToMinutes($task['time_spent']),
+            'remaining' => TimeHelper::hoursToMinutes($task['time_remaining'])
+        ];
     }
 
     /**
-     * Return the "real" remaining time for a task after it's current
-     * planning. Basically this will get the original tasks remaining
-     * time and subtract this from the already planned time.
+     * Add times to the internal global array, which holds information
+     * about on which day or for the whole week how the times are; like
+     * remainin, spent and planned times.
      *
-     * @param  array $task
-     * @return integer
+     * @param string $day
+     * @param integer $minutes_planned
+     * @param array $task
      */
-    public function getTasksActualRemaining($task)
+    public function addTimesToGlobal($day, $minutes_planned, $task)
     {
-        $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
-        $planned = $this->getPlannedTimeForTask($task['id']);
-        return max(0, $remain - $planned);
+        $task_id = $task['id'];
+        if (!in_array($task_id, $this->global_times['task_ids'])) {
+            $remaining = TimeHelper::hoursToMinutes($task['time_remaining']);
+            $spent = TimeHelper::hoursToMinutes($task['time_spent']);
+            $this->global_times['task_ids'][] = $task_id;
+        } else {
+            $remaining = 0;
+            $spent = 0;
+        }
+        $this->global_times['week']['remaining'] += $remaining;
+        $this->global_times['week']['spent'] += $spent;
+        // only add planned time for the real week days;
+        // not for the overflow. the later one is stored
+        // in the "global_times['overflow']" array anyway!
+        if (in_array($day, ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])) {
+            $this->global_times['week']['planned'] += $minutes_planned;
+        }
+        $this->global_times[$day]['remaining'] += $remaining;
+        $this->global_times[$day]['spent'] += $spent;
+        $this->global_times[$day]['planned'] += $minutes_planned;
+    }
+
+    /**
+     * Combine two given plans and sort them accordingly.
+     * This can combine two TasksPlan task arrays. It also
+     * can (that's why I am coding it) combine a TasksPlan
+     * task array with a blocking_pseudo_tasks array from
+     * the DistributionLogic, which is needed for the
+     * feature to also print out the blocking tasks.
+     *
+     * @param  array $plan_a
+     * @param  array $plan_b
+     * @return array
+     */
+    public static function combinePlans($plan_a, $plan_b)
+    {
+        $out = [
+            'mon' => array_merge($plan_a['mon'], $plan_b['mon']),
+            'tue' => array_merge($plan_a['tue'], $plan_b['tue']),
+            'wed' => array_merge($plan_a['wed'], $plan_b['wed']),
+            'thu' => array_merge($plan_a['thu'], $plan_b['thu']),
+            'fri' => array_merge($plan_a['fri'], $plan_b['fri']),
+            'sat' => array_merge($plan_a['sat'], $plan_b['sat']),
+            'sun' => array_merge($plan_a['sun'], $plan_b['sun']),
+            'overflow' => array_merge($plan_a['overflow'], $plan_b['overflow']),
+        ];
+        return self::sortPlan($out);
+    }
+
+    /**
+     * Return the internal array part for the week times.
+     *
+     * @return array
+     */
+    public function getGlobalTimesForWeek()
+    {
+        return $this->global_times['week'];
+    }
+
+    /**
+     * Return the internal array part for the times for
+     * the specified weekday.
+     *
+     * @param  string $day
+     * @return array
+     */
+    public function getGlobalTimesForDay($day = 'mon')
+    {
+        return $this->global_times[$day];
+    }
+
+    /**
+     * Basically a wrapper for getting the "overflow" key
+     * value from getGlobalTimesForDay().
+     *
+     * @return array
+     */
+    public function getGlobalTimesForOverflow()
+    {
+        return $this->global_times['overflow'];
     }
 
     /**
@@ -301,6 +383,132 @@ class TasksPlan
         }
 
         return $quota;
+    }
+
+    /**
+     * Return the final plan, which basically is just the internal
+     * array.
+     *
+     * @return array
+     */
+    public function getPlan()
+    {
+        $this->plan = self::sortPlan($this->plan);
+        return $this->plan;
+    }
+
+    /**
+     * Return the already planned time in minutes for the
+     * task with the given id.
+     *
+     * @param  integer $task_id
+     * @return integer
+     */
+    public function getPlannedTimeForTask($task_id)
+    {
+        if (array_key_exists($task_id, $this->planned_tasks_times)) {
+            return $this->planned_tasks_times[$task_id];
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Return the "real" remaining time for a task after it's current
+     * planning. Basically this will get the original tasks remaining
+     * time and subtract this from the already planned time.
+     *
+     * @param  array $task
+     * @return integer
+     */
+    public function getTasksActualRemaining($task)
+    {
+        $remain = TimeHelper::hoursToMinutes($task['time_remaining']);
+        $planned = $this->getPlannedTimeForTask($task['id']);
+        return max(0, $remain - $planned);
+    }
+
+    /**
+     * BASICALLY THIS IS THE CONDITION CHECKER FOR TASK.
+     *
+     * Check the conditions on which a task can be planned.
+     * Outputs the possible length of the task, which could
+     * be planned. So basically "0" means that a condition
+     * wasn't fulfilled.
+     *
+     * @param  array $task
+     * @param  TimeSlotsDay $time_slots_day
+     * @return integer
+     */
+    public function minutesCanBePlanned($task, $time_slots_day)
+    {
+        // the task is still open and has overtime already
+        if (
+            !TimesCalculator::isDone($task)
+            && TimesCalculator::calculateOvertime(
+                $task['time_estimated'],
+                $task['time_spent'],
+                TimesCalculator::isDone($task)
+            )
+            && !in_array($task['id'], $this->open_overtime_task_ids)
+        ) {
+            // in that case just use the non_time_mode_minutes
+            // as the planable minutes, since it is quite of
+            // unclear anyway, when the task will be done
+            $this->open_overtime_task_ids[] = $task['id'];
+            return $this->non_time_mode_minutes;
+        }
+
+        // this task is completely planned already
+        $tasks_actual_remaining = $this->getTasksActualRemaining($task);
+        if ($tasks_actual_remaining == 0) {
+            return 0;
+        }
+
+        // check project day limit
+        $left_daily_limit = $this->getLeftDailyTime($task, $time_slots_day->getDay());
+        if ($left_daily_limit <= 0) {
+            return 0;
+        }
+
+        // get next possible slot
+        $time_point_str = $task['plan_from'] ?? '';
+        $next_slot_key = $time_slots_day->nextSlot($task, $time_point_str);
+        if ($next_slot_key == -1) {
+            return 0;
+        }
+
+        // start time
+        $start = $time_slots_day->getStartOfSlot($next_slot_key);
+        if ($start == -1) {
+            // should not happen normally ...
+            return 0;
+        }
+
+        // available length of slot
+        $slot_length = $time_slots_day->getLengthOfSlot($next_slot_key);
+
+        // does the slot have enough time according to the config
+        // minimum slot length?
+        if ($slot_length < $this->min_slot_length) {
+            $time_slots_day->depleteSlot($next_slot_key);
+            return 0;
+        }
+
+        // get possible time to plan and return it
+        // prios here are:
+        // - complete actual remaining of task, if project max and slot length allows it
+        // - otherwise only project max, if slot allows it
+        // - otherwisw only the available slot length
+        $out = (
+            ($tasks_actual_remaining > $left_daily_limit)
+            ? $left_daily_limit : $tasks_actual_remaining
+        );
+        $out = (
+            ($out > $slot_length)
+            ? $slot_length : $out
+        );
+        return $out;
     }
 
     /**
@@ -388,142 +596,6 @@ class TasksPlan
     }
 
     /**
-     * Add a task into the internal plan finally.
-     *
-     * @param array $task
-     * @param string $day
-     * @param integer $start
-     * @param integer $end
-     */
-    public function addTaskToPlan($task, $day, $start, $end)
-    {
-        $this->plan[$day][] = [
-            'task' => $task,
-            'start' => $start,
-            'end' => $end,
-            'length' => $end - $start,
-            'spent' => TimeHelper::hoursToMinutes($task['time_spent']),
-            'remaining' => TimeHelper::hoursToMinutes($task['time_remaining'])
-        ];
-    }
-
-    /**
-     * Add times to the internal global array, which holds information
-     * about on which day or for the whole week how the times are; like
-     * remainin, spent and planned times.
-     *
-     * @param string $day
-     * @param integer $minutes_planned
-     * @param array $task
-     */
-    public function addTimesToGlobal($day, $minutes_planned, $task)
-    {
-        $task_id = $task['id'];
-        if (!in_array($task_id, $this->global_times['task_ids'])) {
-            $remaining = TimeHelper::hoursToMinutes($task['time_remaining']);
-            $spent = TimeHelper::hoursToMinutes($task['time_spent']);
-            $this->global_times['task_ids'][] = $task_id;
-        } else {
-            $remaining = 0;
-            $spent = 0;
-        }
-        $this->global_times['week']['remaining'] += $remaining;
-        $this->global_times['week']['spent'] += $spent;
-        // only add planned time for the real week days;
-        // not for the overflow. the later one is stored
-        // in the "global_times['overflow']" array anyway!
-        if (in_array($day, ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'])) {
-            $this->global_times['week']['planned'] += $minutes_planned;
-        }
-        $this->global_times[$day]['remaining'] += $remaining;
-        $this->global_times[$day]['spent'] += $spent;
-        $this->global_times[$day]['planned'] += $minutes_planned;
-    }
-
-    /**
-     * BASICALLY THIS IS THE CONDITION CHECKER FOR TASK.
-     *
-     * Check the conditions on which a task can be planned.
-     * Outputs the possible length of the task, which could
-     * be planned. So basically "0" means that a condition
-     * wasn't fulfilled.
-     *
-     * @param  array $task
-     * @param  TimeSlotsDay $time_slots_day
-     * @return integer
-     */
-    public function minutesCanBePlanned($task, $time_slots_day)
-    {
-        // the task is still open and has overtime already
-        if (
-            !TimesCalculator::isDone($task)
-            && TimesCalculator::calculateOvertime(
-                $task['time_estimated'],
-                $task['time_spent'],
-                TimesCalculator::isDone($task)
-            )
-            && !in_array($task['id'], $this->open_overtime_task_ids)
-        ) {
-            // in that case just use the non_time_mode_minutes
-            // as the planable minutes, since it is quite of
-            // unclear anyway, when the task will be done
-            $this->open_overtime_task_ids[] = $task['id'];
-            return $this->non_time_mode_minutes;
-        }
-
-        // this task is completely planned already
-        $tasks_actual_remaining = $this->getTasksActualRemaining($task);
-        if ($tasks_actual_remaining == 0) {
-            return 0;
-        }
-
-        // check project day limit
-        $left_daily_limit = $this->getLeftDailyTime($task, $time_slots_day->getDay());
-        if ($left_daily_limit <= 0) {
-            return 0;
-        }
-
-        // get next possible slot
-        $time_point_str = $task['plan_from'] ?? '';
-        $next_slot_key = $time_slots_day->nextSlot($task, $time_point_str);
-        if ($next_slot_key == -1) {
-            return 0;
-        }
-
-        // start time
-        $start = $time_slots_day->getStartOfSlot($next_slot_key);
-        if ($start == -1) {
-            // should not happen normally ...
-            return 0;
-        }
-
-        // available length of slot
-        $slot_length = $time_slots_day->getLengthOfSlot($next_slot_key);
-
-        // does the slot have enough time according to the config
-        // minimum slot length?
-        if ($slot_length < $this->min_slot_length) {
-            $time_slots_day->depleteSlot($next_slot_key);
-            return 0;
-        }
-
-        // get possible time to plan and return it
-        // prios here are:
-        // - complete actual remaining of task, if project max and slot length allows it
-        // - otherwise only project max, if slot allows it
-        // - otherwisw only the available slot length
-        $out = (
-            ($tasks_actual_remaining > $left_daily_limit)
-            ? $left_daily_limit : $tasks_actual_remaining
-        );
-        $out = (
-            ($out > $slot_length)
-            ? $slot_length : $out
-        );
-        return $out;
-    }
-
-    /**
      * Sort the tasks on the days according to their starting time.
      *
      * @param  array $plan
@@ -543,18 +615,6 @@ class TasksPlan
     }
 
     /**
-     * Return the final plan, which basically is just the internal
-     * array.
-     *
-     * @return array
-     */
-    public function getPlan()
-    {
-        $this->plan = self::sortPlan($this->plan);
-        return $this->plan;
-    }
-
-    /**
      * Set the internal minimum slot length.
      *
      * @param integer $min_slot_length
@@ -562,65 +622,5 @@ class TasksPlan
     public function setMinSlotLength($min_slot_length = 0)
     {
         $this->min_slot_length = $min_slot_length;
-    }
-
-    /**
-     * Return the internal array part for the week times.
-     *
-     * @return array
-     */
-    public function getGlobalTimesForWeek()
-    {
-        return $this->global_times['week'];
-    }
-
-    /**
-     * Return the internal array part for the times for
-     * the specified weekday.
-     *
-     * @param  string $day
-     * @return array
-     */
-    public function getGlobalTimesForDay($day = 'mon')
-    {
-        return $this->global_times[$day];
-    }
-
-    /**
-     * Basically a wrapper for getting the "overflow" key
-     * value from getGlobalTimesForDay().
-     *
-     * @return array
-     */
-    public function getGlobalTimesForOverflow()
-    {
-        return $this->global_times['overflow'];
-    }
-
-    /**
-     * Combine two given plans and sort them accordingly.
-     * This can combine two TasksPlan task arrays. It also
-     * can (that's why I am coding it) combine a TasksPlan
-     * task array with a blocking_pseudo_tasks array from
-     * the DistributionLogic, which is needed for the
-     * feature to also print out the blocking tasks.
-     *
-     * @param  array $plan_a
-     * @param  array $plan_b
-     * @return array
-     */
-    public static function combinePlans($plan_a, $plan_b)
-    {
-        $out = [
-            'mon' => array_merge($plan_a['mon'], $plan_b['mon']),
-            'tue' => array_merge($plan_a['tue'], $plan_b['tue']),
-            'wed' => array_merge($plan_a['wed'], $plan_b['wed']),
-            'thu' => array_merge($plan_a['thu'], $plan_b['thu']),
-            'fri' => array_merge($plan_a['fri'], $plan_b['fri']),
-            'sat' => array_merge($plan_a['sat'], $plan_b['sat']),
-            'sun' => array_merge($plan_a['sun'], $plan_b['sun']),
-            'overflow' => array_merge($plan_a['overflow'], $plan_b['overflow']),
-        ];
-        return self::sortPlan($out);
     }
 }
