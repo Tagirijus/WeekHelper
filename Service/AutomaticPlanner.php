@@ -3,9 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Service;
 
 use Kanboard\Core\Base;
-use Kanboard\Model\ProjectModel;
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Model\ProjectInfoParser;
 use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
@@ -14,6 +12,13 @@ use Kanboard\Plugin\WeekHelper\Model\CalDAVConverter;
 
 class AutomaticPlanner extends Base
 {
+    /**
+     * The level, which stands for the active week.
+     *
+     * @var string
+     **/
+    var $level_active_week = '';
+
     /**
      * All active projects, parsed with their additional meta data.
      *
@@ -159,9 +164,9 @@ class AutomaticPlanner extends Base
     private function initTasksActiveWeek()
     {
         $this->helper->hoursViewHelper->initTasks();
-        $level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
+        $this->level_active_week = $this->configModel->get('weekhelper_level_active_week', '');
         $this->tasks_active_week = $this->helper->hoursViewHelper
-            ->getTimes()->getTasksByLevel($level_active_week);
+            ->getTimes()->getTasksByLevel($this->level_active_week);
     }
 
     /**
@@ -307,6 +312,7 @@ class AutomaticPlanner extends Base
         if (!$ignore_now) {
             $distributor->depleteUntilNow();
             $distributor->depleteByTimeSpansConfigUntilNow($blocking_config);
+            // TODO: $distributor->depleteProjectQuota($this->helper->hoursViewHelper->getTimes(), $this->level_active_week);
         } else {
             $distributor->depleteByTimeSpansConfig($blocking_config);
         }
