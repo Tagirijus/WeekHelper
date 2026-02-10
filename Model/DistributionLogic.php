@@ -82,7 +82,6 @@ class DistributionLogic
      * Initialize the class with its attributes.
      *
      * @param array  $time_slots_config
-     * @param string $now The TimePoint string; if '' it will use "now"
      */
     public function __construct($time_slots_config = [
         'mon' => '',
@@ -94,12 +93,11 @@ class DistributionLogic
         'sun' => '',
         'min_slot_length' => 0,
         'non_time_mode_minutes' => 0,
-        ],
-        $now = ''
+        ]
     )
     {
         $this->parseTimeSlots($time_slots_config);
-        $this->initTasksPlans($time_slots_config, $now);
+        $this->initTasksPlans($time_slots_config);
     }
 
     /**
@@ -123,14 +121,10 @@ class DistributionLogic
      * Initialize the internal TasksPlan instances.
      *
      * @param array  $time_slots_config
-     * @param string $now The TimePoint string to use for TasksPlan,
-     *                    giving the info about what time it is. Empty
-     *                    means "now".
      */
-    protected function initTasksPlans($time_slots_config, $now = '')
+    protected function initTasksPlans($time_slots_config)
     {
         $this->tasks_plan = new TasksPlan(
-            $now,
             $time_slots_config['min_slot_length'],
             $time_slots_config['non_time_mode_minutes']
         );

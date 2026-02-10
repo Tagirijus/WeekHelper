@@ -11,8 +11,9 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Model\ProjectQuota;
 use Kanboard\Plugin\WeekHelper\Model\TimesCalculator;
-use Kanboard\Plugin\WeekHelper\Model\TimesPoint;
+
 
 class TasksPlan
 {
@@ -96,13 +97,6 @@ class TasksPlan
     var $non_time_mode_minutes;
 
     /**
-     * The TimePoint instance for "now".
-     *
-     * @var TimePoint
-     **/
-    var $now;
-
-    /**
      * This variable holds the overall planned, spent and
      * remaining times per week and per day. Structure:
      *
@@ -155,25 +149,31 @@ class TasksPlan
     var $open_overtime_task_ids = [];
 
     /**
+     * Project quotas by project id:
+     *
+     *  [
+     *      project_id => ProjectQuota
+     *  ]
+     *
+     * @var array
+     **/
+    var $project_quotas = [];
+
+    /**
      * Initialize the instance.
      *
-     * @param  TimePoint $now
      * @param integer $min_slot_length
      * @param integer $non_time_mode_minutes
      */
     public function __construct(
-        $now = null,
         $min_slot_length = 0,
-        $non_time_mode_minutes = 0
+        $non_time_mode_minutes = 0,
+        &$project_quotas = []
     )
     {
-        if (is_null($now)) {
-            $this->now = new TimePoint();
-        } else {
-            $this->now = $now;
-        }
         $this->min_slot_length = $min_slot_length;
         $this->non_time_mode_minutes = $non_time_mode_minutes != 0 ? $non_time_mode_minutes : 5;
+        $this->project_quotas = &$project_quotas;
     }
 
     /**
@@ -247,20 +247,39 @@ class TasksPlan
         $this->planned_project_times[$project_id][$day] += $time;
     }
 
+    // /**
+    //  * Return the planned time for the whole day for the project.
+    //  *
+    //  * @param  integer $project_id
+    //  * @param  string $day
+    //  */
+    // public function getPlannedTimeForProject($project_id, $day)
+    // {
+    //     if (!array_key_exists($project_id, $this->planned_project_times)) {
+    //         // basically initialize some kind of empty day-time counter
+    //         // here, if the given id did not exist.
+    //         $this->addPlannedTimeForProject($project_id, $day, 0);
+    //     }
+    //     return $this->planned_project_times[$project_id][$day];
+    // }
+
     /**
-     * Return the planned time for the whole day for the project.
+     * Get ProjectQuota by project id of the given task.
+     * I do want the whole task here, since: if there is
+     * no ProjectQuota yet, it should be initialized
+     * with the values from the whole task. That's why I
+     * would need its array values as well and not just
+     * the project id.
      *
-     * @param  integer $project_id
-     * @param  string $day
+     * @param  array $task
+     * @return ProjectQuota
      */
-    public function getPlannedTimeForProject($project_id, $day)
+    public function getProjectQuotaByTask($task)
     {
-        if (!array_key_exists($project_id, $this->planned_project_times)) {
-            // basically initialize some kind of empty day-time counter
-            // here, if the given id did not exist.
-            $this->addPlannedTimeForProject($project_id, $day, 0);
+        if (!array_key_exists($task['project_id'], $this->project_quotas)) {
+            $this->project_quotas[$task['project_id']] = new ProjectQuota($task);
         }
-        return $this->planned_project_times[$project_id][$day];
+        return $this->project_quotas[$task['project_id']];
     }
 
     /**
@@ -284,18 +303,24 @@ class TasksPlan
             return 1440;
         }
 
-        // otherwise go on as usual for the weekdays
-        // also, rather new feature: it is possible to assign individual
-        // project daily limits per weekday. keys like "project_max_hours_mon"
-        // can exist with a daily hours number (this will be used) or "-1" as
-        // a value (project_max_hours_day will be used instead then)
-        if ($task['project_max_hours_' . $day] != -1) {
-            $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_' . $day]);
-        } else {
-            $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
-        }
-        $project_id = $task['project_id'];
-        return $project_daily_limit - $this->getPlannedTimeForProject($project_id, $day);
+        // otherwise get the daily remaining quota by the internal ProjectQuota
+        // intsance belonging to the task
+        return $this->getProjectQuotaByTask($task)->getQuota($day);
+
+        // OLD CODE FROM HERE
+
+        // // otherwise go on as usual for the weekdays
+        // // also, rather new feature: it is possible to assign individual
+        // // project daily limits per weekday. keys like "project_max_hours_mon"
+        // // can exist with a daily hours number (this will be used) or "-1" as
+        // // a value (project_max_hours_day will be used instead then)
+        // if ($task['project_max_hours_' . $day] != -1) {
+        //     $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_' . $day]);
+        // } else {
+        //     $project_daily_limit = TimeHelper::hoursToMinutes($task['project_max_hours_day']);
+        // }
+        // $project_id = $task['project_id'];
+        // return $project_daily_limit - $this->getPlannedTimeForProject($project_id, $day);
     }
 
     /**
@@ -368,8 +393,13 @@ class TasksPlan
             $plan_success = $time_slots_day->planTime($next_slot_key, $time_to_plan, $start);
             $success = $plan_success == '';
 
-            // update the limits in ProjectConditions
-            $this->addPlannedTimeForProject($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
+            // update the project quota
+            $this->getProjectQuotaByTask($task)->substractQuota(
+                $time_slots_day->getDay(), $time_to_plan
+            );
+
+            // OLD METHOD: adding to project planned time etc
+            // $this->addPlannedTimeForProject($task['project_id'], $time_slots_day->getDay(), $time_to_plan);
 
             // add task to the internal planning array and update other
             // needed internal attributes
@@ -472,7 +502,7 @@ class TasksPlan
 
         // check project day limit
         $left_daily_limit = $this->getLeftDailyTime($task, $time_slots_day->getDay());
-        if ($left_daily_limit == 0) {
+        if ($left_daily_limit <= 0) {
             return 0;
         }
 

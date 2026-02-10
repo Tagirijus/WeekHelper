@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Model/DistributionLogic.php';
 require_once __DIR__ . '/../tests/TestTask.php';
+require_once __DIR__ . '/../Model/DistributionLogic.php';
+require_once __DIR__ . '/../Model/ProjectQuota.php';
 require_once __DIR__ . '/../Model/TasksPlan.php';
 require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimeSlotsDay.php';
@@ -756,5 +757,44 @@ final class DistributionLogicTest extends TestCase
             $distributed_plan,
             'DistributionLogic with open tasks and overtime did not distribute tasks as expected.'
         );
+    }
+
+    /**
+     * This test is for preparing a new internal logic for distributing
+     * tasks. It can happen that I work in advance for certain tasks,
+     * even if the daily limit would not allow it. Sometimes I might
+     * have some more time than expected. In that case I work on a task.
+     * For now the system handles such things like that: it basically
+     * gets the spent time and "distributes" it throughout the tasks
+     * from the start of the week until the end.
+     *
+     * Example scenario:
+     * I have a daily limit of 1h per day. A task has an estimated for
+     * 5h for the whole week. It could be done for 1h each day, basically.
+     * Now on Monday I found time to even work 2h for this task. This would
+     * mean that the system would get "2h of spent time" and thus "distribute"
+     * this spent time throughout Monday and Tuesday. Now it might be start of
+     * Tuesday and I alrwady worked 2h for this task. This would mean that
+     * the system would not plan this task for this day (Tuesday), since it
+     * already got 2h of spent time, thinking I might have worked these 2h
+     * on Monday+Tuesday already.
+     *
+     * New feature / logic idea:
+     * I might consider adding this as an optional logic, since I am not sure
+     * right now, if it otherwise would break some backwards-compability.
+     * Now the new logic I want to have is that the system would "take" this
+     * "worked in advance" form the end of the week and not from the start.
+     * Means for the above example that not Tuesday would lack of the 1h I
+     * worked in advance already, but Friday.
+     *
+     * Possible solution:
+     * I should keep the "worked in advance" time and substract it from the
+     * end of the week. I have to dig into the code and understand it, but
+     * I guess it is about the "planned_project_times" variable, which also
+     * basically stands for the spent time somehow ... I am still thinking ...
+     */
+    public function TODOtestTasksPlanWorkedInAdvance()
+    {
+        // TODO: write test
     }
 }
