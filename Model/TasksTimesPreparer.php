@@ -380,8 +380,7 @@ class TasksTimesPreparer
                 $subtasks,
                 [
                     'non_time_mode_minutes' => $this->getConfig('non_time_mode_minutes')
-                ],
-                $this->getTimetaggerTranscriber()
+                ]
             );
             $estimated = $calculator->getEstimated();
             $spent = $calculator->getSpent();
