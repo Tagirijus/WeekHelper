@@ -103,7 +103,21 @@ class TimeSpan
     }
 
     /**
-     * Checks if the given value is in before the time span.
+     * Checks if the given value is after the time span.
+     * Means: is it > end
+     *
+     * Info: the time is supposed to be a minutes number.
+     *
+     * @param  integer  $time
+     * @return boolean
+     */
+    public function isAfter($time)
+    {
+        return $time > $this->end;
+    }
+
+    /**
+     * Checks if the given value is before the time span.
      * Means: is it < start
      *
      * Info: the time is supposed to be a minutes number.

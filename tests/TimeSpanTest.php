@@ -64,6 +64,10 @@ final class TimeSpanTest extends TestCase
             $time_span->isBefore(9),
             'TimeSpan->isBefore(9) is not before the start of 10.'
         );
+        $this->assertTrue(
+            $time_span->isAfter(101),
+            'TimeSpan->isAfter(101) is not after the end of 100.'
+        );
     }
 
     public function testTimeSpanMethods()
