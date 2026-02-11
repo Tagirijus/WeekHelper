@@ -105,16 +105,7 @@ class DistributionLogic
     {
         $this->tasks_plan = new TasksPlan(
             $time_slots_config['min_slot_length'],
-            $time_slots_config['non_time_mode_minutes'],
-            [
-                'mon' => $this->time_slots_days['mon']->getLength(),
-                'tue' => $this->time_slots_days['tue']->getLength(),
-                'wed' => $this->time_slots_days['wed']->getLength(),
-                'thu' => $this->time_slots_days['thu']->getLength(),
-                'fri' => $this->time_slots_days['fri']->getLength(),
-                'sat' => $this->time_slots_days['sat']->getLength(),
-                'sun' => $this->time_slots_days['sun']->getLength(),
-            ]
+            $time_slots_config['non_time_mode_minutes']
         );
     }
 
