@@ -459,8 +459,6 @@ class TasksTimesPreparer
             $this->times_by_user->addTimes($estimated, $spent, $remaining, $overtime, $task['owner_id']);
         }
         unset($task);
-
-        $this->sortProjects();
     }
 
     /**
@@ -960,6 +958,59 @@ class TasksTimesPreparer
     }
 
     /**
+     * Return the sorted project ids for the given level.
+     * It will use the config to sort the projects
+     * temporary and return the project ids sorting
+     * accordingly as an array
+     *
+     * @param  string $level
+     * @return array
+     */
+    public function getSortedProjectIds($level)
+    {
+        $project_sorting = $this->getConfig('project_sorting');
+        // create a copy to not change anythign internally
+        $sort_on_me = $this->times_by_project_level;
+
+        if ($project_sorting == 'id') {
+            $project_ids = $this->getProjectIdsByLevel($level);
+            sort($project_ids);
+            return $project_ids;
+        } elseif ($project_sorting == 'remaining_hours_asc') {
+            $sort_on_me->sort('remaining', 'asc');
+        } elseif ($project_sorting == 'remaining_hours_desc') {
+            $sort_on_me->sort('remaining', 'desc');
+        }
+
+        // now use this sorting to sort the plain IDs as well accordingly
+        // 1. doing this by creating a lookup map first
+        $sort_map = [];
+
+        foreach ($sort_on_me->getEntities() as $i => $id) {
+            // I have to "revert" the project id and level
+            // data from the project_id+level combi
+            preg_match('/^(\d+)(.+)$/', $id, $matches);
+            $project_id = $matches[1];
+            $lvl = $matches[2];
+            if ($lvl == $level) {
+                $sort_map[$project_id] = $i;
+            }
+        }
+
+        // 2. using this sort map to sort the project ids
+        $project_ids = $this->getProjectIdsByLevel($level);
+        usort($project_ids, function($a, $b) use ($sort_map) {
+            $pa = isset($sort_map[$a]) ? $sort_map[$a] : PHP_INT_MAX;
+            $pb = isset($sort_map[$b]) ? $sort_map[$b] : PHP_INT_MAX;
+            if ($pa === $pb) {
+                return 0;
+            }
+            return $pa < $pb ? -1 : 1;
+        });
+        return $project_ids;
+    }
+
+    /**
      * Get spent for total.
      *
      * @param  string $level
@@ -1160,56 +1211,5 @@ class TasksTimesPreparer
         if ($this->isTimetaggerConfigSet()) {
             $this->getTimetaggerTranscriber()->overwriteTimesForRemainingTasks();
         }
-    }
-
-    /**
-     * Sort the projects with the wanted sorting logic.
-     * This is, by now, only used for output in tooltips.
-     */
-    protected function sortProjects()
-    {
-        // first sort the TimesDataByEntity instance
-        // for times_by_project, which will manage to
-        // sort the projects by their time
-        $project_sorting = $this->getConfig('project_sorting');
-        if ($project_sorting == 'id') {
-            $this->times_by_project->sort();
-        } elseif ($project_sorting == 'remaining_hours_asc') {
-            $this->times_by_project->sort('remaining', 'asc');
-        } elseif ($project_sorting == 'remaining_hours_desc') {
-            $this->times_by_project->sort('remaining', 'desc');
-        }
-
-        // now use this sorting to sort the plain IDs as well accordingly
-        // 1. doing this by creating a lookup map first
-        $sort_map = [];
-        foreach ($this->times_by_project->getEntities() as $i => $id) {
-            $sort_map[$id] = $i;
-        }
-
-        // 2. using this to sort the project_ids, while non existing ids will be
-        //    put at the end
-        foreach ($this->project_ids_by_level as &$project_ids) {
-            self::sortProjectIdsLevel($project_ids, $sort_map);
-        }
-    }
-
-    /**
-     * Sort the given array by the sort_map, which should contain the project
-     * id as the key and the sorting integer as the value.
-     *
-     * @param  array &$arr
-     * @param  array $sort_map
-     */
-    protected static function sortProjectIdsLevel(&$arr, $sort_map)
-    {
-        usort($arr, function($a, $b) use ($sort_map) {
-            $pa = isset($sort_map[$a]) ? $sort_map[$a] : PHP_INT_MAX;
-            $pb = isset($sort_map[$b]) ? $sort_map[$b] : PHP_INT_MAX;
-            if ($pa === $pb) {
-                return 0; // keep relative order; alternative: return $a <=> $b;
-            }
-            return $pa < $pb ? -1 : 1;
-        });
     }
 }

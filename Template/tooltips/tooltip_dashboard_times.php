@@ -36,7 +36,7 @@
             </th>
         </tr>
 
-        <?php foreach ($times->getProjectIdsByLevel($level) as $project_id): ?>
+        <?php foreach ($times->getSortedProjectIds($level) as $project_id): ?>
 
             <?php $project = $this->hoursViewHelper->getProject($project_id); ?>
 
