@@ -1207,7 +1207,7 @@ class TasksTimesPreparer
             $pa = isset($sort_map[$a]) ? $sort_map[$a] : PHP_INT_MAX;
             $pb = isset($sort_map[$b]) ? $sort_map[$b] : PHP_INT_MAX;
             if ($pa === $pb) {
-                return 0; // behalte relative Reihenfolge; alternativ: return $a <=> $b;
+                return 0; // keep relative order; alternative: return $a <=> $b;
             }
             return $pa < $pb ? -1 : 1;
         });
