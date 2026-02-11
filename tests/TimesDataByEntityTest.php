@@ -133,7 +133,7 @@ final class TimesDataByEntityTest extends TestCase
         $tdpe = new TimesDataByEntity();
 
         $tdpe->addTimes(6, 3, 2, 0, 2);
-        $tdpe->addTimes(2, 0, 5, 0, 2);
+        $tdpe->addTimes(2, 0, 6, 0, 2);
         $tdpe->addTimes(5, 3, 2, 0, 1);
         $tdpe->addTimes(8, 2, 5, 1, 1);
 
@@ -155,9 +155,12 @@ final class TimesDataByEntityTest extends TestCase
         // really is the one with the expected estimated time
         $this->assertSame(13.0, $tdpe->getEstimated($tdpe->getEntities()[1]), $msg);
 
-        // I won't test all sortin methods, but just one more
         $tdpe->sort('overtime', 'desc');
         $this->assertSame(5.0, $tdpe->getSpent($tdpe->getEntities()[0]), $msg);
         $this->assertSame(3.0, $tdpe->getSpent($tdpe->getEntities()[1]), $msg);
+
+        $tdpe->sort('remaining', 'desc');
+        $this->assertSame(8.0, $tdpe->getRemaining($tdpe->getEntities()[0]), $msg);
+        $this->assertSame(7.0, $tdpe->getRemaining($tdpe->getEntities()[1]), $msg);
     }
 }
