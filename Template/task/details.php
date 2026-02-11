@@ -215,7 +215,7 @@
             $percent = $times->getPercentByTask($task['id'], true, '');
             $percent_txt = $percent . '%';
             $percent_opacity = 1;
-            if ($percent > 100) {
+            if ($percent > 100 || $this->hoursViewHelper->isTaskDone($task)) {
                 $percent = 100;
             }
         ?>

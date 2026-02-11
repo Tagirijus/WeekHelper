@@ -276,27 +276,9 @@ class TimesData
     protected function updatePercent()
     {
         $percent = 0.0;
-
-        // basically could mean "done", since nothing
-        // remains. this should be considered as
-        // 100% already
-        if ($this->getRemaining() == 0) {
-            $percent = 1.0;
-
-        // there is something pending, which means
-        // percentage has to be something below 100%
-        } else {
-
-            // overtime means that worktime was faster or slower.
-            // the estimated time should "virtually" be adjusted
-            // accordingly to this changed working speed.
-            $new_estimation = $this->getEstimated() + $this->getOvertime();
-
-            if ($new_estimation >= 0.0) {
-                $percent = $this->getSpent() / ($new_estimation);
-            }
+        if ($this->getSpent() != 0) {
+            $percent = $this->getSpent() / $this->getEstimated();
         }
-
         $this->percent = $percent;
     }
 }

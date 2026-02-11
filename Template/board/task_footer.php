@@ -154,7 +154,7 @@ $times = $this->hoursViewHelper->getTimes();
                 $percent = (int) $times->getPercentByTask($task['id'], true, '');
                 $percent_txt = $percent . '%';
                 $percent_opacity = $hoursview_config['progressbar_opacity'];
-                if ($percent > 100) {
+                if ($percent > 100 || $this->hoursViewHelper->isTaskDone($task)) {
                     $percent = 100;
                 } elseif ($percent == 0) {
                     $percent_opacity = $hoursview_config['progressbar_0_opacity'];

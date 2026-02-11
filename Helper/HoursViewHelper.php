@@ -301,6 +301,28 @@ class HoursViewHelper extends Base
     }
 
     /**
+     * Return the logic if the given task is considered "done".
+     *
+     * @param  array  $task
+     * @return boolean
+     */
+    public function isTaskDone($task)
+    {
+        if (!array_key_exists('nb_subtasks', $task)) {
+            $subtasks = $this->getSubtasksByTaskId($task['id']);
+            $completed = 0;
+            foreach ($subtasks as $subtask) {
+                if ($subtask['status'] == 2) {
+                    $completed++;
+                }
+            }
+            $task['nb_subtasks'] = count($subtasks);
+            $task['nb_completed_subtasks'] = $completed;
+        }
+        return TimesCalculator::isDone($task);
+    }
+
+    /**
      * Get configuration for plugin as array.
      *
      * @return array
