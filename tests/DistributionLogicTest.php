@@ -6,6 +6,7 @@ require_once __DIR__ . '/../tests/TestTask.php';
 require_once __DIR__ . '/../Model/DistributionLogic.php';
 require_once __DIR__ . '/../Model/ProjectQuota.php';
 require_once __DIR__ . '/../Model/TasksPlan.php';
+require_once __DIR__ . '/../Model/TasksTimesPreparer.php';
 require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimeSlotsDay.php';
 require_once __DIR__ . '/../Model/TimeSpan.php';
@@ -14,6 +15,7 @@ require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
 use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
+use Kanboard\Plugin\WeekHelper\Model\TasksTimesPreparer;
 use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 use Kanboard\Plugin\WeekHelper\Model\TimeSpan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
@@ -788,13 +790,203 @@ final class DistributionLogicTest extends TestCase
      * worked in advance already, but Friday.
      *
      * Possible solution:
-     * I should keep the "worked in advance" time and substract it from the
-     * end of the week. I have to dig into the code and understand it, but
-     * I guess it is about the "planned_project_times" variable, which also
-     * basically stands for the spent time somehow ... I am still thinking ...
+     * I introduced whole new classes: ProjectQuota and ProjectQuotaAll, which
+     * are being used by TasksPlan to get the actual project daily limits.
+     * DistributionLogic can modify this ProjectQuotaAll instance and pass it
+     * to the TasksPlan so that TasksPlan will use this for planning then,
+     * regardless of the actual tasks array data about the project daily limits
+     * (how it was before, basically!). This way my above scenario should be
+     * possible as wanted.
+     *
+     * Future idea:
+     * In case I want to have different kind of logics if it comes to working
+     * in advance, maybe I do want the program to fetch available time from
+     * start of the week. Then I could create a new config which could handle
+     * this and this would change the whole logic happening inside the method
+     * DistribbutionLogic->depleteProjectQuota().
+     *
+     * STILL PERSISTING PROBLEM:
+     * For now the TimePoint in depleteProjectQuota() is for filling the spent
+     * time for the project quota before that. After that is "filled" (depleted)
+     * the end of the week is to fill until the start towards the TimePoint.
+     * Per day this might be okayish, but if it comes to the exact time point of
+     * the day, it is not that precise, since there could be time slots, which
+     * wold not allow spent time per project, for example. But at the moment I
+     * do not have a good solution for considering this as well. So for now
+     * this "work in advance" mode is non-precise and allows spent time to be
+     * spent on time slots, which normally cannot plan such tasks from this
+     * project (maybe). In generall it just lowers the project daily limit
+     * only - the planned tasks in the end can still only be planned on the
+     * specific time slots, but it can be non-precise in some situations ...
+     * ALSO I just realized that with the current algorithm it can also mean
+     * that two projects for which I worked in advance could have this time
+     * slot time before TimePoint to be used as "yeah, this task was spent here",
+     * meaning that in 1h allegedly both projects worked in advance-time could
+     * have been done. Another thing I cannot and do not want to solve now.
+     * It really feels like I should have come up with an overall completely
+     * other business logic in general, for the WHOLE automatic planning ...
      */
-    public function TODOtestTasksPlanWorkedInAdvance()
+    public function testTasksPlanWorkedInAdvance()
     {
-        // TODO: write test
+        // in my test it will be Wednesday 1:00. For this task on this
+        // time I could have normally worked 6h, but I did work 8h
+        // for it. Also the 1h before TimePoint of 1:00 would not be
+        // a time slot on which this task normally could have been
+        // planned - but for now this algorithm is non-precise, since I
+        // fear that I otherwise had to fully refactore huge parts of
+        // the code. So this 1h is considered to be time the task could
+        // have been worked for anyway. So it's 7h of work, which could
+        // have been spent, according to this algorithm. So in that case
+        // the extra 1h of work now should be fetched from Friday so that
+        // there should still be 2h be planned on Wednesday for this task
+        // (but from slot 2, of course!). Friday should have 2h of task be
+        // planned accordingly.
+        $task_1 = TestTask::create(
+            column_name: 'col_a',
+            project_id: 1,
+            project_max_hours_day: 3,
+            project_type: 'a',
+            time_estimated: 15.0,
+            time_spent: 8.0,
+            time_remaining: 7.0,
+            title: '1',
+        );
+        // since I will assume it is Wednesday already, this task
+        // should technically create 5h of overflow already, because
+        // according to this task I did not work on it already, but
+        // normally I should have for 5 hours, when it is Wednesday 1:00.
+        // Now I don't and the first time slot on Wednesday is just for this
+        // task, but only 1 h is left and the next time slot will be filled
+        // by task a already; leaving only 1h to be planned on Wednesday for
+        // this task and leaving 9h to be planned on Thu and Fri; so only 4h
+        // available planning time. 9-4=5
+        $task_2 = TestTask::create(
+            column_name: 'col_a',
+            project_id: 2,
+            project_max_hours_day: 2,
+            project_type: 'b',
+            time_estimated: 10.0,
+            time_spent: 0.0,
+            time_remaining: 10.0,
+            title: '2',
+        );
+        $init_tasks = [
+            $task_1,
+            $task_2,
+        ];
+
+        // I need the TasksTimesPreparer for this to work;
+        // virtually I assigned some level, since I need
+        // this in the TasksTimesPreparer, which stores
+        // certain times level depending I want to access
+        // later in real scenarios.
+        $config = [
+            'levels_config' => [
+                'level_1' => 'col_a',
+            ]
+        ];
+        $ttp = new TasksTimesPreparer($config);
+
+        // now the final distribution instance
+        $time_slots_config = [
+            'mon' => '0:00-5:00',
+            'tue' => '0:00-5:00',
+            'wed' => "0:00-2:00 b\n2:00-5:00",
+            'thu' => '0:00-5:00',
+            'fri' => '0:00-5:00',
+            'sat' => '',
+            'sun' => '',
+            'min_slot_length' => 0,
+            'non_time_mode_minutes' => 0,
+        ];
+        $distributor = new DistributionLogic($time_slots_config);
+
+        // and this part is, if I would distribute for the active
+        // week, while it would be Wednesday, 1:00 o'clock
+        $now = new TimePoint('wed 1:00');
+        $distributor->depleteUntilTimePoint($now);
+        $distributor->depleteProjectQuota($ttp, 'level_1', $now);
+
+        // final disgtribution of the tasks
+        $distributor->distributeTasks($init_tasks);
+        $distributed_plan = $distributor->getTasksPlan()->getPlan();
+
+        // expected plan
+        $expected_plan = [
+            'mon' => [],
+            'tue' => [],
+            'wed' => [
+                [
+                    'task' => $task_2,
+                    'start' => 60,
+                    'end' => 120,
+                    'length' => 60,
+                    'spent' => 0,
+                    'remaining' => 600,
+                ],
+                [
+                    'task' => $task_1,
+                    'start' => 120,
+                    'end' => 240,
+                    'length' => 120,
+                    'spent' => 480,
+                    'remaining' => 420,
+                ],
+            ],
+            'thu' => [
+                [
+                    'task' => $task_1,
+                    'start' => 0,
+                    'end' => 180,
+                    'length' => 180,
+                    'spent' => 480,
+                    'remaining' => 420,
+                ],
+                [
+                    'task' => $task_2,
+                    'start' => 180,
+                    'end' => 300,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 600,
+                ],
+            ],
+            'fri' => [
+                [
+                    'task' => $task_1,
+                    'start' => 0,
+                    'end' => 120,
+                    'length' => 120,
+                    'spent' => 480,
+                    'remaining' => 420,
+                ],
+                [
+                    'task' => $task_2,
+                    'start' => 120,
+                    'end' => 240,
+                    'length' => 120,
+                    'spent' => 0,
+                    'remaining' => 600,
+                ],
+            ],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [
+                [
+                    'task' => $task_2,
+                    'start' => 0,
+                    'end' => 300,
+                    'length' => 300,
+                    'spent' => 0,
+                    'remaining' => 600,
+                ],
+            ],
+        ];
+
+        $this->assertSame(
+            $expected_plan,
+            $distributed_plan,
+            'DistributionLogic did not distribute tasks as expected with worked in advance scenario.'
+        );
     }
 }

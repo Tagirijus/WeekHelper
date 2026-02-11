@@ -97,6 +97,44 @@ class DistributionLogic
     }
 
     /**
+     * Deplete the ProjectQuota based on the given TasksTimesPreparer,
+     * the given level string (for fetching the times_spent for the
+     * project and depending on the level) and all while considering
+     * the TimePoint. TimePoint is for "everything before that is
+     * supposed to be filled with spent_time first, after that it
+     * should happen from end of week until TimePoint, backwards".
+     *
+     * INFO:
+     * $time_point here is non-precise when it comes to knowing how
+     * much for wich project was spent already on that day before this
+     * time point. Because: maybe before that TimePoint there are slots,
+     * but none for which the project normally could have been planned
+     * tasks for. Since this info only is possible in combination with
+     * individual tasks, this info cannot really be fetched here. So
+     * my agreement for now is to just let a TimeSlotsDay will return
+     * generally how much time before the TimePoint could have been spent
+     * regardless of the slot-condition, which is used when planning tasks.
+     * This can also result in the scenario that two projects with
+     * worked-in-advance-time could see such time slot time before the
+     * timepoint as "spent time was done in this slot". So 1h of
+     * slot could have been used for e.g. multiple 1h of worked-in-advance
+     * time per project (e.g. I worked in advance for two projects could
+     * mean that 2h in this 1h time slot was allegedly spent). This is
+     * surreal, but something I really do not want to solve right now, since
+     * it makes my head really hurt. I might have come up with an overall
+     * and completely different business logic for the whole automatic
+     * planning system . . .
+     *
+     * @param  TasksTimesPreparer $tasks_times_preparer
+     * @param  string $level
+     * @param  TimePoint $time_point
+     */
+    public function depleteProjectQuota($tasks_times_preparer, $level, $time_point)
+    {
+        // code...
+    }
+
+    /**
      * Initialize the internal TasksPlan instances.
      *
      * @param array  $time_slots_config
