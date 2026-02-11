@@ -13,6 +13,7 @@ require_once __DIR__ . '/../Model/TimeSpan.php';
 require_once __DIR__ . '/../Helper/TimeHelper.php';
 
 use PHPUnit\Framework\TestCase;
+use Kanboard\Plugin\WeekHelper\Model\ProjectQuotaAll;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\tests\TestTask;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
@@ -1036,6 +1037,79 @@ final class TasksPlanTest extends TestCase
             $expected_plan,
             $tasks_plan->getPlan(),
             'TasksPlan with open tasks and overtime did not plan tasks as expected, when no non_time_mode_minutes is given.'
+        );
+    }
+
+    public function testProjectQuotaChange()
+    {
+        $tasks_plan = new TasksPlan();
+
+        $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
+        $time_slots_day_tue = new TimeSlotsDay('0:00-10:00', 'tue');
+
+        // I did define some project daily limits, but just to test
+        // as well a bit, if they will be ignored, what they should,
+        // since the ProjectQuota assigning should have higher priority
+        // later on.
+        $task = TestTask::create(
+            project_id: 1, title: 'test task',
+            time_estimated: 10.0, time_spent: 1.0, time_remaining: 9.0,
+            project_max_hours_day: 1.0
+        );
+
+        // fake some ProjectQuota for this project
+        $pqa = new ProjectQuotaAll();
+        $pqa->initProjectQuota(1, [
+            'project_max_hours_day' => 3.0, 'project_max_hours_tue' => 5.0
+        ]);
+        $tasks_plan->setProjectQuotaAll($pqa);
+
+        // now let TasksPlan plan the task on the days
+        $tasks_plan->planTask($task, $time_slots_day_mon);
+        $tasks_plan->planTask($task, $time_slots_day_tue);
+
+        // this should be the expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 180,
+                    'length' => 180,
+                    'spent' => 60,
+                    'remaining' => 540,
+                ],
+            ],
+            'tue' => [
+                [
+                    'task' => $task,
+                    'start' => 0,
+                    'end' => 300,
+                    'length' => 300,
+                    'spent' => 60,
+                    'remaining' => 540,
+                ],
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // INFO:
+        // Actually there should be still 1 hour to be planned, which normally
+        // would land in "overflow". But in this test I did not create an
+        // overflow TimeSlotsDay and also did not let TasksPlan plan into this,
+        // because I find it not important for this specific test. Just in case
+        // I might wonder in the future, where the remaining hour went.
+
+        // test this plan against the actual planned plan
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'TasksPlan did not plan correctly after overwriting the ProjectQuotaAll.'
         );
     }
 }
