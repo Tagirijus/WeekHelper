@@ -814,6 +814,16 @@ class TasksTimesPreparer
     }
 
     /**
+     * Get the all project daily limits.
+     *
+     * @return array
+     */
+    public function getProjectLimits()
+    {
+        return $this->project_limits;
+    }
+
+    /**
      * Get the project daily limits for the given project id.
      * An empty array will be returned, if no limits exist
      * for the given project id.
