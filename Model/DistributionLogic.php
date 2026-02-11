@@ -3,6 +3,7 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+use Kanboard\Plugin\WeekHelper\Model\ProjectQuotaAll;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\TimeSlotsDay;
 use Kanboard\Plugin\WeekHelper\Model\TimePoint;
@@ -104,6 +105,9 @@ class DistributionLogic
      * supposed to be filled with spent_time first, after that it
      * should happen from end of week until TimePoint, backwards".
      *
+     * Also this technically will not really deplete the TasksPlan
+     * ProjectQuotaAll, but basically will override it.
+     *
      * INFO:
      * $time_point here is non-precise when it comes to knowing how
      * much for wich project was spent already on that day before this
@@ -131,7 +135,33 @@ class DistributionLogic
      */
     public function depleteProjectQuota($tasks_times_preparer, $level, $time_point)
     {
-        // code...
+        $quota = $this->initProjectQuotaFromTasksTimesPreparer($tasks_times_preparer);
+    }
+
+    /**
+     * Create a ProjectQuotaAll depending on the given TasksTimesPreparer and the
+     * internal TimeSlotsDay instances. This will first basically get the
+     * project limits from the TasksTimesPreparer and check against the actual
+     * available time for the day from the TimeSlotsDay and modify the quota
+     * if needed.
+     *
+     * @param  TasksTimesPreparer $tasks_times_preparer
+     * @return ProjectQuotaAll
+     */
+    protected function initProjectQuotaFromTasksTimesPreparer($tasks_times_preparer)
+    {
+        $quota = new ProjectQuotaAll();
+        foreach ($tasks_times_preparer->getProjectLimits() as $project_id => $limits) {
+            $quota->initProjectQuota($project_id);
+            foreach ($limits as $day => $minutes) {
+                $available_length = $this->time_slots_days[$day]->getLength(true);
+                $quota->setQuotaByProjectIdAndDay(
+                    $project_id, $day,
+                    $minutes <= $available_length ? $minutes : $available_length
+                );
+            }
+        }
+        return $quota;
     }
 
     /**
