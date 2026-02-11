@@ -819,5 +819,15 @@ final class TimeSlotsDayTest extends TestCase
             $time_slots->getLengthBeforeTimePoint($timepoint),
             'getLengthBeforeTimePoint() did not output the expected minutes.'
         );
+
+        // test 2
+        $config = '0:00-2:00';
+        $time_slots = new TimeSlotsDay($config);
+        $timepoint = new TimePoint('wed 1:00');
+        $this->assertSame(
+            60,
+            $time_slots->getLengthBeforeTimePoint($timepoint),
+            'getLengthBeforeTimePoint() did not output the expected minutes for test 2.'
+        );
     }
 }
