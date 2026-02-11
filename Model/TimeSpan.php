@@ -44,55 +44,12 @@ class TimeSpan
     }
 
     /**
-     * Set the start.
-     *
-     * @param integer $start
+     * Depletes the time span to make it have no "time resources"
+     * anymore. Technically it will just set the start to the end.
      */
-    public function setStart($start = 0)
+    public function deplete()
     {
-        $this->start = (int) $start;
-    }
-
-    /**
-     * Get the start.
-     *
-     * @return integer
-     */
-    public function getStart()
-    {
-        return $this->start;
-    }
-
-    /**
-     * Set the end.
-     *
-     * @param integer $end
-     */
-    public function setEnd($end = 0)
-    {
-        $this->end = (int) $end;
-    }
-
-    /**
-     * Get the end.
-     *
-     * @return integer
-     */
-    public function getEnd()
-    {
-        return $this->end;
-    }
-
-    /**
-     * Checks if the given value is in the time span.
-     * Means: is it >= start and < end?
-     *
-     * @param  integer  $time
-     * @return boolean
-     */
-    public function isIn($time)
-    {
-        return $time >= $this->start && $time < $this->end;
+        $this->setStart($this->getEnd());
     }
 
     /**
@@ -126,6 +83,40 @@ class TimeSpan
     }
 
     /**
+     * Get the end.
+     *
+     * @return integer
+     */
+    public function getEnd()
+    {
+        return $this->end;
+    }
+
+    /**
+     * Get the start.
+     *
+     * @return integer
+     */
+    public function getStart()
+    {
+        return $this->start;
+    }
+
+    /**
+     * Checks if the given value is in the time span.
+     * Means: is it >= start and < end?
+     *
+     * Info: the time is supposed to be a minutes number.
+     *
+     * @param  integer  $time
+     * @return boolean
+     */
+    public function isIn($time)
+    {
+        return $time >= $this->start && $time < $this->end;
+    }
+
+    /**
      * Calculate the length of the time span, which basically
      * will just calculate end - start.
      *
@@ -137,12 +128,23 @@ class TimeSpan
     }
 
     /**
-     * Depletes the time span to make it have no "time resources"
-     * anymore. Technically it will just set the start to the end.
+     * Set the end.
+     *
+     * @param integer $end
      */
-    public function deplete()
+    public function setEnd($end = 0)
     {
-        $this->setStart($this->getEnd());
+        $this->end = (int) $end;
+    }
+
+    /**
+     * Set the start.
+     *
+     * @param integer $start
+     */
+    public function setStart($start = 0)
+    {
+        $this->start = (int) $start;
     }
 
     /**
