@@ -88,16 +88,18 @@ class ProjectQuotaAll
      * Substract quota for the given project and day by the given
      * amount of minutes.
      *
+     * If something fails, the method returns -1.
+     *
      * @param  integer $project_id
      * @param  string $day
      * @param  integer $minutes
-     * @return boolean
+     * @return integer
      */
     public function substractQuotaByProjectIdAndDay($project_id, $day, $minutes)
     {
         if (!array_key_exists($project_id, $this->project_quotas)) {
-            return false;
+            return -1;
         }
-        return $this->project_quotas[$project_id]->substractQuota($day, $minutes) != -1;
+        return $this->project_quotas[$project_id]->substractQuota($day, $minutes);
     }
 }
