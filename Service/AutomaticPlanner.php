@@ -8,7 +8,7 @@ use Kanboard\Plugin\WeekHelper\Model\DistributionLogic;
 use Kanboard\Plugin\WeekHelper\Model\TasksPlan;
 use Kanboard\Plugin\WeekHelper\Model\CalDAVFetcher;
 use Kanboard\Plugin\WeekHelper\Model\CalDAVConverter;
-
+use Kanboard\Plugin\WeekHelper\Model\TimePoint;
 
 class AutomaticPlanner extends Base
 {
@@ -312,7 +312,11 @@ class AutomaticPlanner extends Base
         if (!$ignore_now) {
             $distributor->depleteUntilNow();
             $distributor->depleteByTimeSpansConfigUntilNow($blocking_config);
-            // TODO: $distributor->depleteProjectQuota($this->helper->hoursViewHelper->getTimes(), $this->level_active_week);
+            $distributor->depleteProjectQuota(
+                $this->helper->hoursViewHelper->getTimes(),
+                $this->level_active_week,
+                new TimePoint()
+            );
         } else {
             $distributor->depleteByTimeSpansConfig($blocking_config);
         }
