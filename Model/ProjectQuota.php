@@ -104,7 +104,6 @@ class ProjectQuota
      *
      * @param  string $day
      * @param  integer $minutes
-     * @return integer
      */
     public function setQuota($day, $minutes)
     {
