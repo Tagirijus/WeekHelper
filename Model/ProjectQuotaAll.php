@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * INFO:
+ * This class was spposed to solve a problem, which I might
+ * have solved in the end quite differently. So maybe the
+ * introduction of this class was not needed. But I keep
+ * it since I find it a bit more sane to think about
+ * the project limits.
+ *
  * This class is some kind of repository for all the
  * ProjectQuota instances for all the projects.
  * It also has the functionality to deplete certain

@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * INFO:
+ * This class was spposed to solve a problem, which I might
+ * have solved in the end quite differently. So maybe the
+ * introduction of this class was not needed. But I keep
+ * it since I find it a bit more sane to think about
+ * the project limits.
+ *
  * With this class I want to store the daily quota for
  * a project. It can store the daily limits of minutes
  * which can still be planned.
