@@ -795,4 +795,29 @@ final class TimeSlotsDayTest extends TestCase
             'nextSlot("musik") returned the wrong slot key.'
         );
     }
+
+    /**
+     * This new method is for getting the time of the time slot
+     * before the given TimePoint. The day does not matter. It
+     * is used in the ProjectQuota depletion in the DistributionLogic
+     * class.
+     *
+     * There is still the issue that this method won't check the
+     * slto condition and if a projects task would technically be
+     * allowed to be planned in this time slot. But I explained
+     * this in the other docstrings already.
+     */
+    public function testLengthBeforeTimePoint()
+    {
+        $config = "0:00-1:00 office\n";
+        $config .= "5:00-10:00 musik\n";
+        $time_slots = new TimeSlotsDay($config);
+        // should result in 1h (0:00-1:00) + 1h (5:00-6:00) = 2h / 120 minutes
+        $timepoint = new TimePoint('mon 6:00');
+        $this->assertSame(
+            120,
+            $time_slots->getLengthBeforeTimePoint($timepoint),
+            'getLengthBeforeTimePoint() did not output the expected minutes.'
+        );
+    }
 }

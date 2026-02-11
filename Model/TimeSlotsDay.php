@@ -276,6 +276,31 @@ class TimeSlotsDay
     }
 
     /**
+     * Get the length of the whole TimeSlotsDay class until
+     * the given TimePoint. This method will also just look
+     * at the initial values only for now.
+     *
+     * @param  TimePoint $time_point
+     * @return integer
+     */
+    public function getLengthBeforeTimePoint($time_point)
+    {
+        $minutes = 0;
+        foreach ($this->slots as $slot) {
+            $timespan = $slot['timespan'];
+            if ($timespan->isAfter($time_point->getTime())) {
+                $minutes += $timespan->length();
+            }
+            if ($timespan->isIn($time_point->getTime())) {
+                $minutes += $time_point->getTime() - $timespan->getStart();
+                // also break, since all other slots should be after that
+                break;
+            }
+        }
+        return $minutes;
+    }
+
+    /**
      * Return the length for the wanted slot.
      *
      * With $init_value set to "true", the initial values
