@@ -194,6 +194,7 @@ class CalDAVConverter
         $diff = $event['start']->diff($event['end']);
         $diff = (int) $diff->format('%r%a');
         if ($diff == 1 && $event['end']->format('G:i') == '0:00') {
+            $start = '23:58';
             $end = '23:59';
         } else {
             $end = $event['end']->format('G:i');

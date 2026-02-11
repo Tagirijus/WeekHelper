@@ -299,7 +299,6 @@ class AutomaticPlanner extends Base
      * @param  array $tasks
      * @param  boolean $ignore_now
      * @param  string $blocking_config
-     * @param  boolean $add_blocking_pseudo_tasks
      * @return array
      */
     public function prepareWeek(

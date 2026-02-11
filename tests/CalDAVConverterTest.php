@@ -45,7 +45,7 @@ final class CalDAVConverterTest extends TestCase
         $converted = CalDAVConverter::eventToTimeSpanString($caldav_event);
 
         $this->assertSame(
-            'thu 0:00-23:59 active thu (calendar_name)',
+            'thu 23:58-23:59 active thu (calendar_name)',
             $converted,
             'CalDAVConverter event was not translated correctly into a string.'
         );
@@ -115,7 +115,7 @@ final class CalDAVConverterTest extends TestCase
             '2026-01-10'
         );
 
-        $expected_active = 'thu 0:00-23:59 active thu (calendar_name)' . "\n";
+        $expected_active = 'thu 23:58-23:59 active thu (calendar_name)' . "\n";
         $expected_active .= 'fri 10:00-11:00 active fri (calendar_name)' . "\n";
         $this->assertSame(
             $expected_active,
@@ -123,7 +123,7 @@ final class CalDAVConverterTest extends TestCase
             'CalDAVConverter did not convert blocking config string for active week correctly.'
         );
 
-        $expected_planned = 'thu 0:00-23:59 planned thu (calendar_name)' . "\n";
+        $expected_planned = 'thu 23:58-23:59 planned thu (calendar_name)' . "\n";
         $this->assertSame(
             $expected_planned,
             $caldav_converter->generateBlockingStringForPlannedWeek(),
