@@ -45,7 +45,7 @@ class DistributionLogic
      * with many hours of limit. So tasks, which do not
      * fit into the week, will fit on this "special day".
      *
-     * @var array
+     * @var TimeSlotsDay[]
      **/
     var $time_slots_days = [
         'mon' => null,
@@ -136,6 +136,62 @@ class DistributionLogic
     public function depleteProjectQuota($tasks_times_preparer, $level, $time_point)
     {
         $quota = $this->initProjectQuotaFromTasksTimesPreparer($tasks_times_preparer);
+
+        foreach (array_keys($tasks_times_preparer->getProjectLimits()) as $project_id) {
+            $to_substract = TimeHelper::hoursToMinutes(
+                $tasks_times_preparer->getSpentByProjectLevel($project_id, $level)
+            );
+            if ($to_substract <= 0) {
+                continue;
+            }
+            $remaining_slots = [];
+            foreach ($this->time_slots_days as $day => $slot) {
+                if ($to_substract <= 0) {
+                    break;
+                }
+
+                // given TimePoint is after this TimeSlotsDay,
+                // so "deplete" ProjectQuota for this day
+                if ($slot->dayDiffFromTimePoint($time_point) > 0) {
+                    $to_substract = $quota->substractQuotaByProjectIdAndDay(
+                        $project_id, $day, $to_substract
+                    );
+                }
+
+                // given TimePoint is ON this TimeSlotsDay,
+                // so "deplete" ProjectQuota for this day, but
+                // only "until" the TimePoint
+                if ($slot->dayDiffFromTimePoint($time_point) == 0) {
+                    $length_before = $slot->getLengthBeforeTimePoint($time_point);
+                    $to_substract = $quota->substractQuotaByProjectIdAndDay(
+                        $project_id, $day,
+                        $length_before <= $to_substract ? $length_before : $to_substract
+                    );
+                }
+
+                // TimePoint is before this TimeSlotsDay,
+                // add it to the remaining slots, which will be
+                // processed in another step, reversed to work of
+                // the week from end to start
+                if ($slot->dayDiffFromTimePoint($time_point) < 0) {
+                    $remaining_slots[$day] = $slot;
+                }
+            }
+
+            // now process the slots, which come after th given TimePoint,
+            // but in reverse order
+            foreach (array_reverse($remaining_slots, true) as $day => $slot) {
+                if ($to_substract <= 0) {
+                    break;
+                }
+                $to_substract = $quota->substractQuotaByProjectIdAndDay(
+                    $project_id, $day, $to_substract
+                );
+            }
+        }
+
+        // finally override the TasksPlan ProjectQuotaAll
+        $this->tasks_plan->setProjectQuotaAll($quota);
     }
 
     /**

@@ -5,8 +5,13 @@ declare(strict_types=1);
 require_once __DIR__ . '/../tests/TestTask.php';
 require_once __DIR__ . '/../Model/DistributionLogic.php';
 require_once __DIR__ . '/../Model/ProjectQuota.php';
+require_once __DIR__ . '/../Model/ProjectQuotaAll.php';
+require_once __DIR__ . '/../Model/SortingLogic.php';
+require_once __DIR__ . '/../Model/TaskDataExtender.php';
 require_once __DIR__ . '/../Model/TasksPlan.php';
 require_once __DIR__ . '/../Model/TasksTimesPreparer.php';
+require_once __DIR__ . '/../Model/TimesData.php';
+require_once __DIR__ . '/../Model/TimesDataByEntity.php';
 require_once __DIR__ . '/../Model/TimesCalculator.php';
 require_once __DIR__ . '/../Model/TimeSlotsDay.php';
 require_once __DIR__ . '/../Model/TimeSpan.php';
@@ -856,7 +861,7 @@ final class DistributionLogicTest extends TestCase
         // according to this task I did not work on it already, but
         // normally I should have for 5 hours, when it is Wednesday 1:00.
         // Now I don't and the first time slot on Wednesday is just for this
-        // task, but only 1 h is left and the next time slot will be filled
+        // task, but only 1h is left and the next time slot will be filled
         // by task a already; leaving only 1h to be planned on Wednesday for
         // this task and leaving 9h to be planned on Thu and Fri; so only 4h
         // available planning time. 9-4=5
@@ -886,12 +891,13 @@ final class DistributionLogicTest extends TestCase
             ]
         ];
         $ttp = new TasksTimesPreparer($config);
+        $ttp->initTasksAndTimes($init_tasks);
 
         // now the final distribution instance
         $time_slots_config = [
             'mon' => '0:00-5:00',
             'tue' => '0:00-5:00',
-            'wed' => "0:00-2:00 b\n2:00-5:00",
+            'wed' => "0:00-2:00 b\n2:00-4:00",
             'thu' => '0:00-5:00',
             'fri' => '0:00-5:00',
             'sat' => '',
