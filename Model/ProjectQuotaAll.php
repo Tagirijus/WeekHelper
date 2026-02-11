@@ -70,6 +70,21 @@ class ProjectQuotaAll
     }
 
     /**
+     * Set the quota in minutes for the given project id
+     * and day.
+     *
+     * @param  integer $project_id
+     * @param  string $day
+     * @param  integer $minutes
+     */
+    public function setQuotaByProjectIdAndDay($project_id, $day, $minutes)
+    {
+        if (array_key_exists($project_id, $this->project_quotas)) {
+            return $this->project_quotas[$project_id]->setQuota($day, $minutes);
+        }
+    }
+
+    /**
      * Substract quota for the given project and day by the given
      * amount of minutes.
      *
