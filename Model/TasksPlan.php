@@ -35,6 +35,26 @@ class TasksPlan
     ];
 
     /**
+     * An array, holding the info about the available slot
+     * times, for which tasks can be planned. This attribute
+     * is (so far) only used for the plaintext output so
+     * that it can be shown how much time, overall or per
+     * day, is still "free" to be planned. Structure will
+     * be generated as:
+     *     [
+     *         'mon' => integer,
+     *         'tue' => integer,
+     *         ...
+     *         'all' => integer
+     *     ]
+     *
+     * @var array
+     **/
+    var $available_slot_times = [
+        'all' => 0,
+    ];
+
+    /**
      * The final big array, holding the plan. The structure
      * of this array is this:
      *     [
@@ -310,6 +330,20 @@ class TasksPlan
     }
 
     /**
+     * Return the available plannable time for the given day.
+     * Fallback is for "all" days (whole week).
+     *
+     * @param  string $day
+     * @return integer
+     */
+    public function getAvailableSlotTime($day = 'all')
+    {
+        if (array_key_exists($day, $this->available_slot_times)) {
+            return $this->available_slot_times[$day];
+        }
+    }
+
+    /**
      * Return the internal array part for the week times.
      *
      * @return array
@@ -429,6 +463,25 @@ class TasksPlan
     }
 
     /**
+     * Init the internal attribute, storing info about how
+     * much time can still be planned on a specific day.
+     * If the key with the day string does not exist, it
+     * has to be initialized.
+     *
+     * @param  TimeSlotsDay $time_slots_day
+     */
+    protected function initAvailableSlotTime($time_slots_day)
+    {
+        $day = $time_slots_day->getDay();
+        if (!array_key_exists($day, $this->available_slot_times)) {
+            $this->available_slot_times[$day] = $time_slots_day->getLength();
+            if ($day != 'overflow') {
+                $this->available_slot_times['all'] += $time_slots_day->getLength();
+            }
+        }
+    }
+
+    /**
      * BASICALLY THIS IS THE CONDITION CHECKER FOR TASK.
      *
      * Check the conditions on which a task can be planned.
@@ -527,6 +580,11 @@ class TasksPlan
     {
         $success = false;
 
+        // init the available time for that day so that it later
+        // can be modified when a task gets planned. this, so far,
+        // will be used in the plaintext output
+        $this->initAvailableSlotTime($time_slots_day);
+
         // a task can have a "plan_from" timepoint string.
         // this should be able to split an available time slot into
         // two slots. This way it is easier to assign a task into the
@@ -590,6 +648,7 @@ class TasksPlan
             // needed internal attributes
             $this->addPlannedTimeForTask($task['id'], $time_to_plan);
             $this->addTaskToPlan($task, $time_slots_day->getDay(), $start, $end);
+            $this->updateAvailableSlotTime($time_slots_day->getDay(), $time_to_plan);
         }
 
         return $success;
@@ -633,5 +692,22 @@ class TasksPlan
     public function setMinSlotLength($min_slot_length = 0)
     {
         $this->min_slot_length = $min_slot_length;
+    }
+
+    /**
+     * Substract the given minutes from the available time
+     * for the day.
+     *
+     * @param  string $day
+     * @param  integer $minutes
+     */
+    protected function updateAvailableSlotTime($day, $minutes)
+    {
+        if (array_key_exists($day, $this->available_slot_times)) {
+            $this->available_slot_times[$day] -= $minutes;
+            if ($day != 'overflow') {
+                $this->available_slot_times['all'] -= $minutes;
+            }
+        }
     }
 }

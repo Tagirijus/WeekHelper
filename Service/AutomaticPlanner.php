@@ -438,9 +438,11 @@ class AutomaticPlanner extends Base
         $planned = $this->getTasksPlan($week)->getGlobalTimesForWeek()['planned'];
         $spent = $this->getTasksPlan($week)->getGlobalTimesForWeek()['spent'];
         $overflow = $this->getTasksPlan($week)->getGlobalTimesForOverflow()['planned'];
+        $available = $this->getTasksPlan($week)->getAvailableSlotTime('all');
 
         $out = 'Planned: ' . TimeHelper::minutesToReadable($planned, ' h');
         $out .= ', Spent: ' . TimeHelper::minutesToReadable($spent, ' h');
+        $out .= ', Free: ' . TimeHelper::minutesToReadable($available, ' h');
         $out .= "\n";
 
         if ($overflow > 0) {
@@ -500,6 +502,15 @@ class AutomaticPlanner extends Base
                         TimeHelper::minutesToReadable(
                             $this->getTasksPlan($week)->getGlobalTimesForDay($day)['planned'],
                             'h'
+                        ) . (
+                            $day != 'overflow' ?
+                            (
+                                ' | ' .
+                                TimeHelper::minutesToReadable(
+                                    $this->getTasksPlan($week)->getAvailableSlotTime($day),
+                                    'h'
+                                )
+                            ) : ''
                         )
                     );
                 } else {
