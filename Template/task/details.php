@@ -1,7 +1,7 @@
 <section id="task-summary">
     <?php
         $title_prepared = $this->weekHelperHelper->prepareWeekpatternInTitle($this->text->e($task['title']), $task);
-        $this->hoursViewHelper->initTasks('project', $task['project_id']);
+        $this->hoursViewHelper->initTasks();
         $times = $this->hoursViewHelper->getTimes();
     ?>
     <h2><?= $title_prepared ?></h2>

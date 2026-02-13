@@ -1,6 +1,6 @@
 <?php
 
-$this->hoursViewHelper->initTasks('project', $project['id']);
+$this->hoursViewHelper->initTasks();
 $captions = $this->hoursViewHelper->getLevelCaptions();
 $projectSite = true;
 
