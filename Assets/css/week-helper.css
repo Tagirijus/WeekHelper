@@ -261,6 +261,11 @@
 
 
 /* AUTOMATIC PLAN GUI */
+.plan-container {
+}
+.plan-hidden {
+	display: none;
+}
 ul.plan-list {
 	list-style: none;
 	width: 100%;
@@ -270,22 +275,61 @@ div.plan-entry-line {
 	display: block;
 }
 div.plan-entry-time {
-	display: inline-block;
+	display: block;
 	position: relative;
-	width: 10%;
+	width: 100%;
+	margin-top: .5em;
+	vertical-align: top;
+}
+@media (min-width: 500px) {
+	div.plan-entry-time {
+		display: inline-block;
+		width: 20%;
+		margin-top: 0em;
+	}
+}
+@media (min-width: 1250px) {
+	div.plan-entry-time {
+		width: 12%;
+	}
 }
 div.plan-entry-task {
-	display: inline-block;
+	display: block;
 	position: relative;
-	width: 80%;
 }
-a.plan-hover:hover {
-	text-decoration: underline;
+@media (min-width: 500px) {
+	div.plan-entry-task {
+		display: inline-block;
+		width: 50%;
+	}
+}
+@media (min-width: 900px) {
+	div.plan-entry-task {
+		width: 70%;
+	}
+}
+@media (min-width: 1250px) {
+	div.plan-entry-task {
+		width: 80%;
+	}
+}
+.plan-hover:hover {
+	text-decoration: underline !important;
 }
 .plan-icon {
 	color: black !important;
 	font-size: 1.25em;
 }
+.plan-day {
+	font-weight: bold;
+	margin-top: 3em;
+}
 .plan-ml {
 	margin-left: .5em;
+}
+.plan-ml-first {
+	margin-left: 0em;
+}
+.plan-inline-block {
+	display: inline-block;
 }

@@ -48,6 +48,7 @@ class Plugin extends Base
         }
         $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/checkbox-inserter.min.js'));
         $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/subtask-toggle-refresh.min.js'));
+        $this->hook->on('template:layout:js', array('template' => 'plugins/WeekHelper/Assets/js/automaticplan.min.js'));
 
         // Views - Template Hook
         $this->template->hook->attach(

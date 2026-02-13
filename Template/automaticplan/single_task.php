@@ -17,7 +17,7 @@
             <a href="/board/<?= $task['task']['project_id'] ?>" class="plan-hover">
                 [<?= $task['task']['project_alias'] ?>]
             </a>
-            <a href="/task/<?= $task['task']['id'] ?>" class="plan-ml plan-hover"><?= $task['task']['title'] ?></a>
+            <a href="/task/<?= $task['task']['id'] ?>" class="plan-hover"><?= $task['task']['title'] ?></a>
             <a href="/task/<?= $task['task']['id'] ?>/edit" class="js-modal-large plan-ml">
                 <i class="fa fa-edit fa-fw js-modal-large plan-icon"></i>
             </a>
