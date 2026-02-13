@@ -281,14 +281,14 @@ div.plan-entry-time {
 	margin-top: .5em;
 	vertical-align: top;
 }
-@media (min-width: 500px) {
+@container (min-width: 500px) {
 	div.plan-entry-time {
 		display: inline-block;
 		width: 20%;
 		margin-top: 0em;
 	}
 }
-@media (min-width: 1250px) {
+@container (min-width: 1250px) {
 	div.plan-entry-time {
 		width: 12%;
 	}
@@ -297,18 +297,18 @@ div.plan-entry-task {
 	display: block;
 	position: relative;
 }
-@media (min-width: 500px) {
+@container (min-width: 500px) {
 	div.plan-entry-task {
 		display: inline-block;
 		width: 50%;
 	}
 }
-@media (min-width: 900px) {
+@container (min-width: 900px) {
 	div.plan-entry-task {
 		width: 70%;
 	}
 }
-@media (min-width: 1250px) {
+@container (min-width: 1250px) {
 	div.plan-entry-task {
 		width: 80%;
 	}
@@ -322,7 +322,7 @@ div.plan-entry-task {
 }
 .plan-day {
 	font-weight: bold;
-	margin-top: 3em;
+	margin-top: 2em;
 }
 .plan-ml {
 	margin-left: .5em;
@@ -332,4 +332,44 @@ div.plan-entry-task {
 }
 .plan-inline-block {
 	display: inline-block;
+}
+
+/* automatic plan sticky div */
+.plan-sticky-container {
+	transition: all .3s ease;
+	position: fixed;
+	bottom: 2.5em;
+	right: 0;
+	width: 20%;
+	height: 12em;
+	overflow: hidden;
+
+	padding-top: 0;
+	margin-top: -1em;
+	padding-right: .75em;
+	padding-left: .75em;
+	padding-bottom: .5em;
+
+	border-radius: 7px;
+	background: rgba(35, 40, 60, 0.75);
+	backdrop-filter: blur(2px);
+	font-size: .6em;
+
+	scroll-behavior: smooth;
+}
+.plan-sticky-container:hover {
+	width: 40%;
+	height: 20em;
+	overflow: auto;
+
+	padding: .75em .5em;
+
+	font-size: .75em;
+}
+.plan-sticky-container button {
+	font-size: .75em;
+	display: none;
+}
+.plan-sticky-container:hover button {
+	display: inline;
 }

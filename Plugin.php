@@ -65,6 +65,13 @@ class Plugin extends Base
             $this->template->hook->attach(
                 'template:layout:bottom', 'WeekHelper:time_box');
         }
+        if ($this->configModel->get('weekhelper_automatic_planner_sticky_enabled', 1) == 1) {
+            $this->template->hook->attach(
+                'template:layout:bottom', 'WeekHelper:automaticplan/sticky_div', [
+                    'planner' => $this->automaticPlanner
+                ]
+            );
+        }
         $this->template->hook->attach(
             'template:project:header:before', 'WeekHelper:board/project_head_hours'
         );

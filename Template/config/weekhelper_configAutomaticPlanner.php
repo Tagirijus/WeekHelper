@@ -6,6 +6,25 @@
 
     <br>
 
+    <!-- Enable sticky planner -->
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Show sticky week plan'), 'automatic_planner_sticky_enabled') ?>
+            <?= $this->form->checkbox('automatic_planner_sticky_enabled', t('enabled'), 1, $automatic_planner_sticky_enabled) ?>
+        </div>
+
+    </div>
+    <p class="task-form-main-column weekhelper-config-weak-text">
+        <?= t('Show a sticky div on the screen, which contains the automatic week planning.') ?>
+    </p>
+
+    <br>
+    <br>
+
+
+
     <!-- Blocking slots -->
 
     <div class="task-form-container">
@@ -83,22 +102,8 @@
     <br>
 
 
-    <!-- Enable sticky planner -->
 
-    <div class="task-form-container">
-
-        <div class="task-form-main-column">
-            <?= $this->form->label(t('Show sticky week plan'), 'automatic_planner_sticky_enabled') ?>
-            <?= $this->form->checkbox('automatic_planner_sticky_enabled', t('enabled'), 1, $automatic_planner_sticky_enabled) ?>
-        </div>
-
-    </div>
-    <p class="task-form-main-column weekhelper-config-weak-text">
-        <?= t('Show a sticky div on the screen, which contains the automatic week planning.') ?>
-    </p>
-
-    <br>
-    <br>
+    <!-- week settings -->
 
     <span>Active / planned week</span>
 

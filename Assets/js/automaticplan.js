@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	});
 
+	var plan_sticky_container = document.getElementsByClassName('plan-sticky-container');
+	if (plan_sticky_container != null) {
+		plan_sticky_container[0].addEventListener('mouseleave', () => {
+		    plan_sticky_container[0].scrollTop = 0;
+		});
+	}
+
 });
 
 
