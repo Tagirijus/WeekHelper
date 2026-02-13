@@ -258,3 +258,34 @@
 .thv-100-percent {
 	opacity: 0.3;
 }
+
+
+/* AUTOMATIC PLAN GUI */
+ul.plan-list {
+	list-style: none;
+	width: 100%;
+}
+div.plan-entry-line {
+	width: 100%;
+	display: block;
+}
+div.plan-entry-time {
+	display: inline-block;
+	position: relative;
+	width: 10%;
+}
+div.plan-entry-task {
+	display: inline-block;
+	position: relative;
+	width: 80%;
+}
+a.plan-hover:hover {
+	text-decoration: underline;
+}
+.plan-icon {
+	color: black !important;
+	font-size: 1.25em;
+}
+.plan-ml {
+	margin-left: .5em;
+}

@@ -318,9 +318,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             $this->response->html($this->helper->layout->dashboard('WeekHelper:automaticplan/automaticplan', [
                 'title' => 'Automatic Plan',
                 'user' => $this->getUser(),
-                'plan' => $this->automaticPlanner->getAutomaticPlanAsArray(
-                    $this->request->getStringParam('add_blocking', 0) == 1
-                )
+                'planner' => $this->automaticPlanner
             ]));
         } elseif ($type == 'json') {
             $automatic_plan = json_encode($this->automaticPlanner->getAutomaticPlanAsArray(
