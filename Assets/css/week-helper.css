@@ -261,6 +261,11 @@
 
 
 /* AUTOMATIC PLAN GUI */
+.plan-wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
 .plan-container {
 }
 .plan-hidden {
@@ -372,4 +377,31 @@ div.plan-entry-task {
 }
 .plan-sticky-container:hover button {
 	display: inline;
+}
+.plan-sticky-container .plan-stats {
+	top: 0;
+}
+.plan-sticky-container:hover .plan-stats {
+	top: 1em;
+	font-size: .8em;
+}
+.plan-stats {
+	position: absolute;
+	right: 2em;
+	top: 1em;
+}
+.plan-sticky-container .plan-stats-big {
+	display: none;
+}
+.plan-sticky-container:hover .plan-stats-big, .plan-stats-big {
+	display: inline;
+}
+.plan-stats-small {
+	display: none;
+}
+.plan-sticky-container .plan-stats-small {
+	display: inline;
+}
+.plan-sticky-container:hover .plan-stats-small, .plan-stats-small {
+	display: none;
 }

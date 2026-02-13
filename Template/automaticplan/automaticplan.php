@@ -27,28 +27,45 @@
     }
 ?>
 
-<button class="plan-btn btn <?= $btn_active_class ?>" data-plan-secet-btn="active">Active</button>
-<button class="plan-btn btn <?= $btn_planned_class ?>" data-plan-secet-btn="planned">Planned</button>
-<button class="plan-btn btn <?= $btn_config_class ?>" data-plan-secet-btn="config">Config</button>
+<div class="plan-wrapper">
 
-<div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
-    <?php foreach ($active as $day => $tasks): ?>
-        <?= $this->render('WeekHelper:automaticplan/week_tasks', [
-            'tasks' => $tasks,
-            'day' => $day
-        ]) ?>
-    <?php endforeach ?>
-</div>
+    <button class="plan-btn btn <?= $btn_active_class ?>" data-plan-secet-btn="active">Active</button>
+    <button class="plan-btn btn <?= $btn_planned_class ?>" data-plan-secet-btn="planned">Planned</button>
+    <button class="plan-btn btn <?= $btn_config_class ?>" data-plan-secet-btn="config">Config</button>
 
-<div class="plan-container <?= $container_planned_class ?>" data-plan-tab="planned">
-    <?php foreach ($planned as $day => $tasks): ?>
-        <?= $this->render('WeekHelper:automaticplan/week_tasks', [
-            'tasks' => $tasks,
-            'day' => $day
-        ]) ?>
-    <?php endforeach ?>
-</div>
+    <div class="plan-stats">
+        <div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
+            <?= $this->render('WeekHelper:automaticplan/stats_single', [
+                'tasksplan' => $planner->getTasksPlan('active')
+            ]) ?>
+        </div>
+        <div class="plan-container <?= $container_planned_class ?>" data-plan-tab="planned">
+            <?= $this->render('WeekHelper:automaticplan/stats_single', [
+                'tasksplan' => $planner->getTasksPlan('planned')
+            ]) ?>
+        </div>
+    </div>
 
-<div class="plan-container <?= $container_config_class ?>" data-plan-tab="config">
-    <div class="plan-day">to be made ...</div>
+    <div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
+        <?php foreach ($active as $day => $tasks): ?>
+            <?= $this->render('WeekHelper:automaticplan/week_tasks', [
+                'tasks' => $tasks,
+                'day' => $day
+            ]) ?>
+        <?php endforeach ?>
+    </div>
+
+    <div class="plan-container <?= $container_planned_class ?>" data-plan-tab="planned">
+        <?php foreach ($planned as $day => $tasks): ?>
+            <?= $this->render('WeekHelper:automaticplan/week_tasks', [
+                'tasks' => $tasks,
+                'day' => $day
+            ]) ?>
+        <?php endforeach ?>
+    </div>
+
+    <div class="plan-container <?= $container_config_class ?>" data-plan-tab="config">
+        <div class="plan-day">to be made ...</div>
+    </div>
+
 </div>
