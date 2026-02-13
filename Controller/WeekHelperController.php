@@ -313,11 +313,20 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
      */
     public function getAutomaticPlan()
     {
-        $type = $this->request->getStringParam('type', 'text');
-        if ($type == 'json') {
+        $type = $this->request->getStringParam('type', 'page');
+        if ($type == 'page') {
+            $this->response->html($this->helper->layout->dashboard('WeekHelper:automaticplan/automaticplan', [
+                'title' => 'Automatic Plan',
+                'user' => $this->getUser(),
+                'plan' => $this->automaticPlanner->getAutomaticPlanAsArray(
+                    $this->request->getStringParam('add_blocking', 0) == 1
+                )
+            ]));
+        } elseif ($type == 'json') {
             $automatic_plan = json_encode($this->automaticPlanner->getAutomaticPlanAsArray(
                 $this->request->getStringParam('add_blocking', 0) == 1
             ));
+            return $this->response->text($automatic_plan);
         } else {
             $automatic_plan = $this->automaticPlanner->getAutomaticPlanAsText(
                 [
@@ -333,8 +342,8 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
                     'add_blocking' => $this->request->getStringParam('add_blocking', 0) == 1
                 ]
             );
+            return $this->response->text($automatic_plan);
         }
-        return $this->response->text($automatic_plan);
     }
 
     /**

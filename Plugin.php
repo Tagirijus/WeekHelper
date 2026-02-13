@@ -133,6 +133,13 @@ class Plugin extends Base
                 ]
             );
         }
+        // automatic plan link on sidebar
+        $this->template->hook->attach(
+            'template:dashboard:sidebar', 'WeekHelper:automaticplan/automaticplan_sidebar', [
+                // WEITER HIER
+                'caption' => $this->configModel->get('hoursview_all_caption', 'All')
+            ]
+        );
         // info about non-time-mode
         $non_time_mode_minutes = $this->configModel->get('hoursview_non_time_mode_minutes', 0);
         if ($non_time_mode_minutes != 0) {
