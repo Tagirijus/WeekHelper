@@ -320,6 +320,12 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
                 'user' => $this->getUser(),
                 'planner' => $this->automaticPlanner
             ]));
+        } elseif ($type == 'sticky') {
+            $this->response->html($this->template->render('WeekHelper:automaticplan/sticky_div', [
+                'title' => 'Automatic Plan',
+                'user' => $this->getUser(),
+                'planner' => $this->automaticPlanner
+            ]));
         } elseif ($type == 'json') {
             $automatic_plan = json_encode($this->automaticPlanner->getAutomaticPlanAsArray(
                 $this->request->getStringParam('add_blocking', 0) == 1

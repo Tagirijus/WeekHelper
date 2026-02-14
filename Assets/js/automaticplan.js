@@ -1,23 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+	initAutomaticPlanControls();
+
+});
+
+function initAutomaticPlanControls() {
 	var plan_btn = document.querySelectorAll('.plan-btn');
-	Array.prototype.forEach.call(plan_btn, (el, i) => {
+	if (plan_btn != null) {
+		Array.prototype.forEach.call(plan_btn, (el, i) => {
 
-		el.addEventListener('click', (event) => {
-			event.preventDefault();
-			planToggleTab(el);
-		});
+			el.addEventListener('click', (event) => {
+				event.preventDefault();
+				planToggleTab(el);
+			});
 
-	});
-
-	var plan_sticky_container = document.getElementsByClassName('plan-sticky-container');
-	if (plan_sticky_container != null) {
-		plan_sticky_container[0].addEventListener('mouseleave', () => {
-		    plan_sticky_container[0].scrollTop = 0;
 		});
 	}
 
-});
+	var plan_sticky_container = document.getElementsByClassName('plan-sticky-container');
+	if (plan_sticky_container != null) {
+		if (plan_sticky_container[0] != null) {
+			plan_sticky_container[0].addEventListener('mouseleave', () => {
+			    plan_sticky_container[0].scrollTop = 0;
+			});
+		}
+	}
+}
 
 
 function planToggleTab(el) {
