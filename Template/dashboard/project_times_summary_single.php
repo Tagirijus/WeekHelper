@@ -1,5 +1,5 @@
 <?php
-    $this->hoursViewHelper->initTasks();
+    $this->hoursViewHelper->initTasks('project', $project['id']);
     $times = $this->hoursViewHelper->getTimes();
     $hoursview_config = $this->hoursViewHelper->getConfig();
 ?>

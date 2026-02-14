@@ -1,6 +1,14 @@
 <?php
 
-$this->hoursViewHelper->initTasks();
+// for my other plugin (actually a plugin I did only modify!)
+// I need more than just the project tasks; so in case this
+// plugin calls this template, I will simply initialize
+// all tasks.
+if ($caller_controller == 'Bigboard') {
+    $this->hoursViewHelper->initTasks();
+} else {
+    $this->hoursViewHelper->initTasks('project', $column['project_id']);
+}
 $times = $this->hoursViewHelper->getTimes();
 $column_name = $column['title'];
 $swimlane_name = $swimlane['name'];

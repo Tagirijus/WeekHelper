@@ -7,7 +7,7 @@ this with a config. Also the row should be hidden, if no icon is visible at all.
 -->
 
 <?php
-    $this->hoursViewHelper->initTasks();
+    $this->hoursViewHelper->initTasks('project', $task['project_id']);
     $times = $this->hoursViewHelper->getTimes();
 ?>
 
