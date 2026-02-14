@@ -278,6 +278,7 @@ ul.plan-list {
 div.plan-entry-line {
 	width: 100%;
 	display: block;
+	container-type: inline-size;
 }
 div.plan-entry-time {
 	display: block;
@@ -305,11 +306,6 @@ div.plan-entry-task {
 @container (min-width: 500px) {
 	div.plan-entry-task {
 		display: inline-block;
-		width: 50%;
-	}
-}
-@container (min-width: 900px) {
-	div.plan-entry-task {
 		width: 70%;
 	}
 }
