@@ -1,11 +1,20 @@
 # Changelog
 
 
+## v3.00
+### What's Changed
+
+- Refactored the whole code base and (hopefully) improved time calculations.
+- Added the **automatic planner** (huge thing to me).
+- Added Timetagger integration for overwriting spent times (see README).
+- Added CalDAV integration for the automatic planner (see README).
+- Removed some features I did not use anyway (hovernig stats with the tabs, for example).
+
+
 ## v2.16
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added that in non-time mode the last subtask can not only overwrite "remaining time" with a positive number, but also overwrite "spent time" instead, if negative.
 - Fixed some override calculation sub last subtask in non-time mode.
 - Fixed some internal calculations which lead to buggy numbers and percentage bars.
@@ -16,7 +25,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Last subtask's title in a task can override the remaining time, when it's a numeric value and the non-time-mode is enabled.
 - Subtask can contain "N%" in title in non-time-mode, which can make them have a certain percentage of the whole estimated time.
 - Fix: End of year weeks calculation was incorrect.
@@ -27,7 +35,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added non-time-mode feature.
 - Hard coded removed some icons from task cards and list.
 
@@ -36,7 +43,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Icon for open tasks prepending in title added.
 
 
@@ -44,7 +50,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - The blocking card icon is now more obvious.
 - Also the blocking icon on the blocked card can be avoided with a config, if the blocking card is in specific columns.
 
@@ -53,7 +58,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Clicking on _"Start timer"_ for a subtask now will set the parent tasks started date, if there was none and change the subtask status as well.
 
 
@@ -61,7 +65,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Levels stuff can now not only be shown as a tooltip when hovering on the dashboard level thing, but also optionally as a separate dashboard page, linked through the sidebar.
 
 
@@ -69,7 +72,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added feature with config to be able to sort the projects on the dashboard tooltip by remaining time.
 
 
@@ -77,7 +79,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added block hours calculation on dashboard project tooltip. You can set up a _block\_hours_ in the config now. If it is >0, on the tooltip there will be shown a blocks calculation, how many blocks would be needed for the remaining time of the project.
 
 
@@ -85,7 +86,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Improved ignore subtask feature.
 - Added tooltip for task detail times.
 - Automatic action task title replacement for "[DUPICATE]" to "" got extended by the pattern, the user can set up in the config for the plugin [DuplicateMod](https://github.com/Tagirijus/DuplicateMod).
@@ -96,7 +96,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added ignore subtask by title feature.
 
 
@@ -104,7 +103,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added tooltips for time levels on dashboard.
 
 
@@ -112,7 +110,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Fixes that the automatic action would only replace "[DUPLICATE]" in the title with blank, thus the title got white space added.
 - Automatic action gets new weeknumber without a leading zero now.
 - More future weeks are not available in the "w"-replacer dropdown (which can be triggered in the title of a task).
@@ -123,7 +120,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Changed how _overtime_ is being displayed.
 
 
@@ -131,7 +127,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added an alternative week-difference calculation, which will use the calendar weeks for the difference, instead of plain "7 days is a week" calculation. This better reflects the typical work week from monday to friday (or saturdax or even sunday), for example.
 
 
@@ -139,7 +134,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added start date to card (on the bottom) and also moved due date to the bottom.
 - Added config and feature to change style of remaining boxes according to the difference to today.
 - Added option to show the week of the due date on the card.
@@ -149,7 +143,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - I merged my [HoursView](https://github.com/Tagirijus/HoursView) plugin with this _WeekHelper_ plugin.
 
 
@@ -157,7 +150,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Start of the day is now monady
 - Added option for a sticky time box on the bottom right
 
@@ -166,7 +158,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Fixed some trigger for week-replacer
 - Added checkbox inserter
 
@@ -174,7 +165,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Added styling to the weekpattern on the cards and on the task list
 - Changed default weekpattern
 
@@ -183,7 +173,6 @@ _(most recent changes are listed on top):_
 
 ### What's Changed
 
-_(most recent changes are listed on top):_
 - Initial release
 - Translations starter template included
 
