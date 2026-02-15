@@ -21,8 +21,12 @@
             <a href="/task/<?= $task['task']['id'] ?>/edit" class="js-modal-large plan-ml">
                 <i class="fa fa-edit fa-fw js-modal-large plan-icon"></i>
             </a>
+            <div class="plan-task-length">
+                <?= TimeHelper::minutesToReadable($task['length'], ' h') ?>
+            </div>
         <?php else: ?>
             <?= $task['task']['title'] ?>
+            (<?= TimeHelper::minutesToReadable($task['length'], ' h') ?>)
         <?php endif ?>
     </div>
 </div>

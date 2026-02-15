@@ -314,6 +314,15 @@ div.plan-entry-task {
 		width: 80%;
 	}
 }
+.plan-task-length {
+	position: absolute;
+	right: 1em;
+	top: .75em;
+	display: inline-block;
+	/*width: auto;*/
+	color: black;
+	text-align: right;
+}
 .plan-hover:hover {
 	text-decoration: underline !important;
 }
