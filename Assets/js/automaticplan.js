@@ -30,7 +30,7 @@ function initAutomaticPlanControls() {
 
 function planToggleTab(el) {
 	// cookie setting
-	let selected = el.getAttribute('data-plan-secet-btn');
+	let selected = el.getAttribute('data-plan-selected-btn');
 	createCookie('plan-tab-selected', selected, 365);
 
 	// buttons toggle

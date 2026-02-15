@@ -29,9 +29,9 @@
 
 <div class="plan-wrapper">
 
-    <button class="plan-btn btn <?= $btn_active_class ?>" data-plan-secet-btn="active">Active</button>
-    <button class="plan-btn btn <?= $btn_planned_class ?>" data-plan-secet-btn="planned">Planned</button>
-    <button class="plan-btn btn <?= $btn_config_class ?>" data-plan-secet-btn="config">Config</button>
+    <button class="plan-btn btn <?= $btn_active_class ?>" data-plan-selected-btn="active">Active</button>
+    <button class="plan-btn btn <?= $btn_planned_class ?>" data-plan-selected-btn="planned">Planned</button>
+    <button class="plan-btn btn <?= $btn_config_class ?>" data-plan-selected-btn="config">Config</button>
 
     <div class="plan-stats">
         <div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
