@@ -17,7 +17,7 @@ function initAutomaticPlanControls() {
 		});
 	}
 
-	var plan_sticky_container = document.getElementsByClassName('plan-sticky-container');
+	var plan_sticky_container = document.querySelectorAll('.plan-sticky-container');
 	if (plan_sticky_container != null) {
 		if (plan_sticky_container[0] != null) {
 			plan_sticky_container[0].addEventListener('mouseleave', () => {
