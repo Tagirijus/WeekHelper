@@ -333,6 +333,21 @@ div.plan-entry-task {
 .plan-day {
 	font-weight: bold;
 	margin-top: 2em;
+	container-type: inline-size;
+}
+.plan-day-planned {
+	display: none;
+}
+@container (min-width: 500px) {
+	.plan-day-planned {
+		display: inline;
+		position: relative;
+		top: -.2em;
+		left: .2em;
+		font-weight: lighter;
+		font-size: .75em;
+		opacity: .75;
+	}
 }
 .plan-ml {
 	margin-left: .5em;

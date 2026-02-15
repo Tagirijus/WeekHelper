@@ -1,7 +1,9 @@
 <?php
     $array_plan = $planner->getAutomaticPlanAsArray(true);
     $active = $array_plan['active'];
+    $active_tasksplan = $planner->getTasksPlan('active');
     $planned = $array_plan['planned'];
+    $planned_tasksplan = $planner->getTasksPlan('planned');
 
     // selected tabs fetched from cookies
     if (($_COOKIE['plan-tab-selected'] ?? '') == 'active') {
@@ -50,7 +52,8 @@
         <?php foreach ($active as $day => $tasks): ?>
             <?= $this->render('WeekHelper:automaticplan/week_tasks', [
                 'tasks' => $tasks,
-                'day' => $day
+                'day' => $day,
+                'daytimes' => $active_tasksplan->getGlobalTimesForDay($day),
             ]) ?>
         <?php endforeach ?>
     </div>
@@ -59,7 +62,8 @@
         <?php foreach ($planned as $day => $tasks): ?>
             <?= $this->render('WeekHelper:automaticplan/week_tasks', [
                 'tasks' => $tasks,
-                'day' => $day
+                'day' => $day,
+                'daytimes' => $planned_tasksplan->getGlobalTimesForDay($day),
             ]) ?>
         <?php endforeach ?>
     </div>

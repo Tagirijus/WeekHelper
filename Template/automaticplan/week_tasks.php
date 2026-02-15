@@ -1,5 +1,14 @@
+<?php
+    use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
+?>
+
 <?php if (!empty($tasks)): ?>
-    <div class="plan-day"><?= strtoupper($day) ?></div>
+    <div class="plan-day">
+        <?= strtoupper($day) ?>
+        <span class="plan-day-planned">
+            (<?= TimeHelper::minutesToReadable($daytimes['planned'], ' h') ?>)
+        </span>
+    </div>
     <ul class="plan-list">
         <?php $last_time = -1; ?>
         <?php foreach ($tasks as $task): ?>
