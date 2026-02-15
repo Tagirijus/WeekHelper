@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			response => response.text()
 		).then(
 			result => {
-				document.body.innerHTML += result;
+				KB.find('body').add(KB.dom('div').html(result).build());
 				initAutomaticPlanControls();
 			}
 		);
