@@ -90,7 +90,7 @@ class TaskMoveFromColumnToColumnOnMonday extends Base
                     $this->getParam('dest_column_id'),
                     $task['position'],
                     $task['swimlane_id'],
-                    false
+                    true
                 );
             }
         }
