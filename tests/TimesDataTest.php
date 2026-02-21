@@ -32,10 +32,11 @@ final class TimesDataTest extends TestCase
 
         $td = new TimesData();
         // this happens, if I am done faster than estimated;
-        // 0.0 remaining should always be considered 100%
+        // percentage should still show whether I worked
+        // faster or slower accordingly
         $td->addTimes(10.0, 5.0, 0.0, -5.0);
-        $this->assertSame(1.0, $td->getPercent(), $msg);
-        $this->assertSame('100%', $td->getPercentAsString(), $msg);
+        $this->assertSame(0.5, $td->getPercent(), $msg);
+        $this->assertSame('50%', $td->getPercentAsString(), $msg);
 
         $td = new TimesData();
         $td->addTimes(10.0, 15.0, 0.0, 5.0);
@@ -43,8 +44,8 @@ final class TimesDataTest extends TestCase
         // makes 12 estimated, 15 spent, 2 remaining and 5 overtime;
         // can happen if these times come from subtasks and I have
         // overtime for one task, and another still open to do subtask
-        $this->assertSame(15.0 / 17.0, $td->getPercent(), $msg);
-        $this->assertSame('88%', $td->getPercentAsString(), $msg);
+        $this->assertSame(1.25, $td->getPercent(), $msg);
+        $this->assertSame('125%', $td->getPercentAsString(), $msg);
 
         $td = new TimesData();
         $td->addTimes(10.0, 5.0, 0.0, -5.0);
@@ -53,19 +54,29 @@ final class TimesDataTest extends TestCase
         // can happen if these times come from subtasks and I have
         // negative overtime for one task, because I was faster
         // and another still open to do subtask
-        $this->assertSame(5.0 / 7.0, $td->getPercent(), $msg);
-        $this->assertSame('71%', $td->getPercentAsString(), $msg);
+        $this->assertSame(5.0 / 12.0, $td->getPercent(), $msg);
+        $this->assertSame('42%', $td->getPercentAsString(), $msg);
 
         $td = new TimesData();
         $td->addTimes(10.0, 10.0, 0.0, 0.0);
         $td->addTimes(2.0, 20.0, 0.0, 18.0);
-        $this->assertSame(1.0, $td->getPercent(), $msg);
-        $this->assertSame('100%', $td->getPercentAsString(), $msg);
+        $this->assertSame(2.5, $td->getPercent(), $msg);
+        $this->assertSame('250%', $td->getPercentAsString(), $msg);
 
         $td = new TimesData();
         $td->addTimes(2.0, 1.0, 1.0, 0.0);
         $td->addTimes(2.0, 20.0, 0.0, 18.0);
-        $this->assertSame(21.0 / 22.0, $td->getPercent(), $msg);
-        $this->assertSame('95%', $td->getPercentAsString(), $msg);
+        $this->assertSame(21.0 / 4.0, $td->getPercent(), $msg);
+        $this->assertSame('525%', $td->getPercentAsString(), $msg);
+    }
+
+    public function testDivisionByZeroPercentage()
+    {
+        $msg = 'TimesData percentage leads to division by zero.';
+
+        $td = new TimesData();
+
+        $td->addTimes(0.0, 4.5, 0.0, 0.0);
+        $this->assertSame(0.0, $td->getPercent(), $msg);
     }
 }

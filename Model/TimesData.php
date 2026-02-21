@@ -276,7 +276,7 @@ class TimesData
     protected function updatePercent()
     {
         $percent = 0.0;
-        if ($this->getSpent() != 0) {
+        if ($this->getEstimated() != 0) {
             $percent = $this->getSpent() / $this->getEstimated();
         }
         $this->percent = $percent;
