@@ -72,18 +72,36 @@ $times = $this->hoursViewHelper->getTimes();
             </span>
         <?php endif ?> -->
 
-        <?php if ($task['score']): ?>
-            <span class="task-score" title="<?= t('Complexity') ?>">
-                <i class="fa fa-trophy" role="img" aria-label="<?= t('Complexity') ?>"></i>
-                <?= $this->text->e($task['score']) ?>
-            </span>
+
+        <!-- show task score only without non-time-mode enabled -->
+        <?php if ($hoursview_config['non_time_mode_minutes'] == 0): ?>
+
+            <?php if ($task['score']): ?>
+                <span class="task-score" title="<?= t('Complexity') ?>">
+                    <i class="fa fa-trophy" role="img" aria-label="<?= t('Complexity') ?>"></i>
+                    <?= $this->text->e($task['score']) ?>
+                </span>
+            <?php endif ?>
+
+
         <?php endif ?>
 
+        <!-- show the times for the task: remaining (spent / estimated) -->
+
         <?php if (! empty($times->getEstimatedByTask($task['id']) || ! empty($times->getSpentByTask($task['id'])))): ?>
-            <span class="task-time-estimated" title="<?= t('Time remaining') ?>">
-                <span class="ui-helper-hidden-accessible"><?= t('Time remaining') ?> </span><?= $this->text->e($times->getRemainingByTask($task['id'], true)) ?>h
+
+            <span title="<?= t('Time spent') ?> / <?= t('Time estimated') ?>" class="task-spent-estimated">
+                (<?= $this->text->e($times->getSpentByTask($task['id'], true)) ?>h
+                /
+                <?= $this->text->e($times->getEstimatedByTask($task['id'], true)) ?>h)
             </span>
+
+            <span title="<?= t('Time remaining') ?>" class="task-remaining">
+                <?= $this->text->e($times->getRemainingByTask($task['id'], true)) ?>h
+            </span>
+
         <?php endif ?>
+
 
     </div>
     <div class="task-board-icons-row">

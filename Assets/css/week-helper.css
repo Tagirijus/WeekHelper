@@ -23,6 +23,20 @@
     border: 1px dotted #333;
     border-radius: 4px
 }
+.task-remaining {
+	font-weight: bold;
+}
+.task-spent-estimated {
+	position:absolute;
+	opacity: 0 !important;
+	transition: .25s;
+	width: 0px;
+}
+.task-board:hover .task-spent-estimated {
+	position: relative;
+	opacity: 1 !important;
+	width: 100%;
+}
 
 
 
