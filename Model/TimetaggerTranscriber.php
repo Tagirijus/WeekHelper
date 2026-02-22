@@ -206,6 +206,11 @@ class TimetaggerTranscriber
      */
     protected function overwriteTimes(&$task, $timetagger_tags, $remaining_run = false)
     {
+        // generally tasks without "time_estimated" should not be touched
+        if ($task['time_estimated'] == 0.0) {
+            return;
+        }
+
         // for each event, find matching tags and distribute
         foreach ($this->timetagger_fetcher->getEvents() as $event) {
 

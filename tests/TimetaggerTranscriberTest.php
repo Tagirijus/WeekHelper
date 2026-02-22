@@ -510,4 +510,53 @@ final class TimetaggerTranscriberTest extends TestCase
         $this->assertSame(1.5, $tasks[0]['time_remaining'], $msg);
         $this->assertSame(0.0, $tasks[0]['time_overtime'], $msg);
     }
+
+    public function testDoNotOverwriteWithoutEstimated()
+    {
+        //
+        // SIMULATED TIMETAGGER FETCHING
+        //
+
+        $tf = new TimetaggerFetcher();
+        $json = '{"records": [';
+        // length: 5.25 hours
+        // tags: a, b, c
+        $json .= '{"key": "A", "mt": 0, "t1": 0, "t2": 18900, "ds": "#a #b #c", "st": 0.0}';
+        $json .= ']}';
+        // finally this makes for project "#a #b #c":
+        // length: 5.25
+
+        $tf->events = TimetaggerFetcher::eventsFromJSONString($json);
+
+
+        //
+        // SIMULATED KANBAORD TASKS
+        //
+        $tasks = [
+            [
+                'id' => 1,
+                'time_estimated' => 0.0,
+                'time_spent' => 0.0,      # should stay
+                'time_remaining' => 0.0,  # should stay
+                'time_overtime' => 0.0,   # should stay
+                'nb_subtasks' => 2,
+                'nb_completed_subtasks' => 2,
+                'timetagger_tags' => 'a,b,c'
+            ],
+        ];
+
+
+        // now overwrite these tasks spent times
+        $ts = new TimetaggerTranscriber($tf);
+        foreach ($tasks as &$task) {
+            $ts->overwriteTimesForTask($task);
+        }
+        $ts->overwriteTimesForRemainingTasks();
+
+        $msg = 'TimetaggerTranscriber should not overwrite tasks without estimated time.';
+        // final check
+        $this->assertSame(0.0, $tasks[0]['time_spent'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_remaining'], $msg);
+        $this->assertSame(0.0, $tasks[0]['time_overtime'], $msg);
+    }
 }
