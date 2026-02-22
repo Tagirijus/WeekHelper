@@ -430,4 +430,42 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             ]
         ));
     }
+
+    /**
+     * Confirm modal to reset all tasks in the given column.
+     */
+    public function cleanTasksInColumnConfirm()
+    {
+        $project = $this->getProject();
+        $column_id = $this->request->getIntegerParam('column_id');
+        $swimlane_id = $this->request->getIntegerParam('swimlane_id');
+
+        $this->response->html($this->template->render('WeekHelper:weekhelper_popover/clean_tasks_in_column', array(
+            'project' => $project,
+            'nb_tasks' => $this->taskFinderModel->countByColumnAndSwimlaneId($project['id'], $column_id, $swimlane_id),
+            'column' => $this->columnModel->getColumnTitleById($column_id),
+            'swimlane' => $this->swimlaneModel->getNameById($swimlane_id),
+            'values' => array('column_id' => $column_id, 'swimlane_id' => $swimlane_id),
+        )));
+    }
+
+    /**
+     * Reset the tasks in the given column. This will remove all
+     * done subtasks of the tasks. In "non-time-mode" it will also
+     * set their score to 0.
+     */
+    public function cleanTasksInColumn()
+    {
+        $project = $this->getProject();
+        $values = $this->request->getValues();
+
+        $this->taskStatusModel->cleanTasksBySwimlaneAndColumn(
+            $values['swimlane_id'],
+            $values['column_id'],
+            $this->configModel->get('hoursview_non_time_mode_minutes', 0) != 0
+        );
+
+        $this->flash->success(t('All tasks of the column "%s" and the swimlane "%s" have been cleaned successfully.', $this->columnModel->getColumnTitleById($values['column_id']), $this->swimlaneModel->getNameById($values['swimlane_id'])));
+        $this->response->redirect($this->helper->url->to('BoardViewController', 'show', array('project_id' => $project['id'])));
+    }
 }

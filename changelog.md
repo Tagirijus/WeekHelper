@@ -1,7 +1,14 @@
 # Changelog
 
 
-## v3.00
+## v3.1
+### What's Changed
+
+- TimetaggerTranscriber won't overwrite tasks without them having an estimated time now.
+- Added column board action for "clean" done tasks. This will delete done subtasks and in "non-time-mode" it will also reset the tasks score to 0.
+
+
+## v3.0
 ### What's Changed
 
 - Refactored the whole code base and (hopefully) improved time calculations.

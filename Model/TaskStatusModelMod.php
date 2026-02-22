@@ -148,4 +148,68 @@ class TaskStatusModelMod extends Base
                     ->eq('is_active', $status)
                     ->exists();
     }
+
+    /**
+     * Clean a task. Remove its subtasks, if they are done.
+     * In non-time-mode it also will set the tasks score
+     * to 0.
+     *
+     * @access public
+     * @param  integer   $task_id   Task id
+     * @param  boolean   $non_time_mode
+     * @return boolean
+     */
+    public function clean($task_id, $non_time_mode)
+    {
+        // remove done subtasks
+        $subtasks = $this->subtaskModel->getAll($task_id);
+        foreach ($subtasks as $subtask) {
+            if ($subtask['status'] == 2) {
+                $this->subtaskModel->remove($subtask['id']);
+            }
+        }
+
+        // in non-time-mode, set the tasks score to 0
+        if ($non_time_mode) {
+            return $this->taskModificationModel->update(['id' => $task_id, 'score' => 0]);
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Clean multiple tasks
+     *
+     * @access public
+     * @param  array   $task_ids
+     * @param  boolean $non_time_mode
+     */
+    public function cleanMultipleTasks(array $task_ids, $non_time_mode)
+    {
+        foreach ($task_ids as $task_id) {
+            $this->clean($task_id, $non_time_mode);
+        }
+    }
+
+    /**
+     * Clean all tasks within a column/swimlane. It will
+     * remove done subtasks and in "non-time-mode" it will
+     * reset the scores to 0.
+     *
+     * @access public
+     * @param  integer $swimlane_id
+     * @param  integer $column_id
+     * @param  boolean $non_time_mode
+     */
+    public function cleanTasksBySwimlaneAndColumn($swimlane_id, $column_id, $non_time_mode)
+    {
+        $task_ids = $this->db
+            ->table(\Kanboard\Model\TaskModel::TABLE)
+            ->eq('swimlane_id', $swimlane_id)
+            ->eq('column_id', $column_id)
+            ->eq(\Kanboard\Model\TaskModel::TABLE.'.is_active', \Kanboard\Model\TaskModel::STATUS_OPEN)
+            ->findAllByColumn('id');
+
+        $this->cleanMultipleTasks($task_ids, $non_time_mode);
+    }
 }

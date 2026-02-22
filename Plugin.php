@@ -152,6 +152,11 @@ class Plugin extends Base
                 ['non_time_mode_minutes' => $non_time_mode_minutes]
             );
         }
+        // board column dropdown actions
+        $this->template->hook->attach(
+            'template:board:column:dropdown',
+            'WeekHelper:board/table_column_actions'
+        );
 
         // Template Overrides
         $this->template->setTemplateOverride('board/task_public', 'WeekHelper:board/task_public');
@@ -235,7 +240,7 @@ class Plugin extends Base
 
     public function getPluginVersion()
     {
-        return '3.0.0';
+        return '3.1.0';
     }
 
     public function getCompatibleVersion()
