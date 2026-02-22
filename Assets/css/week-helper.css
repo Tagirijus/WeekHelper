@@ -328,6 +328,11 @@ div.plan-entry-task {
 		width: 80%;
 	}
 }
+.plan-entry-smaller-prio {
+	position: relative;
+	top: -.2em;
+	font-size: .6em;
+}
 .plan-task-length {
 	position: absolute;
 	right: 1em;

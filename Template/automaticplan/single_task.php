@@ -21,6 +21,9 @@
             <a href="/task/<?= $task['task']['id'] ?>/edit" class="js-modal-large plan-ml">
                 <i class="fa fa-edit fa-fw js-modal-large plan-icon"></i>
             </a>
+            <span class="plan-entry-smaller-prio">
+                <?= $this->task->renderPriority($task['task']['priority']) ?>
+            </span>
             <div class="plan-task-length">
                 <?= TimeHelper::minutesToReadable($task['length'], ' h') ?>
             </div>
