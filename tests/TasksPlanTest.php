@@ -536,7 +536,7 @@ final class TasksPlanTest extends TestCase
 
     public function testMinSlotLength()
     {
-        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $tasks_plan = new TasksPlan(15);
 
         $task_a = TestTask::create(
             project_id: 4,
@@ -583,7 +583,7 @@ final class TasksPlanTest extends TestCase
 
     public function testMinSlotLengthB()
     {
-        $tasks_plan = new TasksPlan(min_slot_length: 30);
+        $tasks_plan = new TasksPlan(30);
 
         $time_slots_day_mon = new TimeSlotsDay("6:00-6:20\n10:00-12:00", 'mon');
         $time_slots_day_tue = new TimeSlotsDay("6:00-8:00", 'tue');
@@ -678,7 +678,7 @@ final class TasksPlanTest extends TestCase
      */
     public function testMinSlotLengthC()
     {
-        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $tasks_plan = new TasksPlan(15);
 
         $task_a = TestTask::create(
             is_running: true,
@@ -760,7 +760,7 @@ final class TasksPlanTest extends TestCase
      */
     public function testMinSlotLengthD()
     {
-        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $tasks_plan = new TasksPlan(15);
         $task_a = TestTask::create(
             project_max_hours_mon: 0.2,  # 12 min
             time_remaining: 1.2,  # 1:12 h
@@ -793,7 +793,7 @@ final class TasksPlanTest extends TestCase
 
         // NOW THE TEST AGAIN, BUT WITH A RUNNING TASK
 
-        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $tasks_plan = new TasksPlan(15);
         $task_a = TestTask::create(
             is_running: true,
             project_max_hours_mon: 0.2,  # 12 min
@@ -849,7 +849,7 @@ final class TasksPlanTest extends TestCase
      */
     public function testOpenTaskAndOvertimeA()
     {
-        $tasks_plan = new TasksPlan(non_time_mode_minutes: 30);
+        $tasks_plan = new TasksPlan();
 
         $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
 
@@ -879,15 +879,15 @@ final class TasksPlanTest extends TestCase
                 [
                     'task' => $task_a,
                     'start' => 0,
-                    'end' => 30,
-                    'length' => 30,
+                    'end' => 1,
+                    'length' => 1,
                     'spent' => 360,
                     'remaining' => 0,
                 ],
                 [
                     'task' => $task_b,
-                    'start' => 30,
-                    'end' => 90,
+                    'start' => 1,
+                    'end' => 61,
                     'length' => 60,
                     'spent' => 0,
                     'remaining' => 60,
@@ -945,15 +945,15 @@ final class TasksPlanTest extends TestCase
                 [
                     'task' => $task_a,
                     'start' => 0,
-                    'end' => 5,
-                    'length' => 5,
+                    'end' => 1,
+                    'length' => 1,
                     'spent' => 360,
                     'remaining' => 0,
                 ],
                 [
                     'task' => $task_b,
-                    'start' => 5,
-                    'end' => 65,
+                    'start' => 1,
+                    'end' => 61,
                     'length' => 60,
                     'spent' => 0,
                     'remaining' => 60,
@@ -1073,7 +1073,7 @@ final class TasksPlanTest extends TestCase
 
     public function testPlanningBForMinSlotLength()
     {
-        $tasks_plan = new TasksPlan(min_slot_length: 16);
+        $tasks_plan = new TasksPlan(16);
 
         // for Monday only task A should be planned
         $time_slots_day_mon = new TimeSlotsDay("6:00-8:00", 'mon');
@@ -1240,7 +1240,7 @@ final class TasksPlanTest extends TestCase
 
     public function testRemainingMinutesOpenOvertimeTask()
     {
-        $tasks_plan = new TasksPlan(non_time_mode_minutes: 15);
+        $tasks_plan = new TasksPlan();
 
         $task = TestTask::create(
             title: 'over, uh oh', time_estimated: 5.0, time_spent: 6.0,
@@ -1249,7 +1249,7 @@ final class TasksPlanTest extends TestCase
         );
         $time_slots_day_mon = new TimeSlotsDay('0:00-10:00', 'mon');
         $this->assertSame(
-            15,
+            1,
             $tasks_plan->minutesCanBePlanned($task, $time_slots_day_mon),
             'Open + overtime task gets wrong "minutes can be planned".'
         );

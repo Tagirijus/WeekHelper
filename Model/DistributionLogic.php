@@ -228,8 +228,7 @@ class DistributionLogic
     protected function initTasksPlans($time_slots_config)
     {
         $this->tasks_plan = new TasksPlan(
-            $time_slots_config['min_slot_length'],
-            $time_slots_config['non_time_mode_minutes']
+            $time_slots_config['min_slot_length']
         );
     }
 

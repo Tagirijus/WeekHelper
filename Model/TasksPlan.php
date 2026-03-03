@@ -121,19 +121,6 @@ class TasksPlan
     var $min_slot_length = 0;
 
     /**
-     * The minutes a Kanboard task score should be. So
-     * far this value is used for tasks, which are
-     * open, but have overtime. My logic here is just
-     * to use the non_time_mode_minutes as the remaining
-     * time for such tasks. They might take longer or
-     * shorter, but I need anything so that such still-open
-     * tasks can be planned.
-     *
-     * @var integer
-     **/
-    var $non_time_mode_minutes;
-
-    /**
      * This variable holds the overall planned, spent and
      * remaining times per week and per day. Structure:
      *
@@ -196,16 +183,11 @@ class TasksPlan
      * Initialize the instance.
      *
      * @param integer $min_slot_length
-     * @param integer $non_time_mode_minutes
      * @param null|array $available_day_times
      */
-    public function __construct(
-        $min_slot_length = 0,
-        $non_time_mode_minutes = 0,
-    )
+    public function __construct($min_slot_length = 0,)
     {
         $this->min_slot_length = $min_slot_length;
-        $this->non_time_mode_minutes = $non_time_mode_minutes != 0 ? $non_time_mode_minutes : 5;
         $this->project_quota_all = new ProjectQuotaAll();
     }
 
@@ -505,11 +487,11 @@ class TasksPlan
             )
             && !in_array($task['id'], $this->open_overtime_task_ids)
         ) {
-            // in that case just use the non_time_mode_minutes
-            // as the planable minutes, since it is quite of
-            // unclear anyway, when the task will be done
+            // in that case just use 1 minute as the planable minutes,
+            // since it is quite of unclear anyway, when the task will
+            // be done
             $this->open_overtime_task_ids[] = $task['id'];
-            return $this->non_time_mode_minutes;
+            return 1;
         }
 
         // this task is completely planned already

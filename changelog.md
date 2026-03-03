@@ -7,6 +7,7 @@
 - Added priority of task in automatic plan list.
 - Added check that a task cannot be planned on a day, when the time it would be planned is less than the min_slot_length setting, but the task would normally have more remaining than that. In that case, technically, a task will be planned on the other days instead.
 - Min slot length won't be checked for running tasks now.
+- Changed that still open tasks without remaining time won't use the score * non_time_mode_minutes anymore as the planned remaining time. Instead is is 1 minute now.
 
 
 ## v3.1
