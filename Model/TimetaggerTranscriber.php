@@ -3,7 +3,6 @@
 namespace Kanboard\Plugin\WeekHelper\Model;
 
 use Kanboard\Plugin\WeekHelper\Helper\TimeHelper;
-use Kanboard\Plugin\WeekHelper\Model\TimeCalculator;
 
 /**
  * This class is for overwriting the given tasks spent times.
