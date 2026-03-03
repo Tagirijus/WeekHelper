@@ -5,6 +5,7 @@
 ### What's Changed
 
 - Added priority of task in automatic plan list.
+- Min slot length won't be checked for running tasks now.
 
 
 ## v3.1

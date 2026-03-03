@@ -672,6 +672,82 @@ final class TasksPlanTest extends TestCase
     }
 
     /**
+     * I added the logic that for running tasks the min_slot_length
+     * won't be checked, so that running tasks can be lower than
+     * the min_slot_length.
+     */
+    public function testMinSlotLengthC()
+    {
+        $tasks_plan = new TasksPlan(min_slot_length: 15);
+
+        $task_a = TestTask::create(
+            is_running: true,
+            time_remaining: 0.2,  # 12 min
+            title: 'a',
+        );
+        $task_b = TestTask::create(
+            time_remaining: 0.2,  # 12 min
+            title: 'b',
+        );
+        // I will create two days here. normally I would be able to plan both tasks
+        // on these days, but for the sake of easier testing, I later will only
+        // plan task A on "Monday" and task B on "Tuesday".
+        $time_slots_day_mon = new TimeSlotsDay("0:00-0:10\n1:00-2:00", 'mon');
+        $time_slots_day_tue = new TimeSlotsDay("0:00-0:10\n1:00-2:00", 'tue');
+
+        // now task A should be plannable on Monday from 0:00 to 0:12 and 1:00-1:02
+        $tasks_plan->planTask($task_a, $time_slots_day_mon);
+
+        // while task B for Tuesday should only be plannable 1:00-1:12
+        $tasks_plan->planTask($task_b, $time_slots_day_tue);
+
+        // expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 10,
+                    'length' => 10,
+                    'spent' => 0,
+                    'remaining' => 12,
+                ],
+                [
+                    'task' => $task_a,
+                    'start' => 60,
+                    'end' => 62,
+                    'length' => 2,
+                    'spent' => 0,
+                    'remaining' => 12,
+                ]
+            ],
+            'tue' => [
+                [
+                    'task' => $task_b,
+                    'start' => 60,
+                    'end' => 72,
+                    'length' => 12,
+                    'spent' => 0,
+                    'remaining' => 12,
+                ]
+            ],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // check the plans
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'With a running task the calculated plan is wrong.'
+        );
+    }
+
+    /**
      * Sometimes there might be tasks, which are still open, while
      * they do not have remaining time, but overtime already. Such
      * tasks should still be able to be planned so that it is clear

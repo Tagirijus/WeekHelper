@@ -543,7 +543,9 @@ class TasksPlan
 
         // does the slot have enough time according to the config
         // minimum slot length?
-        if ($slot_length < $this->min_slot_length) {
+        if (
+            !($task['is_running'] ?? false) && $slot_length < $this->min_slot_length
+        ) {
             $time_slots_day->depleteSlot($next_slot_key);
             return 0;
         }
