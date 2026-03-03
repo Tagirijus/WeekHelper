@@ -748,6 +748,100 @@ final class TasksPlanTest extends TestCase
     }
 
     /**
+     * I added another minutesCanBePlanned check, which won't plan
+     * tasks for less minutes than the min_slot_length, if they
+     * actually would have this or more than that remaining. Only
+     * running tasks can skip this check.
+     *
+     * The reason is: one day I had some task for 4 min left of the
+     * day, while this task actually had way more minutes left in
+     * total. It just felt weird to me and I wanted this task not
+     * to be planned that day still, but on another day.
+     */
+    public function testMinSlotLengthD()
+    {
+        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $task_a = TestTask::create(
+            project_max_hours_mon: 0.2,  # 12 min
+            time_remaining: 1.2,  # 1:12 h
+            title: 'a',
+        );
+        $time_slots_day = new TimeSlotsDay("0:00-0:10\n1:00-2:00", 'mon');
+        // task should not be planned on monday, since it only would have
+        // 12 min left for Monday, while this is less than min_slot_length
+        // and also the task is not running, with what this check could
+        // be skipped
+        $tasks_plan->planTask($task_a, $time_slots_day);
+        // expected plan
+        $expected_plan = [
+            'mon' => [],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // check the plans
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'Min slot length test failed for a task with remaining daily quota < min_slot_length.'
+        );
+
+        // NOW THE TEST AGAIN, BUT WITH A RUNNING TASK
+
+        $tasks_plan = new TasksPlan(min_slot_length: 15);
+        $task_a = TestTask::create(
+            is_running: true,
+            project_max_hours_mon: 0.2,  # 12 min
+            time_remaining: 1.2,  # 1:12 h
+            title: 'a',
+        );
+        $time_slots_day = new TimeSlotsDay("0:00-0:10\n1:00-2:00", 'mon');
+        // task should now be planned on monday 0:00-0:10 and 1:00-1:02,
+        // since it is running, which will skip the min_length checks
+        $tasks_plan->planTask($task_a, $time_slots_day);
+        // expected plan
+        $expected_plan = [
+            'mon' => [
+                [
+                    'task' => $task_a,
+                    'start' => 0,
+                    'end' => 10,
+                    'length' => 10,
+                    'spent' => 0,
+                    'remaining' => 72,
+                ],
+                [
+                    'task' => $task_a,
+                    'start' => 60,
+                    'end' => 62,
+                    'length' => 2,
+                    'spent' => 0,
+                    'remaining' => 72,
+                ]
+            ],
+            'tue' => [],
+            'wed' => [],
+            'thu' => [],
+            'fri' => [],
+            'sat' => [],
+            'sun' => [],
+            'overflow' => [],
+        ];
+
+        // check the plans
+        $this->assertSame(
+            $expected_plan,
+            $tasks_plan->getPlan(),
+            'Min slot length test failed for a task with remaining daily quota < min_slot_length.'
+        );
+    }
+
+    /**
      * Sometimes there might be tasks, which are still open, while
      * they do not have remaining time, but overtime already. Such
      * tasks should still be able to be planned so that it is clear

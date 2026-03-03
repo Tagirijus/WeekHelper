@@ -555,15 +555,41 @@ class TasksPlan
         // - complete actual remaining of task, if project max and slot length allows it
         // - otherwise only project max, if slot allows it
         // - otherwisw only the available slot length
-        $out = (
+        $final_plan_time = (
             ($tasks_actual_remaining > $left_daily_limit)
             ? $left_daily_limit : $tasks_actual_remaining
         );
-        $out = (
-            ($out > $slot_length)
-            ? $slot_length : $out
+        $final_plan_time = (
+            ($final_plan_time > $slot_length)
+            ? $slot_length : $final_plan_time
         );
-        return $out;
+
+        // additional check with the calculated "to plan time":
+        // if this is lower than min_slot_length, while the task
+        // would have more remaining than that normally: do not
+        // plan it, if it's not running already
+        if (
+            // the task should not be running; otherwise this check
+            // can be skipped, since running tasks should be able
+            // to "avoid min_length checks".
+            !($task['is_running'] ?? false)
+            // the tasks reamining should at least be min_slot_length,
+            // which means: if this check would not be, the remaining
+            // task, if lower than min_slot_length, would actually
+            // never be plannable. this way the remaining of lower
+            // of min_slot_length can still be planned
+            && $tasks_actual_remaining >= $this->min_slot_length
+            // the final check, which will make the check fail, basically,
+            // is when the time, which normally would now be planned, is
+            // lower than min_slot_length. this makes tasks with tiny
+            // minutes for a day, while there actually be more, just be
+            // planned on other days instead
+            && $final_plan_time < $this->min_slot_length
+        ) {
+            return 0;
+        }
+
+        return $final_plan_time;
     }
 
     /**
