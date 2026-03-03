@@ -568,6 +568,10 @@ class TasksPlan
         // if this is lower than min_slot_length, while the task
         // would have more remaining than that normally: do not
         // plan it, if it's not running already
+        //
+        //                  ! ! ! !  ATTENTION   ! ! ! !
+        // ==> I SHOULD CONSIDER MAKING THIS CHECK OPTIONAL VIA CONFIG <==
+        //
         if (
             // the task should not be running; otherwise this check
             // can be skipped, since running tasks should be able
