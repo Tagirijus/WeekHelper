@@ -329,6 +329,18 @@ div.plan-entry-task {
 		width: 80%;
 	}
 }
+.plan-project-batch {
+	background-color: rgba(50, 50, 70, .8);
+	padding: .25em .3em;
+	margin-right: .5em;
+	border-radius: 3px;
+}
+.plan-project-batch > span {
+	color: white;
+}
+.plan-project-batch:hover {
+	background-color: rgba(110, 110, 150, 1);
+}
 .plan-entry-smaller-prio {
 	position: relative;
 	top: -.2em;
@@ -343,8 +355,8 @@ div.plan-entry-task {
 	color: black;
 	text-align: right;
 }
-.plan-hover:hover {
-	text-decoration: underline !important;
+.plan-hover:hover:not(.plan-project-batch) {
+	text-decoration: underline;
 }
 .plan-icon {
 	color: black !important;

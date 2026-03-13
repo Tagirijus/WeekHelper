@@ -10,6 +10,7 @@
 - Changed that still open tasks without remaining time won't use the score * non_time_mode_minutes anymore as the planned remaining time. Instead is is 1 minute now.
 - Changed that "clean done tasks" function will set subtasks with status "1" to status "0" now.
 - Added that for the tasks in the automatic plan there is now the "planned" time together with the "total reamining" time on the text output and the automatic plan page (+ sticky).
+- Changed project alias styling on task mini-card in automatic plan.
 
 
 ## v3.1

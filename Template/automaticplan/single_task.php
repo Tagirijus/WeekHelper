@@ -10,12 +10,20 @@
     </div>
 
     <div class="task-board plan-entry-task color-<?= $task['task']['color_id'] ?? '' ?>">
+
         <?php if (isset($task['task']['is_running'])): ?>
             🔴
         <?php endif ?>
+
         <?php if (isset($task['task']['id'])): ?>
-            <a href="/board/<?= $task['task']['project_id'] ?>" class="plan-hover">
-                [<?= $task['task']['project_alias'] ?>]
+
+            <a href="/board/<?= $task['task']['project_id'] ?>" class="plan-project-batch">
+
+                <!-- project alias batch -->
+                <span>
+                    <?= $task['task']['project_alias'] ?>
+                </span>
+
             </a>
             <a href="/task/<?= $task['task']['id'] ?>" class="plan-hover"><?= $task['task']['title'] ?></a>
             <a href="/task/<?= $task['task']['id'] ?>/edit" class="js-modal-large plan-ml">
@@ -25,6 +33,7 @@
                 <?= $this->task->renderPriority($task['task']['priority']) ?>
             </span>
             <div class="plan-task-length">
+
                 <!-- overtime indicator -->
                 <?php if ($task['task']['time_overtime']): ?>
                     ⚠️
@@ -39,10 +48,16 @@
                     $length = $planned . ' / ' . $total;
                 ?>
                 <?= $length ?>
+
             </div>
+
         <?php else: ?>
+
+            <!-- titel for blocking task only -->
             <?= $task['task']['title'] ?>
             (<?= TimeHelper::minutesToReadable($task['length'], ' h') ?>)
+
         <?php endif ?>
+
     </div>
 </div>
