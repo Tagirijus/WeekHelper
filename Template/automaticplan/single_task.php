@@ -25,6 +25,12 @@
                 <?= $this->task->renderPriority($task['task']['priority']) ?>
             </span>
             <div class="plan-task-length">
+                <!-- overtime indicator -->
+                <?php if ($task['task']['time_overtime']): ?>
+                    ⚠️
+                <?php endif ?>
+
+                <!-- length calculations -->
                 <?php
                     $planned = TimeHelper::minutesToReadable($task['length'], ' h');
                     $total = TimeHelper::minutesToReadable(
