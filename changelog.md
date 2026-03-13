@@ -1,7 +1,7 @@
 # Changelog
 
 
-## unreleased
+## v3.2
 ### What's Changed
 
 - Added priority of task in automatic plan list.
