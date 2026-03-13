@@ -166,6 +166,8 @@ class TaskStatusModelMod extends Base
         foreach ($subtasks as $subtask) {
             if ($subtask['status'] == 2) {
                 $this->subtaskModel->remove($subtask['id']);
+            } elseif ($subtask['status'] == 1) {
+                $this->subtaskModel->update(['id' => $subtask['id'], 'status' => 0]);
             }
         }
 
