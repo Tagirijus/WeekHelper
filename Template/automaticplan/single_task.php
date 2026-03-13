@@ -25,7 +25,14 @@
                 <?= $this->task->renderPriority($task['task']['priority']) ?>
             </span>
             <div class="plan-task-length">
-                <?= TimeHelper::minutesToReadable($task['length'], ' h') ?>
+                <?php
+                    $planned = TimeHelper::minutesToReadable($task['length'], ' h');
+                    $total = TimeHelper::minutesToReadable(
+                        TimeHelper::hoursToMinutes($task['task']['time_remaining']), ' h'
+                    );
+                    $length = $planned . ' / ' . $total;
+                ?>
+                <?= $length ?>
             </div>
         <?php else: ?>
             <?= $task['task']['title'] ?>
