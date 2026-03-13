@@ -563,7 +563,17 @@ class AutomaticPlanner extends Base
         $out = '';
         $start_daytime = TimeHelper::minutesToReadable($task['start']);
         $end_daytime = TimeHelper::minutesToReadable($task['end']);
-        $length = TimeHelper::minutesToReadable($task['length'], ' h');
+
+        // planned length / out of total remaining
+        if ($task['task']['time_remaining'] ?? false) {
+            $planned = TimeHelper::minutesToReadable($task['length'], ' h');
+            $total = TimeHelper::minutesToReadable(
+                TimeHelper::hoursToMinutes($task['task']['time_remaining']), ' h'
+            );
+            $length = $planned . ' / ' . $total;
+        } else {
+            $length = TimeHelper::minutesToReadable($task['length'], ' h');
+        }
 
         // time of day
         if (!($params['hide_times'] ?? false)) {
