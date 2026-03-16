@@ -316,7 +316,7 @@ class TimeSlotsDay
     public function getLengthOfSlot($slot_key, $init_value = false)
     {
         if (array_key_exists($slot_key, $this->slots)) {
-            if ($init_value) {
+            if ($init_value && array_key_exists('timespan_init', $this->slots[$slot_key])) {
                 return $this->slots[$slot_key]['timespan_init']->length();
             } else {
                 return $this->slots[$slot_key]['timespan']->length();
