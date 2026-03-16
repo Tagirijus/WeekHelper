@@ -1,6 +1,12 @@
 # Changelog
 
 
+## unreleased
+### What's Changed
+
+- Fix: whole day calendar events with 0:00 to 0:00 the same day got converted wrong.
+
+
 ## v3.2
 ### What's Changed
 

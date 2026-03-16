@@ -51,6 +51,34 @@ final class CalDAVConverterTest extends TestCase
         );
     }
 
+    public function testEventToTimeSpanStringFor0to0()
+    {
+        // sometimes a full day is 0:00-0:00 (I guess for events, spanning
+        // over multiple day ...). I want them to be handled like normal
+        // full days (23:58-23:59)
+        $caldav_event = [
+            'start' => new \DateTime(
+                '2026-03-16T00:00:00',
+                new \DateTimeZone(date_default_timezone_get())
+            ),
+            'end' => new \DateTime(
+                '2026-03-16T00:00:00',
+                new \DateTimeZone(date_default_timezone_get())
+            ),
+            'title' => 'whole day 0:00 to 0:00',
+            'uid' => 'z8117f35-d34a-43ad-a8de-6c0b24da4840',
+            'source' => 'calendar_url_here/calendar_name',
+            'calendar' => 'calendar_name',
+        ];
+        $converted = CalDAVConverter::eventToTimeSpanString($caldav_event);
+
+        $this->assertSame(
+            'mon 23:58-23:59 whole day 0:00 to 0:00 (calendar_name)',
+            $converted,
+            'CalDAVConverter event was not translated correctly into a string for 0:00 to 0:00 event.'
+        );
+    }
+
     public function testGetUtcRangeFor2Weeks()
     {
         [$start, $end] = CalDAVConverter::getRangeFor2Weeks('2026-01-11');

@@ -191,9 +191,17 @@ class CalDAVConverter
     {
         $day = strtolower($event['start']->format('D'));
         $start = $event['start']->format('G:i');
+        $end = $event['end']->format('G:i');
         $diff = $event['start']->diff($event['end']);
         $diff = (int) $diff->format('%r%a');
-        if ($diff == 1 && $event['end']->format('G:i') == '0:00') {
+        if (
+            // either the event is 0:00 to 0:00 of next day
+            ($diff == 1 && $event['end']->format('G:i') == '0:00')
+            ||
+            // or it is 0:00 to 0:00 the same day, which also stands
+            // for a whole day
+            ($start == $end)
+        ) {
             $start = '23:58';
             $end = '23:59';
         } else {
