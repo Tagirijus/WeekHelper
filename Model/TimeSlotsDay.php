@@ -287,6 +287,9 @@ class TimeSlotsDay
     {
         $minutes = 0;
         foreach ($this->slots as $slot) {
+            if (!array_key_exists('timespan_init', $slot)) {
+                continue;
+            }
             $timespan = $slot['timespan_init'];
             if ($timespan->isAfter($time_point->getTime())) {
                 $minutes += $timespan->length();
