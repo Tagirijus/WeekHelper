@@ -457,3 +457,9 @@ div.plan-entry-task {
 .plan-sticky-container:hover .plan-stats-small, .plan-stats-small {
 	display: none;
 }
+.plan-quick-config {
+	margin-top: 2em;
+}
+.plan-quick-config > ul {
+	margin-left: 1.5em;
+}

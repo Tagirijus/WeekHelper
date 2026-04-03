@@ -35,6 +35,9 @@
     <button class="plan-btn btn <?= $btn_planned_class ?>" data-plan-selected-btn="planned">Planned</button>
     <button class="plan-btn btn <?= $btn_config_class ?>" data-plan-selected-btn="config">Config</button>
 
+
+    <!-- automatic plan STATS -->
+
     <div class="plan-stats">
         <div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
             <?= $this->render('WeekHelper:automaticplan/stats_single', [
@@ -48,6 +51,9 @@
         </div>
     </div>
 
+
+    <!-- automatic plan ACTIVE -->
+
     <div class="plan-container <?= $container_active_class ?>" data-plan-tab="active">
         <?php foreach ($active as $day => $tasks): ?>
             <?= $this->render('WeekHelper:automaticplan/week_tasks', [
@@ -57,6 +63,9 @@
             ]) ?>
         <?php endforeach ?>
     </div>
+
+
+    <!-- automatic plan PLANNED -->
 
     <div class="plan-container <?= $container_planned_class ?>" data-plan-tab="planned">
         <?php foreach ($planned as $day => $tasks): ?>
@@ -68,8 +77,24 @@
         <?php endforeach ?>
     </div>
 
+
+    <!-- automatic planner config area -->
+
     <div class="plan-container <?= $container_config_class ?>" data-plan-tab="config">
-        <div class="plan-day">to be made ...</div>
+        <div class="plan-quick-config">
+            <p>
+                Automatic planner quick configs:
+            </p>
+            <br>
+            <ul>
+                <li>
+                    <a href="/weekhelper/updateblockingtasks" class="js-modal-small">Update blocking tasks from CalDAV</a>
+                </li>
+                <li>
+                    <a href="/weekhelper/configAutomaticPlanner" class="js-modal-small">Automatic planner config page (as Modal)</a>
+                </li>
+            </ul>
+        </div>
     </div>
 
 </div>
