@@ -1,9 +1,10 @@
 # Changelog
 
 
-## unreleased
+## v3.3
 ### What's Changed
 
+- Added some links into the config area of the automatic planner sticky div.
 - Fix: whole day calendar events with 0:00 to 0:00 the same day got converted wrong.
 
 
