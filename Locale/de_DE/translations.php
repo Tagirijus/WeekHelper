@@ -102,4 +102,5 @@ return array(
     'Do you really want to clean tasks in this column?' => 'Wirklich alle Tasks in dieser Spalte säubern?',
     'It will remove all done subtasks of %d tasks in the column "%s" and the swimlane "%s". In non-time-mode this will also set their score to 0.' => 'Es werden alle erledigten Subtasks der %d Tasks in der Spalte "%s" und der Swimlane "%s" gelöscht. Im Non-Time-Modus werden zusätzlich die Komplexitäten auf 0 gesetzt.',
     'All tasks of the column "%s" and the swimlane "%s" have been cleaned successfully.' => 'Alle tasks der Spalte "%s" und der Swimlane "%s" wurden erfolgreich gesäubert.',
+    'Times in columns header' => 'Zeiten im Spalten-Header',
 );

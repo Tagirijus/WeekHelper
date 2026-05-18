@@ -167,6 +167,7 @@ class WeekHelperController extends \Kanboard\Controller\PluginController
             'hoursview_dashboard_link_level_3' => $form['dashboard_link_level_3'],
             'hoursview_dashboard_link_level_4' => $form['dashboard_link_level_4'],
             'hoursview_dashboard_link_level_all' => $form['dashboard_link_level_all'],
+            'hoursview_columns_times_enabled' => isset($form['columns_times_enabled']) ? 1 : 0,
         ];
 
         $this->languageModel->loadCurrentLanguage();

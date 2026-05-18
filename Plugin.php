@@ -73,7 +73,8 @@ class Plugin extends Base
         );
         $this->template->hook->attach(
             'template:board:column:header', 'WeekHelper:board/column_hours', [
-                'caller_controller' => $this->request->getStringParam('controller')
+                'caller_controller' => $this->request->getStringParam('controller'),
+                'column_times_enabled' => $this->configModel->get('hoursview_columns_times_enabled', 1)
             ]
         );
         $this->template->hook->attach(

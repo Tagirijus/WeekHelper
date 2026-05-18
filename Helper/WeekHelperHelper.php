@@ -77,6 +77,7 @@ class WeekHelperHelper extends Base
             'dashboard_link_level_3' => $this->configModel->get('hoursview_dashboard_link_level_3', 0),
             'dashboard_link_level_4' => $this->configModel->get('hoursview_dashboard_link_level_4', 0),
             'dashboard_link_level_all' => $this->configModel->get('hoursview_dashboard_link_level_all', 0),
+            'columns_times_enabled' => $this->configModel->get('hoursview_columns_times_enabled', 1),
 
             // Remaining Box
             'remaining_days_enabled' => $this->configModel->get('weekhelper_remaining_days_enabled', 1),

@@ -262,6 +262,25 @@
     </div>
 
 
+    <!-- COLUMNS stuff -->
+
+    <br>
+    <br>
+
+    <p>
+        <h3><?= t('Times in columns header') ?></h3>
+    </p>
+
+    <div class="task-form-container">
+
+        <div class="task-form-main-column">
+            <?= $this->form->label(t('Times in columns header'), 'columns_times_enabled') ?>
+            <?= $this->form->checkbox('columns_times_enabled', t('enabled'), 1, $columns_times_enabled) ?>
+        </div>
+
+    </div>
+
+
 
     <div class="task-form-bottom">
         <?= $this->modal->submitButtons() ?>
