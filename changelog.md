@@ -1,6 +1,12 @@
 # Changelog
 
 
+## v3.4
+### What's Changed
+
+- Added config for showing column times or not.
+
+
 ## v3.3
 ### What's Changed
 
