@@ -705,7 +705,7 @@ class TimeSlotsDay
                             $time_point->getTime()
                         ),
                         'timespan_init' => new TimeSpan(
-                            $slot['timespan_init']->getStart(),
+                            isset($slot['timespan_init']) ? $slot['timespan_init']->getStart() : $slot['timespan']->getStart(),
                             $time_point->getTime()
                         ),
                         'conditions_allow' => $slot['conditions_allow'],
@@ -719,7 +719,7 @@ class TimeSlotsDay
                         ),
                         'timespan_init' => new TimeSpan(
                             $time_point->getTime(),
-                            $slot['timespan_init']->getEnd()
+                            isset($slot['timespan_init']) ? $slot['timespan_init']->getEnd() : $slot['timespan']
                         ),
                         'conditions_allow' => $slot['conditions_allow'],
                         'conditions_refuse' => $slot['conditions_refuse'],
